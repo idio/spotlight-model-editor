@@ -37,3 +37,82 @@ java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar
 2. Go to `File`>`Import Project` -> `Select POM Project`
 4. Edit files
 3. Right click `Main` and select `run scala console`, enjoy
+
+## Editing a model
+start by freeing  as much ram as possible.
+
+### Exploring a Model
+
+outputs 40 SurfaceForms with their respective candidates, priors and statistics
+
+```
+java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
+```
+
+
+### Searching a Topic
+
+looks for a given `DbpediaId` in the Model and returns whether that topic exists or not in the model
+```
+java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar search path-to-turkish/tr/model/ dbpediaId
+```
+
+i.e :
+```
+java -jar .... search path/to/model Michael_Schumacher‎
+```
+
+### Getting Data about a SurfaceForm
+
+Given a surfaceForm it outputs its topic candidates and statistics
+
+```
+java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar check /path/To/Model surfaceForm
+```
+
+i.e:
+```
+java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar check ~/Downloads/tr/model/ evrimleri
+```
+would check the candidate topics and statistics for the surface form `evrimleri`
+
+
+### Adding SurfaceForms and Topics
+attach the given `dbpediaId` as a candidate topic for the  given `surfaceForm`. 
+- creates `dbpediaId` if it does not exist in the model
+- creates `surfaceForm` if it does not exists in the model
+
+The dbpedia types should be separated by pipes
+
+```
+java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar update /path/To/Model/ surfaceForm dbpediaId dbpediaTypesSeparatedByPipe
+
+```
+
+i.e:
+
+```
+java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar update ~/Downloads/tr/model/ ikimono_sf ikimono_topic
+
+```
+would add the topic `ikimono_topic` for the surface form `ikimono_sf`, note that `ikimono_topic` has no `dbpedia_types`.
+
+### Boosting the probability of a Topic for a given Surface Form.
+You can boost the probability of a topic being picked by boosting its counts for a given surface form.
+This can be done by calling `boost`.
+It will increment the counts of the given DbpediaID(topic) for the given surfaceForm by countBoost
+
+```
+java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar boost ~/Downloads/tr/model/ surfaceForm dbpediaId countBoost
+```
+
+i.e:
+```
+java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar boost ~/Downloads/tr/model/ evrimleri Yıldız_evrimi 100
+```
+ 
+it will boost by 100 the counts of the topic `Yıldız_evrimi` when trigerred by surface form `evrimleri` 
+ 
+
+
+
