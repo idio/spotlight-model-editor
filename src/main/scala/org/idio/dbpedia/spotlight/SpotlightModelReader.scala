@@ -10,22 +10,27 @@ import java.io.{FileInputStream, File}
 
 
 object Main{
+
+  def getSpotlightModel(pathToSpotlightModelFolder:String):IdioSpotlightModel = {
+    var spotlightModelReader = new IdioSpotlightModel(pathToSpotlightModelFolder)
+    return spotlightModelReader
+  }
+
   def main(args:Array[String]){
     val action:String= args(0)
     val pathToModelFolder = args(1)
+    // reads the dbpedia models
     println("reading models...")
-    val spotlightModelReader = new IdioSpotlightModel(pathToModelFolder)
-    println("looking for click through rate")
-    //var dbpediaResource = spotlightModelReader.resStore.getResourceByName("Click-through_rate")
-    //println(dbpediaResource.id)
-    //println(dbpediaResource.prior)
+    val spotlightModelReader =  Main.getSpotlightModel(pathToModelFolder)
 
+    // get the statistics for a surface form
     if (action.equals("check")){
       val surfaceText = args(2)
       println("getting statistics for surfaceText.....")
       spotlightModelReader.getStatsForSurfaceForm(surfaceText)
     }
 
+    // checks whether a dbpedia URI exists or not
     if (action.equals("search")){
       val dbpediaURI = args(2)
       println("getting statistics for surfaceText.....")
@@ -35,7 +40,6 @@ object Main{
       }else{
         println(dbpediaURI+" NOT FOUND")
       }
-
 
     }
 
@@ -74,6 +78,7 @@ object Main{
 
     }
 
+    // outputs the properties for 40 Surface forms.
     if (action.equals("explore")){
       spotlightModelReader.showSomeSurfaceForms()
     }

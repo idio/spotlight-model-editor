@@ -114,5 +114,30 @@ java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar boost
 it will boost by 100 the counts of the topic `Yıldız_evrimi` when trigerred by surface form `evrimleri` 
  
 
+# Using the scala console
 
+Best way to play the models and modify them  is to use the scala console.
 
+## Starting a scala console
+- make sure your scala is 2.9.2
+- start a scala console by doing:
+```
+scala  -classpath /path/to/jar/idio-spotlight-model-0.1.0-jar-with-dependencies.jar  -J-Xmx4000M
+```
+
+`Xmx4000M` is the size of the java heap, this has to be big enough to be able to hold the models.
+
+## Playing with the models
+
+Once you start a scala console you can use it like `ipython` to create instances of the scala classes we have, to load the models, check if dbpedia id's exist, add new dbpedia ids, add new surface forms etc..
+
+Example:
+
+```
+var spotlightModel = org.idio.dbpedia.spotlight.Main.getSpotlightModel( "/Users/dav009/Downloads/tr/model/")
+spotlightModel.showSomeSurfaceForms()
+spotlightModel.getStatsForSurfaceForm("evrimleri")
+spotlightModel.searchForDBpediaResource("ikimono_gakari_dbpedia_uri")
+spotlightModel.addNew("ikimono_gakari_sf","ikimono_gakari_dbpedia_uri",1,Array())
+spotlightModel.exportModels("/new/path/of/folder/model/")
+```
