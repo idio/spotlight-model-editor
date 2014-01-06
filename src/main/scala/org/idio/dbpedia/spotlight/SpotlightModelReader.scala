@@ -53,7 +53,9 @@ object Main{
         types = args(4).split("|")
 
       println("addding new sf and concept")
-      spotlightModelReader.addNew(surfaceForm,dbpediaURI,1,types)
+      val contextWords = Array[String]()
+      val contextCounts = Array[Int]()
+      spotlightModelReader.addNew(surfaceForm,dbpediaURI,types,contextWords,contextCounts)
       println("getting the stats for the new surfaceForm")
       spotlightModelReader.getStatsForSurfaceForm(surfaceForm)
 

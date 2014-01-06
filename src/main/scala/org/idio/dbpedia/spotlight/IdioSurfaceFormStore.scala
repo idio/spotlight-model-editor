@@ -16,18 +16,16 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
   * Adds a new surfaceForm to the surfaceFormStore
   * */
   def addSurfaceForm(surfaceText:String):Int =  {
-    println("largo...")
-    println(this.sfStore.stringForID.length)
+
+    println("\t adding a new surface form..."+surfaceText)
     this.sfStore.stringForID = this.sfStore.stringForID :+ surfaceText
-    println(this.sfStore.stringForID.length)
     // the counts for the new surface form is the avg of the counts for the other surface forms
     this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID :+ 1
     this.sfStore.totalCountForID = this.sfStore.totalCountForID :+ 1
 
     // update internal indexes
-    println("updating surface form internal indexes...")
     this.sfStore.createReverseLookup()
-
+    println("\t updating the SF index")
     var surfaceForm = this.sfStore.getSurfaceForm(surfaceText)
 
     return surfaceForm.id
