@@ -14,14 +14,14 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
   * Parses an input line.
   * Returns the SurfaceForm, DbpediaID, Types, ContextWords, ContextCounts
   * */
-  def parseLine(line:String){
+  def parseLine(line:String):(String, String, Array[String], Array[String], Array[Int]) = {
     val splittedLine = line.trim.split("\t")
     var surfaceForm = splittedLine(0)
     var dbpediaId = splittedLine(1)
-    var types = splittedLine(2).split("|")
+    var types = splittedLine(2).split('|')
     var contextWords = splittedLine(3)
-    var contextStringCounts = splittedLine(4).split("|")
-    var contextWordsArray = contextWords.split("|")
+    var contextStringCounts = splittedLine(4).split('|')
+    var contextWordsArray = contextWords.split('|')
 
     var contextCounts = new Array[Int](contextStringCounts.length)
 
@@ -32,7 +32,7 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
       contextCounts(index) = countValue.toInt
     }
 
-    return (surfaceForm, dbpediaId, types, contextWordsArray, contextCounts)
+    (surfaceForm, dbpediaId, types, contextWordsArray, contextCounts)
   }
 
   /*
