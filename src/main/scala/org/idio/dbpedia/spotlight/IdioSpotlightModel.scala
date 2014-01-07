@@ -17,18 +17,51 @@ class IdioSpotlightModel(val pathToFolder:String){
   val propertyFolder = new File(pathToFolder).getParent()
   properties.load(new FileInputStream(new File(propertyFolder, "model.properties")))
 
-  // load the Stores
-  var idioDbpediaResourceStore:IdioDbpediaResourceStore = new IdioDbpediaResourceStore(pathToFolder)
-  var idioCandidateMapStore:IdioCandidateMapStore = new IdioCandidateMapStore(pathToFolder, idioDbpediaResourceStore.resStore)
-  var idioSurfaceFormStore:IdioSurfaceFormStore = new IdioSurfaceFormStore(pathToFolder)
-  var idioTokenTypeStore:IdioTokenResourceStore = new IdioTokenResourceStore(pathToFolder,  properties.getProperty("stemmer"))
+  var idioDbpediaResourceStore:IdioDbpediaResourceStore = null
+  var idioCandidateMapStore:IdioCandidateMapStore = null
+  var idioSurfaceFormStore:IdioSurfaceFormStore = null
+  var idioTokenTypeStore:IdioTokenResourceStore = null
   var idioContextStore:IdioContextStore = null
+
+
+  // load the Stores
   try{
-    this.idioContextStore =  new IdioContextStore(pathToFolder, idioTokenTypeStore.tokenStore)
+    this.idioDbpediaResourceStore = new IdioDbpediaResourceStore(pathToFolder)
   }catch{
     case ex: FileNotFoundException =>{
-        println("...no context store found")
-        this.idioContextStore = null
+      println(ex.getMessage)
+    }
+  }
+
+  try{
+    this.idioCandidateMapStore = new IdioCandidateMapStore(pathToFolder, idioDbpediaResourceStore.resStore)
+  }catch{
+    case ex: Exception =>{
+      println(ex.getMessage)
+    }
+  }
+
+  try{
+    this.idioSurfaceFormStore = new IdioSurfaceFormStore(pathToFolder)
+  }catch{
+    case ex: FileNotFoundException =>{
+      println(ex.getMessage)
+    }
+  }
+  try{
+    this.idioTokenTypeStore = new IdioTokenResourceStore(pathToFolder,  properties.getProperty("stemmer"))
+  }
+  catch{
+    case ex: FileNotFoundException =>{
+      println(ex.getMessage)
+    }
+  }
+  try{
+    this.idioContextStore =  new IdioContextStore(pathToFolder, idioTokenTypeStore.tokenStore)
+  }
+  catch{
+    case ex: FileNotFoundException =>{
+        println(ex.getMessage)
       }
    }
 
@@ -38,16 +71,43 @@ class IdioSpotlightModel(val pathToFolder:String){
   * */
   def exportModels(pathToFolder:String){
     println("exporting models to.." + pathToFolder)
-    MemoryStore.dump(this.idioDbpediaResourceStore.resStore, new File(pathToFolder,"res.mem"))
-    MemoryStore.dump(this.idioCandidateMapStore.candidateMap, new File(pathToFolder,"candmap.mem"))
-    MemoryStore.dump(this.idioSurfaceFormStore.sfStore, new File(pathToFolder,"sf.mem"))
-    MemoryStore.dump(this.idioTokenTypeStore.tokenStore, new File(pathToFolder,"tokens.mem") )
+    try{
+      MemoryStore.dump(this.idioDbpediaResourceStore.resStore, new File(pathToFolder,"res.mem"))
+    }catch{
+      case ex: Exception =>{
+        println(ex.getMessage)
+      }
+    }
+
+    try{
+      MemoryStore.dump(this.idioCandidateMapStore.candidateMap, new File(pathToFolder,"candmap.mem"))
+    }catch{
+      case ex: Exception =>{
+        println(ex.getMessage)
+      }
+    }
+
+    try{
+      MemoryStore.dump(this.idioSurfaceFormStore.sfStore, new File(pathToFolder,"sf.mem"))
+    }catch{
+      case ex: Exception =>{
+        println(ex.getMessage)
+      }
+    }
+
+    try{
+      MemoryStore.dump(this.idioTokenTypeStore.tokenStore, new File(pathToFolder,"tokens.mem") )
+    }catch{
+      case ex: Exception =>{
+        println(ex.getMessage)
+      }
+    }
 
     try{
       MemoryStore.dump(this.idioContextStore.contextStore, new File(pathToFolder,"context.mem"))
     }catch{
       case ex: Exception =>{
-        println("\t Context Store not exported")
+        println(ex.getMessage)
       }
     }
 
@@ -55,12 +115,7 @@ class IdioSpotlightModel(val pathToFolder:String){
 
   }
 
-   /*
-  * Attach a surfaceform to a candidateTopic
-  * if SurfaceForm does not exist it is created
-  * if candidateTopic does not exist it is created
-  * */
-  def addNew(surfaceFormText:String, candidateURI:String, types:Array[String], contextWords:Array[String], contextCounts:Array[Int]){
+  def addNewSFDbpediaResource(surfaceFormText:String, candidateURI:String, types:Array[String]):(Int,Int)={
 
     // create or get the surfaceForm
     val surfaceFormID:Int = this.idioSurfaceFormStore.getAddSurfaceForm(surfaceFormText)
@@ -86,8 +141,14 @@ class IdioSpotlightModel(val pathToFolder:String){
     //update the candidate Store
     this.idioCandidateMapStore.addOrCreate(surfaceFormID, dbpediaResourceID)
 
+    return (surfaceFormID, dbpediaResourceID)
+
+  }
+
+
+  def addNewContextWords(dbpediaResourceID:Int, contextWords:Array[String], contextCounts:Array[Int]){
     //update the context Store
-    println("\trying to update context for: "+ candidateURI)
+    println("\trying to update context for: "+ dbpediaResourceID)
     try{
 
 
@@ -98,11 +159,11 @@ class IdioSpotlightModel(val pathToFolder:String){
       // Add the stems to the token Store and to the contextStore
       for(token<-contextTokenCountMap.keySet){
 
-         val tokenID:Int = this.idioTokenTypeStore.getOrCreateToken(token)
-         val tokenCount:Int = contextTokenCountMap.get(token).get
-         this.idioContextStore.addContext(dbpediaResourceID,tokenID, tokenCount )
+        val tokenID:Int = this.idioTokenTypeStore.getOrCreateToken(token)
+        val tokenCount:Int = contextTokenCountMap.get(token).get
+        this.idioContextStore.addContext(dbpediaResourceID,tokenID, tokenCount )
 
-         println("\t\tadded token to context array - "+ token)
+        println("\t\tadded token to context array - "+ token)
       }
 
     }catch{
@@ -111,8 +172,17 @@ class IdioSpotlightModel(val pathToFolder:String){
         println("\tSkipping Context Tokens....")
       }
     }
+  }
 
-
+   /*
+  * Attach a surfaceform to a candidateTopic
+  * if SurfaceForm does not exist it is created
+  * if candidateTopic does not exist it is created
+  * */
+  def addNew(surfaceFormText:String, candidateURI:String, types:Array[String], contextWords:Array[String], contextCounts:Array[Int]):(Int,Int)={
+    val (surfaceFormID, dbpediaResourceID) = this.addNewSFDbpediaResource(surfaceFormText, candidateURI, types)
+    this.addNewContextWords(dbpediaResourceID, contextWords, contextCounts)
+    return (surfaceFormID, dbpediaResourceID)
   }
 
   /**
@@ -146,7 +216,11 @@ class IdioSpotlightModel(val pathToFolder:String){
       this.idioDbpediaResourceStore.resStore.getResourceByName(candidateURI)
       return true
     }catch{
-      case e:Exception => return false
+      case e:Exception => {
+        println(e.getMessage)
+        println(e.getStackTrace)
+        return false
+      }
     }
   }
 

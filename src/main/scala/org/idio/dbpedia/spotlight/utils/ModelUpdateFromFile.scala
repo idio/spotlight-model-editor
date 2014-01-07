@@ -7,9 +7,6 @@ import org.idio.dbpedia.spotlight.IdioSpotlightModel
  */
 class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
 
-  var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(pathToModelFolder)
-
-
   /*
   * Parses an input line.
   * Returns the SurfaceForm, DbpediaID, Types, ContextWords, ContextCounts
@@ -28,7 +25,7 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
     // Cast Context Counts to Integers
     for (counts<-contextStringCounts.zipWithIndex){
       val index = counts._2
-      val countValue = counts._2
+      val countValue = counts._1
       contextCounts(index) = countValue.toInt
     }
 
@@ -36,12 +33,18 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
   }
 
   /*
-  * Reads
+  * loads everything using the entries in the file.
+  * and exports a new model.
+  * if there is no context.mem it will load just the SF, and Dbpedia Resources.
   * */
   def loadNewEntriesFromFile(){
+    var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
     val source = scala.io.Source.fromFile(this.pathToFile)
     val lines = source.bufferedReader()
     var line = lines.readLine()
+
+    val contextFileWriter = new java.io.PrintWriter(this.pathToFile+"_just_context")
+
     while (line!=null){
 
       val (surfaceForm, dbpediaId, types, contextWordsArray, contextCounts) = parseLine(line)
@@ -50,11 +53,20 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
       println("Topic: "+ dbpediaId)
       println("Types: "+ types.mkString(" "))
       println("Context: "+ contextWordsArray.mkString(" "))
-      idioSpotlightModel.addNew(surfaceForm,dbpediaId, types, contextWordsArray, contextCounts )
+
+
+      val (surfaceFormId, dbpediaResourceId) = idioSpotlightModel.addNew(surfaceForm,dbpediaId, types, contextWordsArray, contextCounts )
+
+      contextFileWriter.println(dbpediaResourceId+"\t"+contextWordsArray.mkString("|")+"\t"+contextCounts.mkString("|"))
+
       println("----------------------------")
       line = lines.readLine()
     }
     source.close()
+    contextFileWriter.close()
+    println("serializing the new model.....")
+    idioSpotlightModel.exportModels(this.pathToModelFolder)
+    println("finished serializing the new model.....")
   }
 
 

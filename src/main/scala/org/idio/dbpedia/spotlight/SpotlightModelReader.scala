@@ -5,6 +5,7 @@ package org.idio.dbpedia.spotlight
  */
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore,MemoryStore,MemoryCandidateMapStore,MemorySurfaceFormStore}
 import org.dbpedia.spotlight.exceptions.SurfaceFormNotFoundException
+import org.idio.dbpedia.spotlight.utils.{ContextUpdateFromFile, ModelUpdateFromFile}
 import java.io.{FileInputStream, File}
 
 
@@ -83,6 +84,22 @@ object Main{
     // outputs the properties for 40 Surface forms.
     if (action.equals("explore")){
       spotlightModelReader.showSomeSurfaceForms()
+    }
+
+    // update model from file
+    if (action.equals("update-sf-dbpedia")){
+      val pathToModel = args(2)
+      val pathToFileWithAdditions = args(3)
+      val modelUpdater:ModelUpdateFromFile = new ModelUpdateFromFile(pathToModel, pathToFileWithAdditions)
+      modelUpdater.loadNewEntriesFromFile()
+    }
+
+    // update context words from file
+    if (action.equals("update-context")){
+      val pathToModel = args(2)
+      val pathToFileWithAdditions = args(3)
+      val modelUpdater:ContextUpdateFromFile = new ContextUpdateFromFile(pathToModel, pathToFileWithAdditions)
+      modelUpdater.loadContextWords()
     }
 
 

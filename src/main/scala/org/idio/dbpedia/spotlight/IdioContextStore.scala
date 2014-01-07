@@ -3,6 +3,7 @@ package org.idio.dbpedia.spotlight
 import org.dbpedia.spotlight.db.memory.{MemoryStore, MemoryContextStore, MemoryTokenTypeStore}
 import java.io.{File, FileInputStream}
 import org.dbpedia.spotlight.model.{TokenType, Token, DBpediaResource}
+import scala.collection.mutable.HashMap
 
 /**
  * Created by dav009 on 02/01/2014.
@@ -51,5 +52,8 @@ class IdioContextStore(val pathtoFolder:String, val tokenStore:MemoryTokenTypeSt
      this.contextStore.counts(dbpediaResourceID) = this.contextStore.counts(dbpediaResourceID).take(indexOftokenId) ++ this.contextStore.counts(dbpediaResourceID).drop(indexOftokenId+1)
 
   }
+
+
+
 
 }
