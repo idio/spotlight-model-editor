@@ -5,7 +5,8 @@ package org.idio.dbpedia.spotlight
  */
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore,MemoryStore,MemoryCandidateMapStore,MemorySurfaceFormStore}
 import org.dbpedia.spotlight.exceptions.SurfaceFormNotFoundException
-import org.idio.dbpedia.spotlight.utils.{ContextUpdateFromFile, ModelUpdateFromFile}
+import org.idio.dbpedia.spotlight.utils.{ContextUpdateFromFile, ModelUpdateFromFile, ModelExplorerFromFile}
+import org.dbpedia.spotlight.db.memory.MemoryOntologyTypeStore;
 import java.io.{FileInputStream, File}
 
 
@@ -25,6 +26,14 @@ object Main{
       // reads the dbpedia models
       println("reading models...")
       val spotlightModelReader =  Main.getSpotlightModel(pathToModelFolder)
+
+
+      if (action.equals("show-resource-types")){
+        val typeStore = spotlightModelReader.idioDbpediaResourceStore.resStore.ontologyTypeStore.asInstanceOf[MemoryOntologyTypeStore]
+        for(ontologyType<-typeStore.idFromName.keySet().toArray){
+          println(ontologyType)
+        }
+      }
 
       // get the statistics for a surface form
       if (action.equals("check")){
@@ -108,6 +117,13 @@ object Main{
         val pathToFileWithAdditions = args(3)
         val modelUpdater:ContextUpdateFromFile = new ContextUpdateFromFile(pathToModel, pathToFileWithAdditions)
         modelUpdater.loadContextWords()
+      }
+
+      //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
+      if (action.equals("file-check")){
+        val pathToFileWithResources = args(2)
+        val modelExplorer:ModelExplorerFromFile = new ModelExplorerFromFile(pathToModelFolder, pathToFileWithResources)
+        modelExplorer.checkEntitiesInFile()
       }
 
     }
