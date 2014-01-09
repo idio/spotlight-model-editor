@@ -3,6 +3,9 @@ package org.idio.dbpedia.spotlight.utils
 import org.idio.dbpedia.spotlight.IdioSpotlightModel
 import scala.collection.mutable.HashSet
 /**
+ * Allows to update a Model (Sf, DbpediaResources, ContextWords) from a file
+ * The format of each line of the file is:
+ * dbpediaURI tab surfaceForm1|surfaceForm2... tab contextW1|contextW2.. tab contextW1Count|contextW2Count..
  * Created by dav009 on 03/01/2014.
  */
 class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
@@ -33,6 +36,9 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
     (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts)
   }
 
+  /*
+  * Parses the input File and outputs a set of SF and dbpedia URIs
+  * */
   def parseFile(pathToFile:String):(HashSet[String], HashSet[String])={
     val setOfSurfaceForms:HashSet[String] = new HashSet[String]()
     val setOfDbpediaURIS:HashSet[String] = new HashSet[String]()

@@ -5,6 +5,9 @@ import java.util.Properties
 import java.io.{FileInputStream, File}
 
 /**
+ * Adds ContextWords to DbpediaResources
+ * The format of each life of the file is:
+ * dbpediaURI tab contextW1|contextW2.. tab contextW1Count|contextW2Count..
  * Created by dav009 on 03/01/2014.
  */
 class ContextUpdateFromFile(pathToModelFolder:String, pathToFile:String){
@@ -33,7 +36,7 @@ class ContextUpdateFromFile(pathToModelFolder:String, pathToFile:String){
   }
 
   /*
-  * loads jsut the context words.
+  * Links DbpediaURIS with Context words and exports the model.
   * */
   def loadContextWords(){
     var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)

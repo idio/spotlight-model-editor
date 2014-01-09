@@ -77,13 +77,6 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
   }
 
   /*
-  * GetCandidatesForSF
-  * */
-  def getCandidates(){
-
-  }
-
-  /*
   * Add a new topic candidate to the list of candidates of a SurfaceForm
   * */
   def addNewCandidateToSF(surfaceFormID:Int, candidateID:Int, candidateCounts:Int){
@@ -93,8 +86,6 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
         return 1
       }
       return 0
-
-
   }
 
 }

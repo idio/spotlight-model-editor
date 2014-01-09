@@ -63,7 +63,7 @@ class IdioTokenResourceStore(val pathtoFolder:String, stemmerLanguage:String) {
   }
 
   /*
-  * Transform ContextWords into ContextTokens.
+  * Transform ContextWords into ContextTokens(stemmed)
   * Returns a map from Token to Token Frequency
   * */
   def getContextTokens(contextWords:Array[String], contextCounts:Array[Int]):HashMap[String,Int] = {

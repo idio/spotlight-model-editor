@@ -25,9 +25,10 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
     this.sfStore.totalCountForID = this.sfStore.totalCountForID :+ 1
   }
 
-
   /*
-  * Adds a new surfaceForm to the surfaceFormStore
+  * Adds a new surfaceForm to the surfaceFormStore.
+  * It does NOT check whether it exists
+  * returns the Id of the new SF
   * */
   def addSurfaceForm(surfaceText:String):Int =  {
     //adding the SF to the internal arrays
@@ -41,6 +42,11 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
     return surfaceForm.id
   }
 
+  /*
+  * Adds a set of surfaceForms to the surfaceFormStore in a singleBatch,
+  * It only adds sf which are not already in the store.
+  * returns a list with the Ids of the added SurfaceForms
+  * */
   def addListOfSF(setOfSurfaceForms:HashSet[String]):ListBuffer[Int]={
 
     val listOfNewSurfaceFormIds:ListBuffer[Int] = ListBuffer[Int]()
@@ -68,7 +74,8 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
   }
 
   /*
-  * returns the id of a surfaceForm, if it doesnt exist, it creates it.
+  * Given a SurfaceForm if it exists returns its Id
+  * otherwise it creates it, rebuild the internal index, and return the SF ID
   * */
   def getAddSurfaceForm(surfaceText:String):Int = {
 
@@ -80,7 +87,7 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
 
       case e: SurfaceFormNotFoundException => println("creating surface form...")
     }
-    // create one in case it cant be found
+    // create sf in case it cant be found
     var surfaceFormId = this.addSurfaceForm(surfaceText)
 
     return surfaceFormId

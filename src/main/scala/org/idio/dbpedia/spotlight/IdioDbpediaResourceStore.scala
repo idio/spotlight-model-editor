@@ -12,7 +12,9 @@ class IdioDbpediaResourceStore(val pathtoFolder:String){
 
   var resStore:MemoryResourceStore = MemoryStore.loadResourceStore(new FileInputStream(new File(pathtoFolder,"res.mem")))
 
-
+  /*
+  * Creates the specified DbpediaResource in the internal Arrays
+  * */
   private def addDbpediaURI(uri:String, support:Int, types:Array[String]){
     //URI i.e: Click-through_rate
     //Types: ??
@@ -44,7 +46,8 @@ class IdioDbpediaResourceStore(val pathtoFolder:String){
   }
 
   /*
-  * Adds a new Dbpedia Resource to teh store
+  * Adds a new Dbpedia Resource to teh store, and rebuilds the indexes.
+  * It does NOT check previous existance
   * */
   def addDbpediaResource(uri:String, support:Int, types:Array[String]):Int ={
 

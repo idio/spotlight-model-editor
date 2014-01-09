@@ -24,8 +24,11 @@ class IdioSpotlightModel(val pathToFolder:String){
   var idioTokenTypeStore:IdioTokenResourceStore = null
   var idioContextStore:IdioContextStore = null
 
-
-  // load the Stores
+  /*
+   The reason for all these Try/Catch is to allow loading the models locally.
+   Allowing to load only the files which are needed as opposed to the whole model.
+  */
+  //load the Stores
   try{
     this.idioDbpediaResourceStore = new IdioDbpediaResourceStore(pathToFolder)
   }catch{
@@ -116,6 +119,11 @@ class IdioSpotlightModel(val pathToFolder:String){
 
   }
 
+  /*
+  * Links the Sf with the DbpediaURI, if they are not linked.
+  * If the Sf does not exist it will create it
+  * if the Dbpedia Resource does not exist it will create it
+  * */
   def addNewSFDbpediaResource(surfaceFormText:String, candidateURI:String, types:Array[String]):(Int,Int)={
 
     // create or get the surfaceForm
@@ -146,7 +154,11 @@ class IdioSpotlightModel(val pathToFolder:String){
 
   }
 
-
+  /*
+  * Adds the words in contextWords to  dbpediaResource's context.
+  * Words already in the DbpediaResource's context won't be added (their counts will not be modified )
+  * Words will be tokenized, their stems are added to the tokenStore if they dont exist.
+  * */
   def addNewContextWords(dbpediaResourceID:Int, contextWords:Array[String], contextCounts:Array[Int]){
     //update the context Store
     println("\trying to update context for: "+ dbpediaResourceID)
@@ -296,9 +308,13 @@ class IdioSpotlightModel(val pathToFolder:String){
     }
   }
 
+  /*
+  * Updates the SurfaceStore by adding the SF in the Set in a single Batch.
+  * If a SF is already in the stores it wont be added.
+  * */
   def addListOfSurfaceForms(setOfSF:HashSet[String]){
       val listOfNewSurfaceFormIds = this.idioSurfaceFormStore.addListOfSF(setOfSF)
-
+      // adds the candidate array for the SF which were added.
       for (surfaceFormId<-listOfNewSurfaceFormIds){
         this.idioCandidateMapStore.createCandidateMapForSurfaceForm(surfaceFormId,new Array[Int](0), new Array[Int](0))
       }

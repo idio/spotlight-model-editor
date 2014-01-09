@@ -3,6 +3,9 @@ package org.idio.dbpedia.spotlight.utils
 import org.idio.dbpedia.spotlight.IdioSpotlightModel
 
 /**
+ * Given a file, it gives an insight of what SF,DbpediaResources exists in a model
+ * The format of each life of the file is:
+ * dbpediaURI tab surfaceForm1|surfaceForm2
  * Created by dav009 on 03/01/2014.
  */
 class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
@@ -16,14 +19,12 @@ class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
     var dbpediaUri = splittedLine(0)
     var surfaceForms = splittedLine(1).split('|')
 
-
     (surfaceForms, dbpediaUri)
   }
 
   /*
-  * loads everything using the entries in the file.
-  * and exports a new model.
-  * if there is no context.mem it will load just the SF, and Dbpedia Resources.
+  * Checks if the SF, dbpediaUris specified in the input file exists
+  * and checks whetheter the SF are linked to the DbpediaURIs
   * */
   def checkEntitiesInFile(){
     var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
@@ -37,8 +38,6 @@ class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
     var totalSF = 0
     var totalTopics = 0
     var totalSFAndTopics = 0
-
-
 
     while (line!=null){
 

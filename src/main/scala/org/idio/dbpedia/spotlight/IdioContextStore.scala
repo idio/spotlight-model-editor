@@ -13,7 +13,8 @@ class IdioContextStore(val pathtoFolder:String, val tokenStore:MemoryTokenTypeSt
   var contextStore:MemoryContextStore = MemoryStore.loadContextStore(new FileInputStream(new File(pathtoFolder,"context.mem")), this.tokenStore)
 
   /*
-  * Creates a context Array for a new DbpediaResource
+  * Creates a context Array for a new DbpediaResource.
+  * The default context Array contains a reference to the token with Id: 0.
   * */
   def createDefaultContextStore(dbpediaResourceID:Int){
       try{
@@ -29,7 +30,8 @@ class IdioContextStore(val pathtoFolder:String, val tokenStore:MemoryTokenTypeSt
   }
 
   /*
-  * adds a token to dbpediaResource's context
+  * adds a token to dbpediaResource's context.
+  * It checks taht the token is not already in the dbpedia Resource's Context
   * */
   def addContext(dbpediaResourceID:Int, tokenID:Int, count:Int){
     // check if the token is already in the context, if so dont do anything.
