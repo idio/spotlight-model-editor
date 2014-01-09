@@ -50,8 +50,8 @@ java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar
 ## Editing
 1. Get IntelliJ
 2. Go to `File`>`Import Project` -> `Select POM Project`
-4. Edit files
-3. Right click `Main` and select `run scala console`, enjoy
+3. Give enough RAM to run the project. Go to `Preferences` -> `Compiler` and add '-Xmx5G' to 'Aditional VM options',
+3. Navigate to the `SpotlightModelReader` class, right click `Main` and select `run scala console`, enjoy
 
 ## Editing a model
 start by freeing  as much ram as possible.
