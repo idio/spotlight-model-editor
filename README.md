@@ -10,7 +10,6 @@ DBpedia Spotlight's jar is one of the dependencies. These steps will guide you o
 
 1. clone `https://github.com/dbpedia-spotlight/dbpedia-spotlight`
 2. compile dbpedia spotlight: 
-  - `mvn assembly:single`
   - `mvn package`
 
 after this step there should be a `dbpedia-spotlight-0.6-jar-with-dependencies.jar` in the `target` folder.
@@ -112,7 +111,42 @@ java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar boost
 ```
  
 it will boost by 100 the counts of the topic `Yıldız_evrimi` when trigerred by surface form `evrimleri` 
- 
+
+### Updating Model From File
+When updating the model with lots of `SF`, `Topics` and `Context Words` best is to do it from a file.
+each line of the file should follow the format:
+
+```
+dbpedia_id <tab> surfaceForm1|surfaceForm2... <tab> contextW1|contextW2... <tab> contextW1Counts|ContextW2Counts
+```
+
+#### All in one go
+make sure you have enough ram to hold all the models that should be around `-Xmx15000M`.
+do:
+
+```
+java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-sf-dbpedia path/to/en/model path_to_file/with/model/changes
+```
+
+#### In two Steps
+If you don't have enough ram you can update the `SF` and `DbpediaTopics` in one step and the `Context Words` in other, this will require less memory.
+
+To update only `sf` and `DbpediaTopics` do:
+
+1. go to the model folder and rename `context.mem` to `context2.mem` this will avoid the jar to avoid loading the `context store`
+2. calling the following command will update the `surfaceform store`, `resource store` and `candidate store`: ```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-sf-dbpedia path/to/en/model path_to_file/with/model/changes```.
+3. a new file `path_to_file/with/model/changes_just_context` will be generated after running the previous command.This file contains dbpediaIds(internal model's indexes) to contextWords, and it can be processed in the following step.
+4. rename `context2.mem` to `context.mem`, and rename every other file in the model folder to something else.( if this is not done, the stores will be loaded and they will consume all your ram) 
+5. calling the following will update the `context store`: 
+```
+java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-context path/to/en/model path_to_file/with/model/changes_just_context
+```
+6. rename all files to their usual conventions and enjoy a fresh baked model
+
+#### Insight
+Before doing actual changes to the model it might be useful to see how many `SF`,`dbpedia topics` and links between those two are missing.
+```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-check path/to/en/model path_to_file/with/model/changes```.
+
 
 # Using the scala console
 
