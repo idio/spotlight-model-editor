@@ -11,7 +11,7 @@ class ContextUpdateFromFile(pathToModelFolder:String, pathToFile:String){
 
   /*
   * Parses an input line.
-  * Returns the SurfaceForm, DbpediaID, Types, ContextWords, ContextCounts
+  * Returns the SurfaceForm, dbpediaURI, Types, ContextWords, ContextCounts
   * */
   def parseLine(line:String):(Int, Array[String], Array[Int]) = {
     val splittedLine = line.trim.split("\t")
@@ -44,7 +44,7 @@ class ContextUpdateFromFile(pathToModelFolder:String, pathToFile:String){
 
       val (dbpediaId, contextWordsArray, contextCounts) = parseLine(line)
 
-      println("dbpediaId: "+ dbpediaId)
+      println("dbpediaURI: "+ dbpediaId)
       println("Context: "+ contextWordsArray.mkString(" "))
       println("context Counts: "+ contextCounts.mkString(" "))
 

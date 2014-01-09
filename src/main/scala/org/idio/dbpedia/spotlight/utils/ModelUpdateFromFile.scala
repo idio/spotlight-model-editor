@@ -11,13 +11,14 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
   * Parses an input line.
   * Returns the SurfaceForm, DbpediaID, Types, ContextWords, ContextCounts
   * */
-  def parseLine(line:String):(String, String, Array[String], Array[String], Array[Int]) = {
+  def parseLine(line:String):(Array[String], String, Array[String], Array[String], Array[Int]) = {
     val splittedLine = line.trim.split("\t")
-    var surfaceForm = splittedLine(0)
-    var dbpediaId = splittedLine(1)
-    var types = splittedLine(2).split('|')
-    var contextWords = splittedLine(3)
-    var contextStringCounts = splittedLine(4).split('|')
+    var dbpediaURI = splittedLine(0)
+    var surfaceForms = splittedLine(1).split('|')
+    //var types = splittedLine(2).split('|')
+    var types = new Array[String](0)
+    var contextWords = splittedLine(2)
+    var contextStringCounts = splittedLine(3).split('|')
     var contextWordsArray = contextWords.split('|')
 
     var contextCounts = new Array[Int](contextStringCounts.length)
@@ -29,7 +30,7 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
       contextCounts(index) = countValue.toInt
     }
 
-    (surfaceForm, dbpediaId, types, contextWordsArray, contextCounts)
+    (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts)
   }
 
   /*
@@ -47,19 +48,21 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
 
     while (line!=null){
 
-      val (surfaceForm, dbpediaId, types, contextWordsArray, contextCounts) = parseLine(line)
+      val (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts) = parseLine(line)
 
-      println("SF: "+ surfaceForm)
-      println("Topic: "+ dbpediaId)
-      println("Types: "+ types.mkString(" "))
-      println("Context: "+ contextWordsArray.mkString(" "))
+      for(surfaceForm<-surfaceForms){
+        println("SF: "+ surfaceForm)
+        println("Topic: "+ dbpediaURI)
+        println("Types: "+ types.mkString(" "))
+        println("Context: "+ contextWordsArray.mkString(" "))
 
 
-      val (surfaceFormId, dbpediaResourceId) = idioSpotlightModel.addNew(surfaceForm,dbpediaId, types, contextWordsArray, contextCounts )
+        val (surfaceFormId, dbpediaResourceId) = idioSpotlightModel.addNew(surfaceForm,dbpediaURI, types, contextWordsArray, contextCounts )
 
-      contextFileWriter.println(dbpediaResourceId+"\t"+contextWordsArray.mkString("|")+"\t"+contextCounts.mkString("|"))
+        contextFileWriter.println(dbpediaResourceId+"\t"+contextWordsArray.mkString("|")+"\t"+contextCounts.mkString("|"))
 
-      println("----------------------------")
+        println("----------------------------")
+      }
       line = lines.readLine()
     }
     source.close()
