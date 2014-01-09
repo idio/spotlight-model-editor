@@ -138,7 +138,10 @@ class IdioSpotlightModel(val pathToFolder:String){
         val dbpediaResource = this.idioDbpediaResourceStore.resStore.getResource(candidate)
         avgSupport = avgSupport + dbpediaResource.support
       }
-      defaultSupportForDbpediaResource = (avgSupport/candidates.length).toInt
+      val calculatedSupport = (avgSupport/candidates.length).toInt
+      if (calculatedSupport>defaultSupportForDbpediaResource){
+        defaultSupportForDbpediaResource = calculatedSupport
+      }
     }catch{
       case e:Exception => println("\tusing default support for.."+candidateURI)
     }
