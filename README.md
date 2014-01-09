@@ -1,8 +1,24 @@
 # Spotlight Model's Editor
 
+Idio's Spotlight Model Editor allows you to create associations between word forms and 
+a DBPedia topic or concept, thus improving the coverage of the topic extraction tool we use.
+
+In order to use the Model Editor, you will need:
+
+- (Oracle) Java 1.7
+- Scala >= 2.9.x
+- Compiling DBPedia Spotlight from source (see below)
+- Compiling Spotlight Model Editor (this tool) from source (see below)
+- A pre-computed language model (downloaded from [here](http://spotlight.sztaki.hu/downloads/) )
+
+We also recommend using [IntelliJ](http://www.jetbrains.com/idea/), for editing the code. See below, 
+for instructions on how to set up a project.
+
 ## Compiling
 
-make sure you have `mvn` in your system
+We assume that you have the correct versions of Java and Scala, also make sure you have `mvn` in your system.
+The language models consume a lot of computational resources, so in these instructions we use the model for 
+Turkish (located in the `tr` folder). Feel free to play with other languages, if you have a big machine.
 
 ### Compiling Dbpedia Spotlight
 
