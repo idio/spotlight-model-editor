@@ -19,18 +19,25 @@ class ContextUpdateFromFile(pathToModelFolder:String, pathToFile:String){
   def parseLine(line:String):(Int, Array[String], Array[Int]) = {
     val splittedLine = line.trim.split("\t")
     var dbpediaId = splittedLine(0).toInt
-    var contextWords = splittedLine(1)
-    var contextStringCounts = splittedLine(2).split('|')
-    var contextWordsArray = contextWords.split('|')
 
-    var contextCounts = new Array[Int](contextStringCounts.length)
 
-    // Cast Context Counts to Integers
-    for (counts<-contextStringCounts.zipWithIndex){
-      val index = counts._2
-      val countValue = counts._1
-      contextCounts(index) = countValue.toInt
+    var contextWordsArray = new Array[String](0)
+    var contextCounts = new Array[Int](0)
+
+    if (splittedLine.size>2){
+      var contextWords = splittedLine(1)
+      var contextStringCounts = splittedLine(2).split('|')
+      contextWordsArray = contextWords.split('|')
+      contextCounts = new Array[Int](contextStringCounts.length)
+
+      // Cast Context Counts to Integers
+      for (counts<-contextStringCounts.zipWithIndex){
+        val index = counts._2
+        val countValue = counts._1
+        contextCounts(index) = countValue.toInt
+      }
     }
+
 
     (dbpediaId, contextWordsArray, contextCounts)
   }
