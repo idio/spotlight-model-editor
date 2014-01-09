@@ -12,7 +12,7 @@ DBpedia Spotlight's jar is one of the dependencies. These steps will guide you o
 2. compile dbpedia spotlight: 
   - `mvn package`
 
-after this step there should be a `dbpedia-spotlight-0.6-jar-with-dependencies.jar` in the `target` folder.
+after this step there should be a `dbpedia-spotlight-0.6-jar-with-dependencies.jar` in the `./dist/target` folder.
 
 ### Compiling Idio's Dbpedia Model Editor
 
