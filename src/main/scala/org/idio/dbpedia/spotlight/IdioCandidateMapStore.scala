@@ -24,7 +24,7 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
     try{
       this.candidateMap.candidates(surfaceFormID)
     }catch{
-      case e:Exception =>
+      case e:Exception =>{
          println("\tcreating candidate map array for "+surfaceFormID)
          var candidates:Array[Int] =Array(candidateID)
          var counts:Array[Int] = Array(1)
@@ -34,7 +34,23 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
           println("\t"+candidate)
         }
          return true
+      }
     }
+
+    try{
+      this.candidateMap.candidates(surfaceFormID).size
+    }catch{
+      case e:Exception =>{
+        println("\tcreating candidate map array for "+surfaceFormID)
+        this.candidateMap.candidates(surfaceFormID) = Array[Int](candidateID)
+        this.candidateMap.candidateCounts(surfaceFormID) = Array[Int](1)
+        println("\tcandidates")
+        for(candidate <- this.candidateMap.candidates(surfaceFormID)){
+          println("\t"+candidate)
+        }
+      }
+    }
+
 
     // if the candidate array exist, then check if the candidate Topic is inside
     if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)){
