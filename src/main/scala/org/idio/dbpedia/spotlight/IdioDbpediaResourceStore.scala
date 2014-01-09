@@ -12,6 +12,18 @@ class IdioDbpediaResourceStore(val pathtoFolder:String){
 
   var resStore:MemoryResourceStore = MemoryStore.loadResourceStore(new FileInputStream(new File(pathtoFolder,"res.mem")))
 
+
+  private def addDbpediaURI(uri:String, support:Int, types:Array[String]){
+    //URI i.e: Click-through_rate
+    //Types: ??
+    this.resStore.supportForID =  Array concat(resStore.supportForID, Array(support) )
+    this.resStore.uriForID = Array concat(resStore.uriForID, Array(uri))
+
+    var dbpediaTypesForResource :Array[Array[java.lang.Short]]= this.getTypesIds(types)
+
+    this.resStore.typesForID = Array concat(resStore.typesForID,dbpediaTypesForResource)
+  }
+
   /*
   * Checks if a given dpbediaID(URI) exists in the resource store
   * if it doesnt it creates it and returns its id
@@ -35,14 +47,10 @@ class IdioDbpediaResourceStore(val pathtoFolder:String){
   * Adds a new Dbpedia Resource to teh store
   * */
   def addDbpediaResource(uri:String, support:Int, types:Array[String]):Int ={
-    //URI i.e: Click-through_rate
-    //Types: ??
-    this.resStore.supportForID =  Array concat(resStore.supportForID, Array(support) )
-    this.resStore.uriForID = Array concat(resStore.uriForID, Array(uri))
 
-    var dbpediaTypesForResource :Array[Array[java.lang.Short]]= this.getTypesIds(types)
+    // add the dbpedia URI to the arrays
+    this.addDbpediaURI(uri, support, types)
 
-    this.resStore.typesForID = Array concat(resStore.typesForID,dbpediaTypesForResource)
     //update internal indexes
     this.resStore.createReverseLookup()
 

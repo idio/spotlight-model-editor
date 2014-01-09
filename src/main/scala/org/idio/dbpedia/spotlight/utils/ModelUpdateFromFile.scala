@@ -1,7 +1,7 @@
 package org.idio.dbpedia.spotlight.utils
 
 import org.idio.dbpedia.spotlight.IdioSpotlightModel
-
+import scala.collection.mutable.HashSet
 /**
  * Created by dav009 on 03/01/2014.
  */
@@ -33,13 +33,39 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
     (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts)
   }
 
+  def parseFile(pathToFile:String):(HashSet[String], HashSet[String])={
+    val setOfSurfaceForms:HashSet[String] = new HashSet[String]()
+    val setOfDbpediaURIS:HashSet[String] = new HashSet[String]()
+
+    val source = scala.io.Source.fromFile(this.pathToFile)
+    val lines = source.getLines()
+
+    for (line<-lines){
+      val (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts) = this.parseLine(line)
+      //get all SurfaceForms into a Set
+      for(surfaceForm<-surfaceForms){
+        setOfSurfaceForms.add(surfaceForm)
+      }
+      //get all DbpediaUris into a Set
+      setOfDbpediaURIS.add(dbpediaURI)
+    }
+
+    return (setOfSurfaceForms, setOfDbpediaURIS)
+  }
+
   /*
   * loads everything using the entries in the file.
   * and exports a new model.
   * if there is no context.mem it will load just the SF, and Dbpedia Resources.
   * */
   def loadNewEntriesFromFile(){
+    val (setOfSurfaceForms, setOfDbpediaURIS) = this.parseFile(this.pathToFile)
+
     var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
+
+    println("adding all SF..."+ setOfSurfaceForms.size)
+    idioSpotlightModel.addListOfSurfaceForms(setOfSurfaceForms)
+
     val source = scala.io.Source.fromFile(this.pathToFile)
     val lines = source.bufferedReader()
     var line = lines.readLine()

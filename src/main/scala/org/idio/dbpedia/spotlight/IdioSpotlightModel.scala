@@ -9,6 +9,7 @@ import java.io.File
 import java.io.{FileReader, FileNotFoundException, IOException, FileInputStream}
 import java.util.{Properties}
 import collection.mutable.HashMap
+import scala.collection.mutable.HashSet
 
 class IdioSpotlightModel(val pathToFolder:String){
 
@@ -293,6 +294,14 @@ class IdioSpotlightModel(val pathToFolder:String){
       }
 
     }
+  }
+
+  def addListOfSurfaceForms(setOfSF:HashSet[String]){
+      val listOfNewSurfaceFormIds = this.idioSurfaceFormStore.addListOfSF(setOfSF)
+
+      for (surfaceFormId<-listOfNewSurfaceFormIds){
+        this.idioCandidateMapStore.createCandidateMapForSurfaceForm(surfaceFormId,new Array[Int](0), new Array[Int](0))
+      }
   }
 
 

@@ -105,17 +105,15 @@ object Main{
     }else{
       // update model from file
       if (action.equals("file-update-sf-dbpedia")){
-        val pathToModel = args(2)
-        val pathToFileWithAdditions = args(3)
-        val modelUpdater:ModelUpdateFromFile = new ModelUpdateFromFile(pathToModel, pathToFileWithAdditions)
+        val pathToFileWithAdditions = args(2)
+        val modelUpdater:ModelUpdateFromFile = new ModelUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
         modelUpdater.loadNewEntriesFromFile()
       }
 
       // update context words from file
       if (action.equals("file-update-context")){
-        val pathToModel = args(2)
-        val pathToFileWithAdditions = args(3)
-        val modelUpdater:ContextUpdateFromFile = new ContextUpdateFromFile(pathToModel, pathToFileWithAdditions)
+        val pathToFileWithAdditions = args(2)
+        val modelUpdater:ContextUpdateFromFile = new ContextUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
         modelUpdater.loadContextWords()
       }
 
