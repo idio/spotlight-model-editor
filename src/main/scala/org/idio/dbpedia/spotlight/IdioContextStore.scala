@@ -42,6 +42,14 @@ class IdioContextStore(val pathtoFolder:String, val tokenStore:MemoryTokenTypeSt
   }
 
   /*
+  * Empty the context Words and context counts of a dbpedia Topic
+  * */
+  def cleanContextWords(dbpediaID:Int){
+    this.contextStore.counts(dbpediaID) = new Array[Int](0)
+    this.contextStore.tokens(dbpediaID) = new Array[Int](0)
+  }
+
+  /*
   * Remove a token from a dbpediaResoruce's context
   * */
   def removeTokenFromContext(dbpediaResourceID:Int, tokenID:Int){

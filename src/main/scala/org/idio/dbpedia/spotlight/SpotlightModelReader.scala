@@ -50,6 +50,21 @@ object Main{
           spotlightModelReader.prettyPrintContext(dbpediaURI)
         }
 
+        /*
+        * Removes all the context words and context counts of a dbepdia topic
+        * and sets the context words and cotnext counts specified in the command line
+        * */
+        case "clean-set-context" =>{
+          var dbpediaURI = args(2)
+          var contextWords = args(3).split('|')
+          var contextCounts =args(4).split('|') map(_.toInt)
+          println("context words for.."+dbpediaURI+" will be deleted")
+          println("context words for.."+dbpediaURI+" will be set as given in input")
+          spotlightModelReader.replaceAllContext(dbpediaURI, contextWords, contextCounts)
+          println("exporting new model.....")
+          spotlightModelReader.exportModels(pathToModelFolder)
+        }
+
         // checks whether a dbpedia URI exists or not
         case "search" =>{
           val dbpediaURI = args(2)
