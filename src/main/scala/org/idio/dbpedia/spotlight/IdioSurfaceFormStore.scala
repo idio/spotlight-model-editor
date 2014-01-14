@@ -54,7 +54,8 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
 
     for(surfaceForm<-setOfSurfaceForms){
       try{
-        this.sfStore.getSurfaceForm(surfaceForm)
+        val sf = this.sfStore.getSurfaceForm(surfaceForm)
+        this.boostCountsIfNeeded(sf.id)
         println("\t found..\t"+surfaceForm)
       } catch{
         case e: SurfaceFormNotFoundException => {
@@ -67,10 +68,23 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
     this.sfStore.createReverseLookup()
 
     for(surfaceForm<-listOfNewSurfaceForms){
-      listOfNewSurfaceFormIds += this.sfStore.getSurfaceForm(surfaceForm).id
+      val sf = this.sfStore.getSurfaceForm(surfaceForm)
+      listOfNewSurfaceFormIds += sf.id
+      this.boostCountsIfNeeded(sf.id)
     }
 
    return listOfNewSurfaceFormIds
+  }
+
+  /*
+  * Raises the SF counts to pass the minimum threshold needed to be spottable
+  * */
+  def boostCountsIfNeeded(surfaceFormID:Int){
+    val annotationProbability = this.sfStore.annotatedCountForID(surfaceFormID) / this.sfStore.totalCountForID(surfaceFormID).toDouble
+    if (annotationProbability<0.27){
+      var newAnnotatedCount = (0.27 * this.sfStore.totalCountForID(surfaceFormID).toDouble).toInt + 1
+      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
+    }
   }
 
   /*

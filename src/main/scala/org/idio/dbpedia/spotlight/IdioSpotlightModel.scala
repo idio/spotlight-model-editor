@@ -128,6 +128,7 @@ class IdioSpotlightModel(val pathToFolder:String){
 
     // create or get the surfaceForm
     val surfaceFormID:Int = this.idioSurfaceFormStore.getAddSurfaceForm(surfaceFormText)
+    this.idioSurfaceFormStore.boostCountsIfNeeded(surfaceFormID)
     var defaultSupportForDbpediaResource:Int = 11
 
     // calculate the default support value based on the current support for the candidates for the given SF
@@ -222,6 +223,19 @@ class IdioSpotlightModel(val pathToFolder:String){
     this.idioDbpediaResourceStore.resStore.totalSupport += boostValue
     this.idioDbpediaResourceStore.resStore.supportForID(candidateID) += boostValue
 
+  }
+
+  /*
+  * Removes all the context words and context counts of a dbepdia topic
+  * and sets the context words and cotnext counts specified in the command line.
+  *
+  * */
+  def replaceAllContext(dbpediaURI:String, contextWords:Array[String], contextCounts:Array[Int]){
+    val dbpediaId = this.idioDbpediaResourceStore.resStore.getResourceByName(dbpediaURI).id
+    // remove all items in dbpediaId's context words and counts
+    this.idioContextStore.cleanContextWords(dbpediaId)
+    // add the specified context words and counts
+    this.addNewContextWords(dbpediaId, contextWords, contextCounts)
   }
 
   /*
