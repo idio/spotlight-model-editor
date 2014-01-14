@@ -39,7 +39,14 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
         }
     }
 
-    (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts)
+    val allSurfaceForms=new HashSet[String]()
+    for(surfaceForm<-surfaceForms){
+      allSurfaceForms.add(surfaceForm)
+      allSurfaceForms.add(surfaceForm.toLowerCase)
+    }
+    val allSurfaceFormsWithLower:Array[String]= allSurfaceForms.toArray
+
+    (allSurfaceFormsWithLower, dbpediaURI, types, contextWordsArray, contextCounts)
   }
 
   /*
@@ -57,6 +64,7 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
       //get all SurfaceForms into a Set
       for(surfaceForm<-surfaceForms){
         setOfSurfaceForms.add(surfaceForm)
+        setOfSurfaceForms.add(surfaceForm.toLowerCase)
       }
       //get all DbpediaUris into a Set
       setOfDbpediaURIS.add(dbpediaURI)
