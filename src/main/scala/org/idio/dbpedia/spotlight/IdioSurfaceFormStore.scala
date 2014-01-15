@@ -78,12 +78,40 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
 
   /*
   * Raises the SF counts to pass the minimum threshold needed to be spottable
+  * makes the SF annotationProbability equals to 0.27, this is done by rising the annotatedCounts
   * */
   def boostCountsIfNeeded(surfaceFormID:Int){
     val annotationProbability = this.sfStore.annotatedCountForID(surfaceFormID) / this.sfStore.totalCountForID(surfaceFormID).toDouble
     if (annotationProbability<0.27){
       var newAnnotatedCount = (0.27 * this.sfStore.totalCountForID(surfaceFormID).toDouble).toInt + 1
       this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
+    }
+  }
+
+  /*
+  * Reduces the SF counts making it less likely to be spotted.
+  * Makes the SF annotationProbability equals to 0.1, this is done by reducing the annotatedCounts
+  * */
+  def decreaseSpottingProbabilityById(surfaceFormID:Int, spotProbability:Double){
+    val annotationProbability = this.sfStore.annotatedCountForID(surfaceFormID) / this.sfStore.totalCountForID(surfaceFormID).toDouble
+    if (annotationProbability>spotProbability){
+      var newAnnotatedCount = (spotProbability * this.sfStore.totalCountForID(surfaceFormID).toDouble).toInt + 1
+      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
+    }
+  }
+
+  /*
+* Reduces the SF counts making it less likely to be spotted.
+* Makes the SF annotationProbability equals to 0.1, this is done by reducing the annotatedCounts
+* */
+  def decreaseSpottingProbabilityByString(surfaceText:String, spotProbability:Double){
+    // looks for the id of the surfaceForm
+    try{
+      var surfaceForm = this.sfStore.getSurfaceForm(surfaceText)
+      this.decreaseSpottingProbabilityById(surfaceForm.id, spotProbability)
+      println("\t the counts for:"+surfaceText+","+surfaceForm.id+" has been reduced.")
+    } catch{
+      case e: SurfaceFormNotFoundException => println("\tgiven surface form:"+surfaceText+" does not exist...")
     }
   }
 

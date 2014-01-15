@@ -50,6 +50,15 @@ object Main{
           spotlightModelReader.prettyPrintContext(dbpediaURI)
         }
 
+        // makes a piped(|) separated list of SF not spottable.
+        // this is done reducing its annotationProbability
+        case "make-sf-not-spottable"=>{
+          val surfaceTexts = args(2).split('|')
+          for (surfaceText<-surfaceTexts){
+            spotlightModelReader.makeSFNotSpottable(surfaceText)
+          }
+        }
+
         /*
         * Removes all the context words and context counts of a dbepdia topic
         * and sets the context words and cotnext counts specified in the command line
