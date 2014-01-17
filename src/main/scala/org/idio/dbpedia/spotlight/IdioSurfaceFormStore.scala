@@ -89,6 +89,22 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
   }
 
   /*
+* Raises the SF counts to pass the minimum threshold needed to be spottable
+* makes the SF annotationProbability equals to 0.27, this is done by rising the annotatedCounts
+* */
+  def boostCountsIfNeededByString(surfaceFormText:String){
+    try{
+        val surfaceFormId=this.sfStore.getSurfaceForm(surfaceFormText).id
+        this.boostCountsIfNeeded(surfaceFormId)
+    }catch{
+      case e: SurfaceFormNotFoundException => {
+        println("given SF:"+ surfaceFormText+" does not exist")
+      }
+    }
+
+  }
+
+  /*
   * Reduces the SF counts making it less likely to be spotted.
   * Makes the SF annotationProbability equals to 0.1, this is done by reducing the annotatedCounts
   * */

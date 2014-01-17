@@ -57,6 +57,17 @@ object Main{
           for (surfaceText<-surfaceTexts){
             spotlightModelReader.makeSFNotSpottable(surfaceText)
           }
+          spotlightModelReader.exportModels(pathToModelFolder)
+        }
+
+        // makes a piped(|) separated list of SF spottable.
+        // this is done boosting its annotationProbability
+        case "make-sf-spottable"=>{
+          val surfaceTexts = args(2).split('|')
+          for (surfaceText<-surfaceTexts){
+            spotlightModelReader.makeSFSpottable(surfaceText)
+          }
+          spotlightModelReader.exportModels(pathToModelFolder)
         }
 
         /*

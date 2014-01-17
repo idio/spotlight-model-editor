@@ -326,10 +326,17 @@ class IdioSpotlightModel(val pathToFolder:String){
   }
 
   /*
-  *  Makes a SF not spottable by reducing its annotationProbability
+  *  Makes a SF not spottable by reducing its annotationProbability to 0.1
   * */
   def makeSFNotSpottable(surfaceText:String){
     this.idioSurfaceFormStore.decreaseSpottingProbabilityByString(surfaceText, 0.1)
+  }
+
+  /*
+*  Makes a SF  spottable by reducing its annotationProbability to 0.1
+* */
+  def makeSFSpottable(surfaceText:String){
+    this.idioSurfaceFormStore.boostCountsIfNeededByString(surfaceText)
   }
 
   /*
