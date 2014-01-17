@@ -14,6 +14,24 @@ In order to use the Model Editor, you will need:
 We also recommend using [IntelliJ](http://www.jetbrains.com/idea/), for editing the code. See below, 
 for instructions on how to set up a project.
 
+- [Compiling](#compiling)
+    - [Compiling Dbpedia Spotlight](#compiling-dbpedia-spotlight)
+    - [Compiling Idio's Dbpedia Model Editor](#compiling-idios-dbpedia-model-editor)
+    - [Importing Project](#importing-project)
+- [Editing a model](#editing-a-model)
+    - [Searching a Topic](#searching=a-topic)
+    - [Getting Data about a SurfaceForm](#getting-data-about-a-surfaceform)
+    - [Making a list of Surface Forms NOT Spottable](#making-a-list-of-surface-forms-not-spottable)
+    - [Making a list of Surface Forms Spottable](#making-a-list-of-surface-forms-spottable)
+    - [Set the Context Words of a Topic](#set-the-context-words-of-a-topic)
+- [Updating Model From File](#updating-model-from-file)
+    - [Insight](#insight)
+    - [Updating a model From File (All in One Go)](#updating-a-model-from-file-all-in-one-go)
+    - [Updating a model From File (Two Steps)](#updating-a-model-from-file-two-steps)
+- [Using the scala console](#using-the-scala-console)
+    - [Starting a scala console](#starting-a-scala-console)
+    - [Playing with the models](#playing-with-the-models)
+
 ## Compiling
 
 We assume that you have the correct versions of Java and Scala, also make sure you have `mvn` in your system.
@@ -47,7 +65,7 @@ java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar
 ```
 
 
-## Editing
+## Importing Project
 1. Get IntelliJ
 2. Go to `File`>`Import Project` -> `Select POM Project`
 3. Give enough RAM to run the project. Go to `Preferences` -> `Compiler` and add '-Xmx5G' to 'Aditional VM options',
@@ -56,10 +74,20 @@ java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar
 ## Editing a model
 start by freeing  as much ram as possible.
 
+Each of the following tools addressing a `command` refers to calling the jar as follows
+
+```
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar <command> arg1 arg2 ... argN
+```
+
+
 ### Exploring a Model
 
-outputs 40 SurfaceForms with their respective candidates, priors and statistics
+- **command**: `explore`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **result**: outputs 40 SurfaceForms with their respective candidates, priors and statistics
 
+example:
 ```
 java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
 ```
@@ -67,10 +95,10 @@ java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar
 
 ### Searching a Topic
 
-looks for a given `DbpediaId` in the Model and returns whether that topic exists or not in the model
-```
-java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar search path-to-turkish/tr/model/ dbpediaId
-```
+- **command**: `search`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: dbpediaURI
+- **result**: looks for a given `DbpediaId` in the Model and returns whether that topic exists or not in the model
 
 i.e :
 ```
@@ -79,54 +107,61 @@ java -jar .... search path/to/model Michael_Schumacher‎
 
 ### Getting Data about a SurfaceForm
 
-Given a surfaceForm it outputs its topic candidates and statistics
+- **command**: `check`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: surfaceForm
+- **result**:  outputs the topic candidates and statistics of the given surfaceForm
 
-```
-java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar check /path/To/Model surfaceForm
-```
-
-i.e:
+example :
 ```
 java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar check ~/Downloads/tr/model/ evrimleri
 ```
 would check the candidate topics and statistics for the surface form `evrimleri`
 
+### Making a list of Surface Forms not Spottable
 
-### Adding SurfaceForms and Topics
-attach the given `dbpediaId` as a candidate topic for the  given `surfaceForm`. 
-- creates `dbpediaId` if it does not exist in the model
-- creates `surfaceForm` if it does not exists in the model
-
-The dbpedia types should be separated by pipes
-
-```
-java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar update /path/To/Model/ surfaceForm dbpediaId dbpediaTypesSeparatedByPipe
+- **command**: `make-sf-not-spottable`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: list of Surface Forms separated by `|`. i.e: `how\|How\|Hello\ World`
+- **result**: Each `SF` in the piped separated list won't be spottable anymore
 
 ```
-
-i.e:
-
-```
-java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar update ~/Downloads/tr/model/ ikimono_sf ikimono_topic
-
-```
-would add the topic `ikimono_topic` for the surface form `ikimono_sf`, note that `ikimono_topic` has no `dbpedia_types`.
-
-### Boosting the probability of a Topic for a given Surface Form.
-You can boost the probability of a topic being picked by boosting its counts for a given surface form.
-This can be done by calling `boost`.
-It will increment the counts of the given DbpediaID(topic) for the given surfaceForm by countBoost
-
-```
-java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar boost ~/Downloads/tr/model/ surfaceForm dbpediaId countBoost
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar make-sf-not-spottable path/to/model listOfPipedSeparatedSurfaceForms
 ```
 
-i.e:
+example: 
+
 ```
-java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar boost ~/Downloads/tr/model/ evrimleri Yıldız_evrimi 100
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar make-sf-not-spottable /mnt/share/spotlight/en/model how\|How\|QC\|the\ one\|The\ one\|The\ One
 ```
- 
-it will boost by 100 the counts of the topic `Yıldız_evrimi` when trigerred by surface form `evrimleri` 
+### Making a list of Surface Forms Spottable
+
+- **command**: `make-sf-spottable`
+- **arg1**: `pathToSpotlightModel/model`
+- **arg2**:  list of Surface Forms separated by `|`. i.e: `how\|How\|Hello\ World`
+- **result**: Each `SF` in the piped separated list will be spottable
+
+
+example: 
+
+```
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar make-sf-spottable /mnt/share/spotlight/en/model adobe\|Adobe
+```
+
+### Set the Context Words of a Topic
+
+- **command**: `clean-set-context`
+- **arg1**: `pathToSpotlightModel/model`
+- **arg2**: dbpediaURI
+- **arg3**: list of Context Words separated by `|`. i.e: `Word1\|Word2`
+- **arg4**: list of context Counts separated by `|` i.e: `1|300`
+- **result**: The context words and counts for  `dbpediaURI` will be clear. The specified context Words will be stemmed and added with their respect counts to the context of the given `dbpediaURI`.
+
+example:
+```
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar clean-set-context /mnt/share/spotlight/en/model Barack_Obama President\|United\|States 10\|54\|3 
+```
+
 
 ### Updating Model From File
 When updating the model with lots of `SF`, `Topics` and `Context Words` best is to do it from a file.
@@ -136,7 +171,11 @@ each line of the file should follow the format:
 dbpedia_id <tab> surfaceForm1|surfaceForm2... <tab> contextW1|contextW2... <tab> contextW1Counts|ContextW2Counts
 ```
 
-#### All in one go
+#### Insight
+Before doing actual changes to the model it might be useful to see how many `SF`,`dbpedia topics` and links between those two are missing.
+```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-check path/to/en/model path_to_file/with/model/changes```.
+
+#### Updating a model From File (All in One Go)
 make sure you have enough ram to hold all the models that should be around `-Xmx15000M`.
 do:
 
@@ -144,10 +183,8 @@ do:
 java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-sf-dbpedia path/to/en/model path_to_file/with/model/changes
 ```
 
-#### In two Steps
+#### Updating a model From File (Two Steps)
 If you don't have enough ram you can update the `SF` and `DbpediaTopics` in one step and the `Context Words` in other, this will require less memory.
-
-To update only `sf` and `DbpediaTopics` do:
 
 1. go to the model folder and rename `context.mem` to `context2.mem` this will avoid the jar to avoid loading the `context store`
 2. calling the following command will update the `surfaceform store`, `resource store` and `candidate store`: ```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-sf-dbpedia path/to/en/model path_to_file/with/model/changes```.
@@ -159,9 +196,17 @@ java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar
 ```
 6. rename all files to their usual conventions and enjoy a fresh baked model
 
-#### Insight
-Before doing actual changes to the model it might be useful to see how many `SF`,`dbpedia topics` and links between those two are missing.
-```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-check path/to/en/model path_to_file/with/model/changes```.
+steps 1-4 could be applied while ignoring 5 and 6 when: 
+- wanting to add `SFs`
+- wanting to link `SFs` with already existing `Dbpedia Topic`
+
+steps 5-6 could be applied while ignoring 1-4 when:
+- wanting to add Context words to a `Dbpedia Topic`
+
+**Important**:  
+- `step 1-4` will only add `SF` and `Dbpedia Topics` if they dont exist.
+- `step 1-4` will make all specified `SF`  spottable
+- `step 5-6` Only ADDS context words to the context of a dbpedia Topic.
 
 
 # Using the scala console
