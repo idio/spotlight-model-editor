@@ -97,42 +97,6 @@ object Main{
           }
         }
 
-        //attach surface form and topic, if they dont exist they are created
-        case "update" =>{
-          val surfaceForm = args(2)
-          val dbpediaURI = args(3)
-
-          var types = Array[String]()
-          if (args.length ==5)
-            types = args(4).split("|")
-
-          println("addding new sf and concept")
-          val contextWords = Array[String]()
-          val contextCounts = Array[Int]()
-          spotlightModelReader.addNew(surfaceForm,dbpediaURI,types,contextWords,contextCounts)
-          println("getting the stats for the new surfaceForm")
-          spotlightModelReader.getStatsForSurfaceForm(surfaceForm)
-
-          //exporting for testing purpouses
-          spotlightModelReader.exportModels("/Users/dav009/IdeaProjects/untitled/out/artifacts/untitled_jar")
-        }
-
-
-        //boost the values for a surfaceForm and a topic
-        case "boost" =>{
-          val surfaceForm = args(2)
-          val dbpediaURI = args(3)
-          val boostValue = args(4).toInt
-
-          println("statistics before the boost...")
-          spotlightModelReader.getStatsForSurfaceForm(surfaceForm)
-
-          spotlightModelReader.boostValue(surfaceForm, dbpediaURI, boostValue)
-
-          println("statistics after the boost..")
-          spotlightModelReader.getStatsForSurfaceForm(surfaceForm)
-        }
-
         // outputs the properties for 40 Surface forms.
         case "explore" =>{
           spotlightModelReader.showSomeSurfaceForms()
