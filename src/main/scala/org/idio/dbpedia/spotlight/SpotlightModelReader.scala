@@ -97,6 +97,21 @@ object Main{
           }
         }
 
+        //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
+        case "remove-sf-topic-association" =>{
+          val pathToFileWithSFTopicPairs = args(2)
+          val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
+
+          for(line<-sourceFile.getLines()){
+            val splittedLine = line.trim().split("\t")
+            val dbpediaURI = splittedLine(0)
+            val surfaceFormText = splittedLine(1)
+            spotlightModelReader.removeAssociation(surfaceFormText, dbpediaURI)
+            println("removed association: "+dbpediaURI+" -- "+surfaceFormText)
+          }
+         spotlightModelReader.exportModels(pathToModelFolder)
+        }
+
         // outputs the properties for 40 Surface forms.
         case "explore" =>{
           spotlightModelReader.showSomeSurfaceForms()
@@ -127,6 +142,9 @@ object Main{
                 val modelExplorer:ModelExplorerFromFile = new ModelExplorerFromFile(pathToModelFolder, pathToFileWithResources)
                 modelExplorer.checkEntitiesInFile()
               }
+
+
+
 
         }
 

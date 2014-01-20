@@ -6,6 +6,7 @@ package org.idio.dbpedia.spotlight
 
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore, MemoryStore, MemoryCandidateMapStore}
 import java.io.{File, FileInputStream}
+import Array.concat
 
 class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResourceStore){
 
@@ -104,4 +105,19 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
       return 0
   }
 
+  /*
+  * Remove association between a SF and a DbpediaURI
+  * */
+  def removeAssociation(surfaceFormID:Int, candidateID:Int){
+      val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere{ case(x) => x==candidateID }
+      this.candidateMap.candidates(surfaceFormID) = this.dropIndex(this.candidateMap.candidates(surfaceFormID), indexOfCandidateInArray)
+      this.candidateMap.candidateCounts(surfaceFormID) =this.dropIndex(this.candidateMap.candidateCounts(surfaceFormID), indexOfCandidateInArray)
+  }
+
+  /**
+   *  Drops the 'i'th element of a list
+  */
+  def dropIndex(xs:Array[Int], n:Int):Array[Int]={
+    return concat(xs.slice(0, n), xs.slice(n+1, xs.length))
+  }
 }

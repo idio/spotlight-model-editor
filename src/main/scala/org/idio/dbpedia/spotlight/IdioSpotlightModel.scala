@@ -351,6 +351,26 @@ class IdioSpotlightModel(val pathToFolder:String){
       }
   }
 
+  /*
+  * Removes the link between a SF and a Dbpedia Topic
+  * */
+  def removeAssociation(surfaceFormText:String, dbpediaURI:String){
+    try{
+      val surfaceFormId = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText).id
+
+      val dbpediaId = this.idioDbpediaResourceStore.resStore.getResourceByName(dbpediaURI).id
+      this.idioCandidateMapStore.removeAssociation(surfaceFormId, dbpediaId)
+
+    }catch{
+      case e:Exception=>{
+        println("\t given dbpediaURI or SF: "+dbpediaURI+" , "+surfaceFormText+" could not be found")
+      }
+      case e:ArrayIndexOutOfBoundsException=>{
+        println("\t no association between "+surfaceFormText+" and "+dbpediaURI+" existed before")
+      }
+    }
+
+  }
 
 
 }
