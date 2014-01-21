@@ -110,10 +110,15 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
   * */
   def decreaseSpottingProbabilityById(surfaceFormID:Int, spotProbability:Double){
     val annotationProbability = this.sfStore.annotatedCountForID(surfaceFormID) / this.sfStore.totalCountForID(surfaceFormID).toDouble
+    if (this.sfStore.totalCountForID(surfaceFormID) < 2){
+      this.sfStore.totalCountForID(surfaceFormID) = 10
+    }
+
     if (annotationProbability>spotProbability){
       var newAnnotatedCount = (spotProbability * this.sfStore.totalCountForID(surfaceFormID).toDouble).toInt + 1
       this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
     }
+
   }
 
   /*
