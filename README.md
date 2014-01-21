@@ -24,6 +24,7 @@ for instructions on how to set up a project.
     - [Making a list of Surface Forms NOT Spottable](#making-a-list-of-surface-forms-not-spottable)
     - [Making a list of Surface Forms Spottable](#making-a-list-of-surface-forms-spottable)
     - [Set the Context Words of a Topic](#set-the-context-words-of-a-topic)
+    - [Deleting Associations between SF and Topics](#deleting-associations-between-sf-and-topics)
 - [Updating Model From File](#updating-model-from-file)
     - [Insight](#insight)
     - [Updating a model From File (All in One Go)](#updating-a-model-from-file-all-in-one-go)
@@ -162,6 +163,23 @@ example:
 java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar clean-set-context /mnt/share/spotlight/en/model Barack_Obama President\|United\|States 10\|54\|3 
 ```
 
+### Deleting Associations between SF and Topics
+
+- **command**: `remove-sf-topic-association`
+- **arg1**: `pathToSpotlightModel/model`
+- **arg2**: pathToInputFile
+- **result**: All associations between SFs and Topics in the given input file will be deleted from the model.
+
+Every line in the input file describes an association which will be deleted, each line should follow the format:
+
+```
+dbpediaURI <tab> Surface Form
+```
+
+example:
+```
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar remove-sf-topic-association /mnt/share/spotlight/en/model /path/to/file/file_with_associations
+```
 
 ### Updating Model From File
 When updating the model with lots of `SF`, `Topics` and `Context Words` best is to do it from a file.
