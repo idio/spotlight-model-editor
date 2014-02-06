@@ -3,13 +3,15 @@ package org.idio.dbpedia.spotlight
 /**
  * Created by dav009 on 23/12/2013.
  */
-import org.dbpedia.spotlight.model.OntologyType
+import org.dbpedia.spotlight.model.{TokenType, OntologyType}
 import org.dbpedia.spotlight.db.memory.{MemoryStore, MemoryResourceStore}
 import java.io.File
 import java.io.{FileReader, FileNotFoundException, IOException, FileInputStream}
 import java.util.{Properties}
 import collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import java.io.PrintWriter
+import scala.collection.JavaConverters._
 
 class IdioSpotlightModel(val pathToFolder:String){
 
@@ -373,6 +375,32 @@ class IdioSpotlightModel(val pathToFolder:String){
       }
     }
 
+  }
+
+  def exportContextStore(pathToFile:String){
+    val writer = new PrintWriter(new File(pathToFile ))
+    val dbpediaIds = this.idioDbpediaResourceStore.resStore.idFromURI.values().asScala
+    for( dbpediaTopicID<-dbpediaIds){
+      var lineInformation:scala.collection.mutable.ArrayBuffer[String]= scala.collection.mutable.ArrayBuffer[String]()
+
+      try{
+        val dbpediaResource = this.idioDbpediaResourceStore.resStore.getResource(dbpediaTopicID)
+          val contextCounts:scala.collection.mutable.Map[TokenType,Int] = this.idioContextStore.contextStore.getContextCounts(dbpediaResource).asScala
+
+          lineInformation += dbpediaResource.uri
+          for ((tokenType, count)<-contextCounts){
+              lineInformation += tokenType.tokenType+":"+count
+          }
+          val writeLine = lineInformation.mkString("\t")+"\n"
+          writer.write(writeLine)
+
+      }catch{
+        case e:Exception=>{
+          println("\t not found context for"+dbpediaTopicID)
+        }
+      }
+    }
+  writer.close()
   }
 
 

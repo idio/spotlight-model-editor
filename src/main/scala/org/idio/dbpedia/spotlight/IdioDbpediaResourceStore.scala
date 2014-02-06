@@ -60,6 +60,15 @@ class IdioDbpediaResourceStore(val pathtoFolder:String){
     return this.resStore.getResourceByName(uri).id
   }
 
+  def printAllSupportValues(){
+
+     for(uri <- this.resStore.idFromURI.keySet().toArray){
+       val id = this.resStore.idFromURI.get(uri)
+       val support = this.resStore.supportForID(id)
+       println(uri+"\t"+support)
+     }
+  }
+
   /*
   * Given a list of string of types it return a list wth types ids:
   * i.e: [dbpdia:person, dbpedia:location] => [100, 392]..

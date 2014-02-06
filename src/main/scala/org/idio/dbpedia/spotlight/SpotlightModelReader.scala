@@ -29,6 +29,16 @@ object Main{
 
       action match{
 
+        case "export-context"=>{
+          println("exporting contexts.....")
+          val pathToFile = args(2)
+          spotlightModelReader.exportContextStore(pathToFile)
+        }
+
+        case "export-support" =>{
+          spotlightModelReader.idioDbpediaResourceStore.printAllSupportValues()
+        }
+
         // prints all types in type store
         case "show-resource-types" =>{
           val typeStore = spotlightModelReader.idioDbpediaResourceStore.resStore.ontologyTypeStore.asInstanceOf[MemoryOntologyTypeStore]
@@ -46,8 +56,10 @@ object Main{
 
         //show context words
         case "show-context" =>{
-          val dbpediaURI = args(2)
-          spotlightModelReader.prettyPrintContext(dbpediaURI)
+          val dbpediaURIS = args(2).split('|')
+          for (dbpediaURI<-dbpediaURIS){
+            spotlightModelReader.prettyPrintContext(dbpediaURI)
+          }
         }
 
         // makes a piped(|) separated list of SF not spottable.
@@ -69,6 +81,7 @@ object Main{
           }
           spotlightModelReader.exportModels(pathToModelFolder)
         }
+
 
         /*
         * Removes all the context words and context counts of a dbepdia topic
