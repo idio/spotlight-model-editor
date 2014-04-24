@@ -264,7 +264,7 @@ Given that the models are quite big (2 GB compressed), downloading, modifying an
  Here's a list of steps.
 
 1. Create the new instance:
-`knife ec2 server create -r "role[spotlight]" -I ami-6d3f9704 -G default -x ubuntu --node-name "dev-spotlight" --environment "development" -f m3.xlarge --availability-zone us-east-1d --secret-file path/to/secret/file`
+`knife ec2 server create -r "role[spotlight]" -I ami-6d3f9704 -G default -x ubuntu --node-name "dev-spotlight" --environment "development" -f m2.xlarge --availability-zone us-east-1d --secret-file path/to/secret/file`
 
 2. ssh into the new instance and install dependencies:
 `sudo apt-get install openjdk-6-jdk maven scala unzip`
