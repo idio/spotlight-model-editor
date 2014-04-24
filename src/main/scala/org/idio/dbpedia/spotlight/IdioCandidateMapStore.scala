@@ -9,10 +9,17 @@ import java.io.{File, FileInputStream}
 import Array.concat
 import org.dbpedia.spotlight.model.{Candidate, SurfaceForm}
 
-class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResourceStore){
+class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore,val pathtoFolder:String, val resStore:MemoryResourceStore){
 
 
-  var candidateMap:MemoryCandidateMapStore = MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder,"candmap.mem")), resStore)
+
+  def this(pathtoFolder:String, resStore:MemoryResourceStore){
+    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder,"candmap.mem")), resStore), pathtoFolder, resStore)
+  }
+
+  def this(candidateMap:MemoryCandidateMapStore, resStore:MemoryResourceStore){
+    this(candidateMap, "",resStore)
+  }
 
   /*
   * Tries to get the candidate array for the given surfaceForm.
@@ -139,15 +146,15 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
 
     // add the candidates associated to the destinationSF but not to the sourceSF
     val setOfCandidatesTopics:collection.immutable.Set[Int] = collection.immutable.Set[Int](newDestinationCandidates:_*)
-    val currentDestinationCandidates = this.candidateMap.getCandidates(destinationSurfaceForm)
+    val currentDestinationCandidates =  this.candidateMap.candidates(destinationSurfaceForm.id).zip(this.candidateMap.candidateCounts(destinationSurfaceForm.id))
 
 
-    currentDestinationCandidates.foreach{ candidate:Candidate =>
+    currentDestinationCandidates.foreach{ case (topicId, count)  =>
 
       // if candidate is not already in the new candidate list then add it
-      if (setOfCandidatesTopics.contains(candidate.resource.id)){
-        newDestinationCandidates = newDestinationCandidates :+ candidate.resource.id
-        newDestinationCandidatesCounts = newDestinationCandidatesCounts :+ candidate.support
+      if (!setOfCandidatesTopics.contains(topicId)){
+        newDestinationCandidates = newDestinationCandidates :+ topicId
+        newDestinationCandidatesCounts = newDestinationCandidatesCounts :+ count
       }
 
     }
