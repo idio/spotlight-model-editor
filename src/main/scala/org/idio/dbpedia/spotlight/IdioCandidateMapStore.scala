@@ -86,7 +86,7 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore,val pathtoF
 * */
   def getAVGSupportForSF(surfaceFormID:Int):Int = {
     val candidateCounts = this.candidateMap.candidateCounts(surfaceFormID)
-    if  (candidateCounts.isInstanceOf[Array[Short]]){
+    if  (candidateCounts.isInstanceOf[Array[Int]]){
       return (candidateCounts.sum  / candidateCounts.size.toDouble).toInt
     }
     return 0
