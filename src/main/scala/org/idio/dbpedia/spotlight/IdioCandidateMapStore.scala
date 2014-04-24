@@ -7,6 +7,7 @@ package org.idio.dbpedia.spotlight
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore, MemoryStore, MemoryCandidateMapStore}
 import java.io.{File, FileInputStream}
 import Array.concat
+import org.dbpedia.spotlight.model.{Candidate, SurfaceForm}
 
 class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResourceStore){
 
@@ -124,6 +125,37 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
       val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere{ case(x) => x==candidateID }
       this.candidateMap.candidates(surfaceFormID) = this.dropIndex(this.candidateMap.candidates(surfaceFormID), indexOfCandidateInArray)
       this.candidateMap.candidateCounts(surfaceFormID) =this.dropIndex(this.candidateMap.candidateCounts(surfaceFormID), indexOfCandidateInArray)
+  }
+
+  /*
+  * get all candidates associated to sourceSurfaceForm
+  * and associates them also to destinationSurfaceForm
+  * */
+  def copyCandidates(sourceSurfaceForm:SurfaceForm, destinationSurfaceForm:SurfaceForm){
+
+    // get the candidates associated to the sourceSF
+    var newDestinationCandidates = this.candidateMap.candidates(sourceSurfaceForm.id).clone()
+    var newDestinationCandidatesCounts = this.candidateMap.candidateCounts(sourceSurfaceForm.id).clone()
+
+    // add the candidates associated to the destinationSF but not to the sourceSF
+    val setOfCandidatesTopics:collection.immutable.Set[Int] = collection.immutable.Set[Int](newDestinationCandidates:_*)
+    val currentDestinationCandidates = this.candidateMap.getCandidates(destinationSurfaceForm)
+
+
+    currentDestinationCandidates.foreach{ candidate:Candidate =>
+
+      // if candidate is not already in the new candidate list then add it
+      if (setOfCandidatesTopics.contains(candidate.resource.id)){
+        newDestinationCandidates = newDestinationCandidates :+ candidate.resource.id
+        newDestinationCandidatesCounts = newDestinationCandidatesCounts :+ candidate.support
+      }
+
+    }
+
+    // update the destinationSF candidate arrays
+    this.candidateMap.candidates(destinationSurfaceForm.id) = newDestinationCandidates
+    this.candidateMap.candidateCounts(destinationSurfaceForm.id) = newDestinationCandidatesCounts
+
   }
 
   /**

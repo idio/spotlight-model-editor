@@ -361,6 +361,20 @@ class IdioSpotlightModel(val pathToFolder:String){
   }
 
   /*
+    takes all topic candidates for the surfaceForm1
+    and associate them to surfaceForm2.
+    Assumes that both SurfaceForms exists in the model
+  */
+  def copyCandidates(surfaceTextSource:String, surfaceTextDestination:String){
+
+    val sourceSurfaceForm = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceTextSource)
+    val destinySurfaceForm = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceTextDestination)
+
+    this.idioCandidateMapStore.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
+
+  }
+
+  /*
   * Removes the link between a SF and a Dbpedia Topic
   * */
   def removeAssociation(surfaceFormText:String, dbpediaURI:String){

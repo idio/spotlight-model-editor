@@ -110,6 +110,19 @@ object Main{
           }
         }
 
+        /*
+          takes all topic candidates for the surfaceForm1
+          and associate them to surfaceForm2.
+          Assumes that both SurfaceForms exists in the model
+        */
+        case "copy-candidates" =>{
+          val surfaceFormTextSource = args(2)
+          val surfaceFormTextDestiny = args(3)
+
+          spotlightModelReader.copyCandidates(surfaceFormTextSource, surfaceFormTextDestiny)
+          spotlightModelReader.exportModels(pathToModelFolder)
+        }
+
         //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
         case "remove-sf-topic-association" =>{
           val pathToFileWithSFTopicPairs = args(2)
