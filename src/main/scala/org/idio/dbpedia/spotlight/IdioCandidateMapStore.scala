@@ -20,7 +20,7 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
   * It looks if the given candidateID is inside the candidate array.
   * if it is not it will add it
   * */
-  def addOrCreate(surfaceFormID:Int, candidateID:Int){
+  def addOrCreate(surfaceFormID:Int, candidateID:Int, candidateCounts:Int){
     // try to get it, create the candidate array in case it doesnt exist
     try{
       this.candidateMap.candidates(surfaceFormID)
@@ -28,7 +28,7 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
       case e:Exception =>{
          println("\tcreating candidate map array for "+surfaceFormID)
          var candidates:Array[Int] =Array(candidateID)
-         var counts:Array[Int] = Array(1)
+         var counts:Array[Int] = Array(candidateCounts)
          this.createCandidateMapForSurfaceForm(surfaceFormID, candidates, counts)
         println("\tcandidates")
         for(candidate <- this.candidateMap.candidates(surfaceFormID)){
@@ -44,7 +44,7 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
       case e:Exception =>{
         println("\tcreating candidate map array for "+surfaceFormID)
         this.candidateMap.candidates(surfaceFormID) = Array[Int](candidateID)
-        this.candidateMap.candidateCounts(surfaceFormID) = Array[Int](1)
+        this.candidateMap.candidateCounts(surfaceFormID) = Array[Int](candidateCounts)
         println("\tcandidates")
         for(candidate <- this.candidateMap.candidates(surfaceFormID)){
           println("\t"+candidate)
@@ -56,7 +56,7 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
     // if the candidate array exist, then check if the candidate Topic is inside
     if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)){
       println("\tadding the candidate("+candidateID+") to candidates of "+surfaceFormID)
-      this.addNewCandidateToSF(surfaceFormID, candidateID, 1)
+      this.addNewCandidateToSF(surfaceFormID, candidateID, candidateCounts)
     }
 
   }
@@ -70,6 +70,18 @@ class IdioCandidateMapStore(val pathtoFolder:String, val resStore:MemoryResource
   def createCandidateMapForSurfaceForm(surfaceFormID:Int, listOfCandidates:Array[Int], listOfCounts:Array[Int]){
     this.candidateMap.candidates = Array concat(this.candidateMap.candidates, Array(listOfCandidates))
     this.candidateMap.candidateCounts =  Array concat(this.candidateMap.candidateCounts, Array(listOfCounts))
+  }
+
+  /*
+* returns the AVG candidate counts for a given SF
+* This value is used when creating a new association between a SF and a Topic
+* */
+  def getAVGSupportForSF(surfaceFormID:Int):Int = {
+    val candidateCounts = this.candidateMap.candidateCounts(surfaceFormID)
+    if  (candidateCounts.isInstanceOf[Array[Short]]){
+      return (candidateCounts.sum  / candidateCounts.size.toDouble).toInt
+    }
+    return 0
   }
 
   /*
