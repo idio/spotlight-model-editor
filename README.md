@@ -29,9 +29,12 @@ for instructions on how to set up a project.
     - [Insight](#insight)
     - [Updating a model From File (All in One Go)](#updating-a-model-from-file-all-in-one-go)
     - [Updating a model From File (Two Steps)](#updating-a-model-from-file-two-steps)
+    
 - [Using the scala console](#using-the-scala-console)
     - [Starting a scala console](#starting-a-scala-console)
     - [Playing with the models](#playing-with-the-models)
+
+- [Practical tips for updating a model](#practical-tips-for-updating-a-model)
 
 ## Compiling
 
@@ -226,7 +229,6 @@ steps 5-6 could be applied while ignoring 1-4 when:
 - `step 1-4` will make all specified `SF`  spottable
 - `step 5-6` Only ADDS context words to the context of a dbpedia Topic.
 
-
 # Using the scala console
 
 Best way to play the models and modify them  is to use the scala console.
@@ -254,3 +256,30 @@ spotlightModel.searchForDBpediaResource("ikimono_gakari_dbpedia_uri")
 spotlightModel.addNew("ikimono_gakari_sf","ikimono_gakari_dbpedia_uri",1,Array())
 spotlightModel.exportModels("/new/path/of/folder/model/")
 ```
+
+## Practical tips for updating a model
+
+Given that the models are quite big (2 GB compressed), downloading, modifying and uploading them would be very
+ time consuming from your local machine. Plus, the operations require a lot of ram, so you better boot a dev instance, and do the changes from there.
+ Here's a list of steps.
+
+1. Create the new instance:
+`knife ec2 server create -r "role[spotlight]" -I ami-6d3f9704 -G default -x ubuntu --node-name "dev-spotlight" --environment "development" -f m2.xlarge --availability-zone us-east-1d --secret-file path/to/secret/file`
+
+2. ssh into the new instance and install dependencies:
+`sudo apt-get install openjdk-6-jdk maven scala unzip`
+
+3. Clone the dbpedia model editor repo:
+`git clone git@github.com:idio/spotlight-model-editor.git`
+
+4. Install the necessary dbpedia spotlight .jar file and compile ```
+cd dbpedia-model-editor
+mvn install:install-file -Dfile=/usr/share/java/dbpedia-spotlight-0.6.jar -DgroupId=org.dbpedia -DartifactId=spotlight -Dversion=0.6 -Dpackaging=jar
+mvn package ```
+
+5. You can now use the model editor for a variety of tasks, for example, to remove SFs Topics associations stored in tab separated file, you can run (we assume the model is located in `/mnt/share/spotlight/`). 
+`sudo java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar remove-sf-topic-association /mnt/share/spotlight/en/model ~/remove_associations`
+The command would re-export the model, so you can just zip and upload the file to S3 to be used.
+
+6. Write the changes you made into a changelog, so we can duplicate them from scratch if needed [need to decide where to store changes] .
+
