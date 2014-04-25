@@ -256,6 +256,21 @@ spotlightModel.searchForDBpediaResource("ikimono_gakari_dbpedia_uri")
 spotlightModel.addNew("ikimono_gakari_sf","ikimono_gakari_dbpedia_uri",1,Array())
 spotlightModel.exportModels("/new/path/of/folder/model/")
 ```
+-----------
+
+`tools/explore.scala` contains a script which can be preloaded into the scala terminal. It imports the classes and stores needed to play with the model at a low level.
+In order to use it:
+
+1. do `JAVA_OPTS="-Xmx9000M -Xms9000M" scala`  note: Adjust the Java heap options to your needs, If you are using all the stores use around 15g
+
+2. once you are in the scala console do: `:load tools/explore.scala` . this will preload the objects:
+    - `resStore`: resource store
+    - `sfStore`: surface form store
+    - `candidateMap`: candidate store
+    - `tokenStore`: token type store
+    - `contextStore`: context token store
+
+
 
 ## Practical tips for updating a model
 
