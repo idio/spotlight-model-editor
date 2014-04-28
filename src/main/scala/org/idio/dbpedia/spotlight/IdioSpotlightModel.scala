@@ -132,6 +132,10 @@ class IdioSpotlightModel(val pathToFolder:String){
     val surfaceFormID:Int = this.idioSurfaceFormStore.getAddSurfaceForm(surfaceFormText)
     this.idioSurfaceFormStore.boostCountsIfNeeded(surfaceFormID)
     var defaultSupportForDbpediaResource:Int = 11
+    val defaultSupportForCandidate:Int = 30
+
+    val avgSupportCandidate = math.max(defaultSupportForCandidate, this.idioCandidateMapStore.getAVGSupportForSF(surfaceFormID)) + 10
+
 
     // calculate the default support value based on the current support for the candidates for the given SF
     try{
@@ -154,7 +158,7 @@ class IdioSpotlightModel(val pathToFolder:String){
     val dbpediaResourceID:Int = this.idioDbpediaResourceStore.getAddDbpediaResource(candidateURI, defaultSupportForDbpediaResource, types)
 
     //update the candidate Store
-    this.idioCandidateMapStore.addOrCreate(surfaceFormID, dbpediaResourceID)
+    this.idioCandidateMapStore.addOrCreate(surfaceFormID, dbpediaResourceID, avgSupportCandidate)
 
     return (surfaceFormID, dbpediaResourceID)
 
@@ -354,6 +358,20 @@ class IdioSpotlightModel(val pathToFolder:String){
       for (surfaceFormId<-listOfNewSurfaceFormIds){
         this.idioCandidateMapStore.createCandidateMapForSurfaceForm(surfaceFormId,new Array[Int](0), new Array[Int](0))
       }
+  }
+
+  /*
+    takes all topic candidates for the surfaceForm1
+    and associate them to surfaceForm2.
+    Assumes that both SurfaceForms exists in the model
+  */
+  def copyCandidates(surfaceTextSource:String, surfaceTextDestination:String){
+
+    val sourceSurfaceForm = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceTextSource)
+    val destinySurfaceForm = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceTextDestination)
+
+    this.idioCandidateMapStore.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
+
   }
 
   /*
