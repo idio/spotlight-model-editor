@@ -4,7 +4,7 @@
 
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore, MemoryCandidateMapStore}
 import org.dbpedia.spotlight.model.SurfaceForm
-import org.idio.dbpedia.spotlight.IdioCandidateMapStore
+import org.idio.dbpedia.spotlight.stores.IdioCandidateMapStore
 import org.scalatest.mock.MockitoSugar.mock
 import org.junit.Test
 import org.junit.Assert._
