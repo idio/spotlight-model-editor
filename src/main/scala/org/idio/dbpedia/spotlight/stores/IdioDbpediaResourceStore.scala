@@ -1,4 +1,4 @@
-package org.idio.dbpedia.spotlight
+package org.idio.dbpedia.spotlight.stores
 
 /**
  * Created by dav009 on 23/12/2013.

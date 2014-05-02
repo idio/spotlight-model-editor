@@ -4,14 +4,15 @@ package org.idio.dbpedia.spotlight
  * Created by dav009 on 23/12/2013.
  */
 import org.dbpedia.spotlight.model.{TokenType, OntologyType}
-import org.dbpedia.spotlight.db.memory.{MemoryStore, MemoryResourceStore}
+import org.dbpedia.spotlight.db.memory.MemoryStore
 import java.io.File
-import java.io.{FileReader, FileNotFoundException, IOException, FileInputStream}
-import java.util.{Properties}
+import java.io.{FileNotFoundException, FileInputStream}
+import java.util.Properties
 import collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import java.io.PrintWriter
 import scala.collection.JavaConverters._
+import org.idio.dbpedia.spotlight.stores._
 
 class IdioSpotlightModel(val pathToFolder:String){
 

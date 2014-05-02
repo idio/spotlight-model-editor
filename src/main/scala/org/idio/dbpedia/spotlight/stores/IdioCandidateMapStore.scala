@@ -1,4 +1,4 @@
-package org.idio.dbpedia.spotlight
+package org.idio.dbpedia.spotlight.stores
 
 /**
  * Created by dav009 on 23/12/2013.
@@ -7,7 +7,7 @@ package org.idio.dbpedia.spotlight
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore, MemoryStore, MemoryCandidateMapStore}
 import java.io.{File, FileInputStream}
 import Array.concat
-import org.dbpedia.spotlight.model.{Candidate, SurfaceForm}
+import org.dbpedia.spotlight.model.SurfaceForm
 
 class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore,val pathtoFolder:String, val resStore:MemoryResourceStore){
 
