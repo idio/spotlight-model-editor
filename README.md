@@ -15,7 +15,6 @@ We also recommend using [IntelliJ](http://www.jetbrains.com/idea/), for editing 
 for instructions on how to set up a project.
 
 - [Compiling](#compiling)
-    - [Compiling Dbpedia Spotlight](#compiling-dbpedia-spotlight)
     - [Compiling Idio's Dbpedia Model Editor](#compiling-idios-dbpedia-model-editor)
     - [Importing Project](#importing-project)
 - [Editing a model](#editing-a-model)
@@ -38,36 +37,22 @@ for instructions on how to set up a project.
 
 ## Compiling
 
-We assume that you have the correct versions of Java and Scala, also make sure you have `mvn` in your system.
+We assume that you have the correct versions of Java and mvn in your system.
+
 The language models consume a lot of computational resources, so in these instructions we use the model for 
 Turkish (located in the `tr` folder). Feel free to play with other languages, if you have a big machine.
 
-### Compiling Dbpedia Spotlight
-
-DBpedia Spotlight's jar is one of the dependencies. These steps will guide you on how to compile spotlight
-
-1. clone `https://github.com/dbpedia-spotlight/dbpedia-spotlight`
-2. compile dbpedia spotlight: 
-  - `mvn package`
-
-after this step there should be a `dbpedia-spotlight-0.6-jar-with-dependencies.jar` in the `./dist/target` folder.
 
 ### Compiling Idio's Dbpedia Model Editor
 
 1. Clone this repo
-2. go to the repo's folder and do:
-
-  ```
-  mvn install:install-file -Dfile=path_to_spotlight_jar/dbpedia-spotlight-0.6-jar-with-dependencies.jar -DgroupId=org.dbpedia -DartifactId=spotlight -Dversion=0.6 -Dpackaging=jar
-  ```
-3. do `mvn compile`
-4. do `mvn package`
-5. call
+2. go to the repo's folder
+3. do `mvn package`
+4. call
 
 ```
 java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
 ```
-
 
 ## Importing Project
 1. Get IntelliJ
