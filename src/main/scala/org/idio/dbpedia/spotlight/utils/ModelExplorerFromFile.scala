@@ -90,25 +90,25 @@ class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
             }
 
             println("----------------------------")
-            println("SF: "+ surfaceForm)
-            println("\t in model?\t\t"+ isSFinModel)
-            println("Topic: "+ dbpediaUri)
-            println("\t in model?\t\t"+isDbpediaResourceinModel)
+            println("SF: " + surfaceForm)
+            println("\t in model?\t\t" + isSFinModel)
+            println("Topic: " + dbpediaUri)
+            println("\t in model?\t\t" + isDbpediaResourceinModel)
             println("is SF connected to the Topic?")
-            println("\t"+areSFandResourceLinked )
+            println("\t" + areSFandResourceLinked )
             println("----------------------------")
       }
       line = lines.readLine()
     }
     println("totals")
     println("TOPICS")
-    println("\t# of topics: "+totalTopics)
-    println("\t# of found topics: "+countsOfFoundTopics)
+    println("\t# of topics: " + totalTopics)
+    println("\t# of found topics: " + countsOfFoundTopics)
     println("SF")
-    println("\t# of SF: "+totalSF)
-    println("\t# of found SF: "+countsOfFoundSF)
-    println("topics linked to SF: "+countsOfLinkedSFTopic)
-    println("expected number of topics and SF links: "+totalSF)
+    println("\t# of SF: " + totalSF)
+    println("\t# of found SF: " + countsOfFoundSF)
+    println("topics linked to SF: " + countsOfLinkedSFTopic)
+    println("expected number of topics and SF links: " + totalSF)
     source.close()
   }
 

@@ -135,7 +135,7 @@ class IdioSpotlightModel(val pathToFolder:String){
     var defaultSupportForDbpediaResource:Int = 11
     val defaultSupportForCandidate:Int = 30
 
-    val avgSupportCandidate = math.max(defaultSupportForCandidate, this.idioCandidateMapStore.getAVGSupportForSF(surfaceFormID)) + 10
+    var avgSupportCandidate = defaultSupportForCandidate
 
 
     // calculate the default support value based on the current support for the candidates for the given SF
@@ -150,8 +150,10 @@ class IdioSpotlightModel(val pathToFolder:String){
       if (calculatedSupport>defaultSupportForDbpediaResource){
         defaultSupportForDbpediaResource = calculatedSupport
       }
+
+      avgSupportCandidate = math.max(defaultSupportForCandidate, this.idioCandidateMapStore.getAVGSupportForSF(surfaceFormID)) + 10
     }catch{
-      case e:Exception => println("\tusing default support for.."+candidateURI)
+      case e:Exception => println("\tusing default support for.." + candidateURI)
     }
 
 
@@ -172,7 +174,7 @@ class IdioSpotlightModel(val pathToFolder:String){
   * */
   def addNewContextWords(dbpediaResourceID:Int, contextWords:Array[String], contextCounts:Array[Int]){
     //update the context Store
-    println("\trying to update context for: "+ dbpediaResourceID)
+    println("\trying to update context for: " + dbpediaResourceID)
     try{
 
 
@@ -187,7 +189,7 @@ class IdioSpotlightModel(val pathToFolder:String){
         val tokenCount:Int = contextTokenCountMap.get(token).get
         this.idioContextStore.addContext(dbpediaResourceID,tokenID, tokenCount )
 
-        println("\t\tadded token to context array - "+ token)
+        println("\t\tadded token to context array - " + token)
       }
 
     }catch{
@@ -308,7 +310,7 @@ class IdioSpotlightModel(val pathToFolder:String){
         val dbpediaTypes:List[OntologyType] = candidate.resource.types
 
         for( dbpediaType:OntologyType<-dbpediaTypes){
-          println("\t\t"+dbpediaType.typeID)
+          println("\t\t" + dbpediaType.typeID)
         }
 
       }
@@ -371,10 +373,10 @@ class IdioSpotlightModel(val pathToFolder:String){
 
     }catch{
       case e:Exception=>{
-        println("\t given dbpediaURI or SF: "+dbpediaURI+" , "+surfaceFormText+" could not be found")
+        println("\t given dbpediaURI or SF: " + dbpediaURI + " , " + surfaceFormText + " could not be found")
       }
       case e:ArrayIndexOutOfBoundsException=>{
-        println("\t no association between "+surfaceFormText+" and "+dbpediaURI+" existed before")
+        println("\t no association between " + surfaceFormText + " and " + dbpediaURI + " existed before")
       }
     }
 
@@ -417,14 +419,14 @@ class IdioSpotlightModel(val pathToFolder:String){
 
           lineInformation += dbpediaResource.uri
           for ((tokenType, count)<-contextCounts){
-              lineInformation += tokenType.tokenType+":"+count
+              lineInformation += tokenType.tokenType + ":" + count
           }
-          val writeLine = lineInformation.mkString("\t")+"\n"
+          val writeLine = lineInformation.mkString("\t") + "\n"
           writer.write(writeLine)
 
       }catch{
         case e:Exception=>{
-          println("\t not found context for"+dbpediaTopicID)
+          println("\t not found context for" + dbpediaTopicID)
         }
       }
     }

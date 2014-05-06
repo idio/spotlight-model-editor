@@ -20,22 +20,18 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
     val fileParser = new ModelFileParser(this.pathToFile)
     println("Parsing INPUT-FILE")
 
-    val (setOfSurfaceForms, setOfDbpediaURIS, lowerSfMap, parsedLines, setOfContextWords) = fileParser.parseFile()
+    val (setOfUpperCaseSF, setOfLowerCaseSF ,setOfDbpediaURIS, lowerSfMap, parsedLines, setOfContextWords) = fileParser.parseFile()
 
     println("Finished parsing INPUT-FILE")
 
     var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
 
-    //get Set of lowercase SurfaceForms
-    val setOfLowercaseSurfaceForms = collection.immutable.HashSet[String](lowerSfMap.values.toList.flatten:_*)
 
-
-    // adding SFs, rebuilding reverse maps
+    // trying to add all set of SF's in a single go, so that the reverseMaps are just built once.
     println("adding SFs")
-    idioSpotlightModel.addSetOfSurfaceForms(setOfSurfaceForms ++ setOfLowercaseSurfaceForms)
+    idioSpotlightModel.addSetOfSurfaceForms(setOfUpperCaseSF ++ setOfLowerCaseSF)
 
-
-    val contextFileWriter = new java.io.PrintWriter(this.pathToFile+"_just_context")
+    val contextFileWriter = new java.io.PrintWriter(this.pathToFile + "_just_context")
 
     parsedLines.foreach{ parsedLine:Entry =>
 
@@ -43,10 +39,10 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
       val allSFBindsToTopics = parsedLine.upperCaseSurfaceForms ++ parsedLine.lowerCaseSF
 
       allSFBindsToTopics.foreach{ surfaceForm:String =>
-        println("SF: "+ surfaceForm)
-        println("Topic: "+ parsedLine.dbpediaURI)
-        println("Types: "+ parsedLine.types.mkString(" "))
-        println("Context: "+ parsedLine.contextWordsArray.mkString(" "))
+        println("SF: " + surfaceForm)
+        println("Topic: " + parsedLine.dbpediaURI)
+        println("Types: " + parsedLine.types.mkString(" "))
+        println("Context: " + parsedLine.contextWordsArray.mkString(" "))
 
         // Updates the model connecting Sf-> Topic
         // Topic -> Contxt Words
@@ -58,7 +54,7 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
           parsedLine.contextCounts
         )
 
-        contextFileWriter.println(dbpediaResourceId+"\t"+parsedLine.contextWordsArray.mkString("|")+"\t"+parsedLine.contextCounts.mkString("|"))
+        contextFileWriter.println(dbpediaResourceId + "\t" + parsedLine.contextWordsArray.mkString("|") + "\t" + parsedLine.contextCounts.mkString("|"))
 
         println("----------------------------")
       }

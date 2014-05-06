@@ -5,7 +5,6 @@ package org.idio.dbpedia.spotlight.stores
  */
 
 import org.dbpedia.spotlight.db.memory.{MemoryStore,MemoryTokenTypeStore}
-import org.dbpedia.spotlight.exceptions.SurfaceFormNotFoundException
 import java.io.{File, FileInputStream}
 import org.dbpedia.spotlight.db.stem.SnowballStemmer
 import scala.collection.mutable.HashMap
@@ -21,7 +20,7 @@ class IdioTokenResourceStore(val pathtoFolder:String, stemmerLanguage:String) {
   def showTokens(){
     for (token:String<-this.tokenStore.tokenForId){
         val counts = this.tokenStore.counts(tokenStore.idFromToken.get(token))
-        println(token+"--"+this.tokenStore.getTokenType(token)+"---"+ counts)
+        println(token + "--" + this.tokenStore.getTokenType(token) + "---" +  counts)
     }
   }
 
@@ -98,15 +97,15 @@ class IdioTokenResourceStore(val pathtoFolder:String, stemmerLanguage:String) {
     val contextTokenMap:HashMap[String,Int] = new HashMap[String, Int]()
 
     (contextWords, contextCounts).zipped foreach { (word, counts) =>
-    {
-      val stemmedWord:String = this.stemToken(word)
-      var currentCount = 0
-      if (contextTokenMap.contains(stemmedWord)){
-        currentCount = contextTokenMap.get(stemmedWord).get
-      }
-      contextTokenMap.put(stemmedWord, currentCount + counts)
+      {
+        val stemmedWord:String = this.stemToken(word)
+        var currentCount = 0
+        if (contextTokenMap.contains(stemmedWord)){
+          currentCount = contextTokenMap.get(stemmedWord).get
+        }
+        contextTokenMap.put(stemmedWord, currentCount + counts)
 
-    }
+      }
     }
     return contextTokenMap
   }

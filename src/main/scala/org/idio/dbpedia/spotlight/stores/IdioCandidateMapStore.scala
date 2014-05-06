@@ -34,7 +34,7 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
       this.candidateMap.candidates(surfaceFormID)
     }catch{
       case e:Exception =>{
-         println("\tcreating candidate map array for "+surfaceFormID)
+         println("\tcreating candidate map array for " + surfaceFormID)
 
          val candidates:Array[Int] = Array(candidateID)
          val counts:Array[Int] = Array(candidateCounts)
@@ -43,7 +43,7 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
          println("\tcandidates")
 
         this.candidateMap.candidates(surfaceFormID).foreach{ candidate =>
-          println("\t"+candidate)
+          println("\t" + candidate)
         }
 
          return true
@@ -55,7 +55,7 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
     }catch{
       case e:Exception =>{
 
-        println("\tcreating candidate map array for "+surfaceFormID)
+        println("\tcreating candidate map array for " + surfaceFormID)
 
         this.candidateMap.candidates(surfaceFormID) = Array[Int](candidateID)
         this.candidateMap.candidateCounts(surfaceFormID) = Array[Int](candidateCounts)
@@ -63,7 +63,7 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
         println("\tcandidates")
 
         this.candidateMap.candidates(surfaceFormID).foreach{ candidate =>
-          println("\t"+candidate)
+          println("\t" + candidate)
         }
 
       }
@@ -72,7 +72,7 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
 
     // if the candidate array exist, then check if the candidate Topic is inside
     if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)){
-      println("\tadding the candidate("+candidateID+") to candidates of "+surfaceFormID)
+      println("\tadding the candidate(" + candidateID + ") to candidates of " + surfaceFormID)
       this.addNewCandidateToSF(surfaceFormID, candidateID, candidateCounts)
     }
 
@@ -178,6 +178,6 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
    *  Drops the 'i'th element of a list
   */
   def dropIndex(xs:Array[Int], n:Int):Array[Int]={
-    return concat(xs.slice(0, n), xs.slice(n+1, xs.length))
+    return concat(xs.slice(0, n), xs.slice(n + 1, xs.length))
   }
 }

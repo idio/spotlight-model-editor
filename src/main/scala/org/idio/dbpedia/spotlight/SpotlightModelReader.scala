@@ -3,11 +3,8 @@ package org.idio.dbpedia.spotlight
 /**
  * Created by dav009 on 19/12/2013.
  */
-import org.dbpedia.spotlight.db.memory.{MemoryResourceStore,MemoryStore,MemoryCandidateMapStore,MemorySurfaceFormStore}
-import org.dbpedia.spotlight.exceptions.SurfaceFormNotFoundException
 import org.idio.dbpedia.spotlight.utils.{ContextUpdateFromFile, ModelUpdateFromFile, ModelExplorerFromFile}
 import org.dbpedia.spotlight.db.memory.MemoryOntologyTypeStore;
-import java.io.{FileInputStream, File}
 
 
 
@@ -42,7 +39,7 @@ object Main{
         // prints all types in type store
         case "show-resource-types" =>{
           val typeStore = spotlightModelReader.idioDbpediaResourceStore.resStore.ontologyTypeStore.asInstanceOf[MemoryOntologyTypeStore]
-          for(ontologyType<-typeStore.idFromName.keySet().toArray){
+          typeStore.idFromName.keySet().toArray.foreach{ ontologyType =>
             println(ontologyType)
           }
         }
@@ -55,7 +52,7 @@ object Main{
         }
 
         // get the statistics for a surface form
-        case "check" =>{
+        case "check-sf" =>{
           val surfaceText = args(2)
           println("getting statistics for surfaceText.....")
           spotlightModelReader.getStatsForSurfaceForm(surfaceText)
@@ -64,18 +61,15 @@ object Main{
         //show context words
         case "show-context" =>{
           val dbpediaURIS = args(2).split('|')
-          for (dbpediaURI<-dbpediaURIS){
-            spotlightModelReader.prettyPrintContext(dbpediaURI)
-          }
+
+          dbpediaURIS.foreach(spotlightModelReader.prettyPrintContext)
         }
 
         // makes a piped(|) separated list of SF not spottable.
         // this is done reducing its annotationProbability
         case "make-sf-not-spottable"=>{
           val surfaceTexts = args(2).split('|')
-          for (surfaceText<-surfaceTexts){
-            spotlightModelReader.makeSFNotSpottable(surfaceText)
-          }
+          surfaceTexts.foreach(spotlightModelReader.makeSFNotSpottable)
           spotlightModelReader.exportModels(pathToModelFolder)
         }
 
@@ -85,11 +79,12 @@ object Main{
           val pathToFileWithBannedSF = args(2)
           val sourceFile = scala.io.Source.fromFile(pathToFileWithBannedSF)
 
-          for(line<-sourceFile.getLines()){
+          sourceFile.getLines().foreach{ line =>
             val surfaceForm = line.trim()
             spotlightModelReader.makeSFNotSpottable(surfaceForm)
             println("reduced surfaceForm counts for: " + surfaceForm)
           }
+
           spotlightModelReader.exportModels(pathToModelFolder)
         }
 
@@ -97,9 +92,7 @@ object Main{
         // this is done boosting its annotationProbability
         case "make-sf-spottable"=>{
           val surfaceTexts = args(2).split('|')
-          for (surfaceText<-surfaceTexts){
-            spotlightModelReader.makeSFSpottable(surfaceText)
-          }
+          surfaceTexts.foreach(spotlightModelReader.makeSFSpottable)
           spotlightModelReader.exportModels(pathToModelFolder)
         }
 
@@ -119,7 +112,7 @@ object Main{
         }
 
         // checks whether a dbpedia URI exists or not
-        case "search" =>{
+        case "search-topic" =>{
           val dbpediaURI = args(2)
           println("getting statistics for surfaceText.....")
           val searchResult:Boolean = spotlightModelReader.searchForDBpediaResource(dbpediaURI)
@@ -148,7 +141,7 @@ object Main{
           val pathToFileWithSFTopicPairs = args(2)
           val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
 
-          for(line<-sourceFile.getLines()){
+          sourceFile.getLines().foreach{ line =>
             val splittedLine = line.trim().split("\t")
             val dbpediaURI = splittedLine(0)
             val surfaceFormText = splittedLine(1)

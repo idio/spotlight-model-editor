@@ -2,7 +2,6 @@ package org.idio.dbpedia.spotlight.stores
 
 import org.dbpedia.spotlight.db.memory.{MemoryStore, MemoryContextStore, MemoryTokenTypeStore}
 import java.io.{File, FileInputStream}
-import org.dbpedia.spotlight.model.DBpediaResource
 
 /**
  * Created by dav009 on 02/01/2014.

@@ -7,8 +7,6 @@ package org.idio.dbpedia.spotlight.stores
 import org.dbpedia.spotlight.db.memory.{MemoryStore,MemorySurfaceFormStore}
 import org.dbpedia.spotlight.exceptions.SurfaceFormNotFoundException
 import java.io.{File, FileInputStream}
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
 
 class IdioSurfaceFormStore(val pathtoFolder:String){
 
@@ -122,7 +120,7 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
         this.boostCountsIfNeeded(surfaceFormId)
     }catch{
       case e: SurfaceFormNotFoundException => {
-        println("given SF:"+ surfaceFormText+" does not exist")
+        println("given SF:" + surfaceFormText + " does not exist")
       }
     }
 
@@ -154,9 +152,9 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
     try{
       var surfaceForm = this.sfStore.getSurfaceForm(surfaceText)
       this.decreaseSpottingProbabilityById(surfaceForm.id, spotProbability)
-      println("\t the counts for:"+surfaceText+","+surfaceForm.id+" has been reduced.")
+      println("\t the counts for:" + surfaceText + "," + surfaceForm.id + " has been reduced.")
     } catch{
-      case e: SurfaceFormNotFoundException => println("\tgiven surface form:"+surfaceText+" does not exist...")
+      case e: SurfaceFormNotFoundException => println("\tgiven surface form:" + surfaceText + " does not exist...")
     }
   }
 

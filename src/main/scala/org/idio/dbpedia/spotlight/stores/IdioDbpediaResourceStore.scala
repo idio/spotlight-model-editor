@@ -34,14 +34,14 @@ class IdioDbpediaResourceStore(val pathtoFolder:String){
   def getAddDbpediaResource(uri:String, support:Int, types:Array[String]): Int = {
       try{
         val resourceID = this.resStore.getResourceByName(uri).id
-        println("\tfound dbpedia resource for:"+uri+"--"+resourceID)
+        println("\tfound dbpedia resource for:" + uri + "--" + resourceID)
         return resourceID
       }catch{
 
         case e: DBpediaResourceNotFoundException => println("creating dbpedia Resource...")
       }
     val resourceID = this.addDbpediaResource(uri,support,types)
-    println("\tcreated dbpedia Resource for: "+uri+"--"+resourceID)
+    println("\tcreated dbpedia Resource for: " + uri + "--" + resourceID)
     return resourceID
   }
 
@@ -61,12 +61,11 @@ class IdioDbpediaResourceStore(val pathtoFolder:String){
   }
 
   def printAllSupportValues(){
-
-     for(uri <- this.resStore.idFromURI.keySet().toArray){
-       val id = this.resStore.idFromURI.get(uri)
-       val support = this.resStore.supportForID(id)
-       println(uri+"\t"+support)
-     }
+    this.resStore.idFromURI.keySet().toArray.foreach{ uri =>
+      val id = this.resStore.idFromURI.get(uri)
+      val support = this.resStore.supportForID(id)
+      println(uri + "\t" + support)
+    }
   }
 
   /*

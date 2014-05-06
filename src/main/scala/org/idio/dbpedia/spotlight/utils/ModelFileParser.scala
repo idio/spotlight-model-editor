@@ -5,8 +5,12 @@ import scala.collection.mutable.HashSet
 /*
 * Represents a parsed Line of the input file
 * */
-class Entry(val upperCaseSurfaceForms:Array[String],val dbpediaURI:String,val types:Array[String],val contextWordsArray:Array[String],val contextCounts:Array[Int], val lowerCaseSF:Array[String]){
-
+class Entry(val upperCaseSurfaceForms:Array[String],
+            val dbpediaURI:String,
+            val types:Array[String],
+            val contextWordsArray:Array[String],
+            val contextCounts:Array[Int],
+            val lowerCaseSF:Array[String]){
 }
 
 /**
@@ -18,7 +22,8 @@ class ModelFileParser(pathToFile:String){
 
 
   // All uppercase SFs
-  val setOfSurfaceForms:HashSet[String] = new HashSet[String]()
+  val setOfUCSurfaceForms:HashSet[String] = new HashSet[String]()
+  val setOfLCSurfaceForms:HashSet[String] = new HashSet[String]()
 
   // All lower case SFs attached to the uppercase SFs
   val lowerCasesMap:collection.mutable.HashMap[String, Array[String]] = new collection.mutable.HashMap[String, Array[String]]()
@@ -107,7 +112,7 @@ class ModelFileParser(pathToFile:String){
   /*
  * Parses the input File and outputs a set of SF and dbpedia URIs
  * */
-  def parseFile():(HashSet[String], HashSet[String], collection.mutable.HashMap[String, Array[String]], scala.collection.mutable.ArrayBuffer[Entry], collection.mutable.HashSet[String])={
+  def parseFile():(HashSet[String], HashSet[String], HashSet[String], collection.mutable.HashMap[String, Array[String]], scala.collection.mutable.ArrayBuffer[Entry], collection.mutable.HashSet[String])={
 
 
     val source = scala.io.Source.fromFile(this.pathToFile)
@@ -123,8 +128,8 @@ class ModelFileParser(pathToFile:String){
       this.parsedLines +=  new Entry(subSetOfUpperCaseFormsForLine.toArray, dbpediaURI,
         types, contextWordsArray, contextCounts, subSetOflowerCaseFormsForLine.toArray)
 
-      // adding the uppercase SF found in the line to the overall set
-      this.setOfSurfaceForms ++= subSetOfUpperCaseFormsForLine
+      this.setOfUCSurfaceForms ++= subSetOfUpperCaseFormsForLine
+      this.setOfLCSurfaceForms ++= subSetOflowerCaseFormsForLine
 
       // Update the lowercaseMap and their bindings (lowercaseSF -> [UppercaseForms..]
       this.updateLowercaseMap(subSetOflowerCaseFormsForLine, subSetOfUpperCaseFormsForLine)
@@ -138,7 +143,7 @@ class ModelFileParser(pathToFile:String){
 
     source.close()
 
-    return (this.setOfSurfaceForms, this.setOfDbpediaURIS, lowerCasesMap, this.parsedLines, this.setOfContextWords)
+    return (this.setOfUCSurfaceForms, setOfLCSurfaceForms, this.setOfDbpediaURIS, lowerCasesMap, this.parsedLines, this.setOfContextWords)
   }
 
 }

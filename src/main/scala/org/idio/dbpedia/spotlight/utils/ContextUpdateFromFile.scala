@@ -55,9 +55,9 @@ class ContextUpdateFromFile(pathToModelFolder:String, pathToFile:String){
 
       val (dbpediaId, contextWordsArray, contextCounts) = parseLine(line)
 
-      println("dbpediaURI: "+ dbpediaId)
-      println("Context: "+ contextWordsArray.mkString(" "))
-      println("context Counts: "+ contextCounts.mkString(" "))
+      println("dbpediaURI: " + dbpediaId)
+      println("Context: " + contextWordsArray.mkString(" "))
+      println("context Counts: " + contextCounts.mkString(" "))
 
       idioSpotlightModel.addNewContextWords(dbpediaId, contextWordsArray, contextCounts)
 
