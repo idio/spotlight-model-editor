@@ -9,7 +9,7 @@ import java.io.{File, FileInputStream}
 import Array.concat
 import org.dbpedia.spotlight.model.SurfaceForm
 
-class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore,val pathtoFolder:String, val resStore:MemoryResourceStore){
+class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathtoFolder:String, val resStore:MemoryResourceStore){
 
 
 
@@ -18,7 +18,7 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore,val pathtoF
   }
 
   def this(candidateMap:MemoryCandidateMapStore, resStore:MemoryResourceStore){
-    this(candidateMap, "",resStore)
+    this(candidateMap, "", resStore)
   }
 
   /*
@@ -35,13 +35,17 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore,val pathtoF
     }catch{
       case e:Exception =>{
          println("\tcreating candidate map array for "+surfaceFormID)
-         var candidates:Array[Int] =Array(candidateID)
-         var counts:Array[Int] = Array(candidateCounts)
+
+         val candidates:Array[Int] = Array(candidateID)
+         val counts:Array[Int] = Array(candidateCounts)
          this.createCandidateMapForSurfaceForm(surfaceFormID, candidates, counts)
-        println("\tcandidates")
-        for(candidate <- this.candidateMap.candidates(surfaceFormID)){
+
+         println("\tcandidates")
+
+        this.candidateMap.candidates(surfaceFormID).foreach{ candidate =>
           println("\t"+candidate)
         }
+
          return true
       }
     }
@@ -50,13 +54,18 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore,val pathtoF
       this.candidateMap.candidates(surfaceFormID).size
     }catch{
       case e:Exception =>{
+
         println("\tcreating candidate map array for "+surfaceFormID)
+
         this.candidateMap.candidates(surfaceFormID) = Array[Int](candidateID)
         this.candidateMap.candidateCounts(surfaceFormID) = Array[Int](candidateCounts)
+
         println("\tcandidates")
-        for(candidate <- this.candidateMap.candidates(surfaceFormID)){
+
+        this.candidateMap.candidates(surfaceFormID).foreach{ candidate =>
           println("\t"+candidate)
         }
+
       }
     }
 

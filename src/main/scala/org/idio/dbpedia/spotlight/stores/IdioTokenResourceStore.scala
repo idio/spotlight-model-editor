@@ -34,19 +34,47 @@ class IdioTokenResourceStore(val pathtoFolder:String, stemmerLanguage:String) {
   }
 
   /*
-  * Returns the Id of a token if it already exists.
-  * Otherwise it adds the token to the store and returns its Id
+  * Add a token to the store if it doesn't exist
   * */
-  def getOrCreateToken(token:String):Int = {
-
+  private def getOrCreateTokenNoMapUpdate(token:String):Int={
     if (this.tokenStore.idFromToken.containsKey(token)){
-       return this.tokenStore.idFromToken.get(token)
+      return this.tokenStore.idFromToken.get(token)
     }
 
     this.tokenStore.tokenForId = this.tokenStore.tokenForId :+ token
     this.tokenStore.counts = this.tokenStore.counts :+ 1
 
-    this.tokenStore.createReverseLookup()
+    return this.tokenStore.tokenForId.size -1
+  }
+
+  /*
+* Add a set of Tokens updating the internal Token store
+* Updates the reverse lookup if necessary
+* */
+  def addSetOfTokens(stemmedTokens:scala.collection.Set[String]):scala.collection.Map[String,Int]={
+
+    val mapOfIdentifiers = scala.collection.mutable.HashMap[String, Int]()
+    val currentStoreSize = this.tokenStore.tokenForId.size
+
+    stemmedTokens.foreach{ token:String =>
+      val id = this.getOrCreateTokenNoMapUpdate(token)
+      mapOfIdentifiers.put(token, id)
+    }
+
+    val newStoreSize = this.tokenStore.tokenForId.size
+
+    if (newStoreSize != currentStoreSize)
+      this.tokenStore.createReverseLookup()
+
+    return mapOfIdentifiers
+  }
+
+  /*
+  * Returns the Id of a token if it already exists.
+  * Otherwise it adds the token to the store and returns its Id
+  * */
+  def getOrCreateToken(token:String):Int = {
+    this.addSetOfTokens(scala.collection.immutable.Set[String](token))
     return this.tokenStore.idFromToken.get(token)
   }
 

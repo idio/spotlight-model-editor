@@ -1,6 +1,7 @@
 package org.idio.dbpedia.spotlight.utils
 
-import org.idio.dbpedia.spotlight.{IdioTokenResourceStore, IdioSpotlightModel,IdioContextStore}
+import org.idio.dbpedia.spotlight.stores.{IdioTokenResourceStore, IdioContextStore}
+import org.idio.dbpedia.spotlight.IdioSpotlightModel
 import java.util.Properties
 import java.io.{FileInputStream, File}
 

@@ -3,7 +3,7 @@ package org.idio.dbpedia.spotlight
 /**
  * Created by dav009 on 23/12/2013.
  */
-import org.dbpedia.spotlight.model.{TokenType, OntologyType}
+import org.dbpedia.spotlight.model.{Candidate, TokenType, OntologyType}
 import org.dbpedia.spotlight.db.memory.MemoryStore
 import java.io.File
 import java.io.{FileNotFoundException, FileInputStream}
@@ -209,28 +209,6 @@ class IdioSpotlightModel(val pathToFolder:String){
     return (surfaceFormID, dbpediaResourceID)
   }
 
-  /**
-   * Increments the counts of a surfaceForm and a candidate Topic.
-   * This presupposes the existence of Both
-   */
-  def boostValue(surfaceFormText:String, candidateURI:String, boostValue:Int){
-
-    val surfaceFormID:Int = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText).id
-    val candidateID:Int = this.idioDbpediaResourceStore.resStore.getResourceByName(candidateURI).id
-
-    //update the annotated Count
-    this.idioSurfaceFormStore.sfStore.annotatedCountForID(surfaceFormID) += boostValue
-
-    // update the candidate count value
-    println("updating candidate count value")
-    this.idioCandidateMapStore.updateCountsOfCandidate(surfaceFormID, candidateID, boostValue)
-
-    //updating the support in the resourceStore
-    println("updating support in resource store for..."+this.idioDbpediaResourceStore.resStore.uriForID(candidateID))
-    this.idioDbpediaResourceStore.resStore.totalSupport += boostValue
-    this.idioDbpediaResourceStore.resStore.supportForID(candidateID) += boostValue
-
-  }
 
   /*
   * Removes all the context words and context counts of a dbepdia topic
@@ -277,10 +255,10 @@ class IdioSpotlightModel(val pathToFolder:String){
     val dbpediaResourceID:Int =  this.idioDbpediaResourceStore.resStore.getResourceByName(dbpediaResourceURI).id
     var tokens:Array[Int] = this.idioContextStore.contextStore.tokens(dbpediaResourceID)
     var counts:Array[Int] = this.idioContextStore.contextStore.counts(dbpediaResourceID)
-    println("Contexts for "+ dbpediaResourceURI+" Id:"+dbpediaResourceID)
+    println("Contexts for " + dbpediaResourceURI + " Id:" + dbpediaResourceID)
     for( i <- 0 to tokens.size-1){
       this.idioTokenTypeStore.tokenStore.idFromToken
-      println("\t"+this.idioTokenTypeStore.tokenStore.getTokenTypeByID(tokens(i))+"--"+ counts(i))
+      println("\t" + this.idioTokenTypeStore.tokenStore.getTokenTypeByID(tokens(i)) + "--" + counts(i))
     }
   }
 
@@ -290,24 +268,29 @@ class IdioSpotlightModel(val pathToFolder:String){
   def getStatsForSurfaceForm(surfaceFormText:String){
     val surfaceForm = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText)
 
-    val candidates:Array[Int] = this.idioCandidateMapStore.candidateMap.candidates(surfaceForm.id)
+    println("surface form id:" + surfaceForm.id)
+    println("")
+    println("annotated count of SF:")
+    println("\t" + surfaceForm.annotatedCount)
+    println("total counts of SF:")
+    println("\t" + surfaceForm.totalCount)
+    println("annotation probability")
+    println("\t" + surfaceForm.annotationProbability)
 
-    println("surface form id:"+surfaceForm.id)
-    // for(candidate <- candidates){
-    //   println("candidates:"+candidate)
-    //}
+    val candidates:Set[Candidate] = this.idioCandidateMapStore.candidateMap.getCandidates(surfaceForm)
+
     for(candidate <- candidates){
 
-      println("---------------"+candidate+"---------------------")
-      val dbpediaResource = this.idioDbpediaResourceStore.resStore.getResource(candidate)
-      println(dbpediaResource.getFullUri+"_"+dbpediaResource.uri)
-      println("\tid:"+candidate)
+      println("---------------" + candidate + "---------------------")
+      val dbpediaResource = candidate.resource
+      println(dbpediaResource.getFullUri)
+      println("\tid:" + candidate)
       println("\tsupport")
-      println("\t\t"+dbpediaResource.support)
+      println("\t\t" + dbpediaResource.support)
       println("\tannotated_count")
-      println("\t\t"+surfaceForm.annotatedCount)
+      println("\t\t" + surfaceForm.annotatedCount)
       println("\tprior")
-      println("\t\t"+dbpediaResource.prior)
+      println("\t\t" + dbpediaResource.prior)
     }
   }
 
@@ -317,9 +300,10 @@ class IdioSpotlightModel(val pathToFolder:String){
   def showSomeSurfaceForms(){
     val someSurfaceForms = this.idioSurfaceFormStore.sfStore.iterateSurfaceForms.slice(0,40)
     for (surfaceForm <- someSurfaceForms){
-      println(surfaceForm.name+"-"+surfaceForm.id)
+      println(surfaceForm.name + "-" + surfaceForm.id)
       for(candidate <- this.idioCandidateMapStore.candidateMap.getCandidates(surfaceForm)){
-        println("\t"+candidate.resource.getFullUri+"\t"+candidate.resource.uri)
+
+        println("\t" + candidate.resource.getFullUri + "\t" + candidate.resource.uri)
 
         val dbpediaTypes:List[OntologyType] = candidate.resource.types
 
@@ -353,14 +337,14 @@ class IdioSpotlightModel(val pathToFolder:String){
   * Updates the SurfaceStore by adding the SF in the Set in a single Batch.
   * If a SF is already in the stores it wont be added.
   * */
-  def addListOfSurfaceForms(setOfSF:HashSet[String]){
-      val listOfNewSurfaceFormIds = this.idioSurfaceFormStore.addListOfSF(setOfSF)
-      // adds the candidate array for the SF which were added.
-      for (surfaceFormId<-listOfNewSurfaceFormIds){
+  def addSetOfSurfaceForms(setOfSF:scala.collection.Set[String]){
+    val listOfNewSurfaceFormIds = this.idioSurfaceFormStore.addSetOfSF(setOfSF)
+    // adds the candidate array for the SF which were added.
+    listOfNewSurfaceFormIds.foreach(
+      surfaceFormId =>
         this.idioCandidateMapStore.createCandidateMapForSurfaceForm(surfaceFormId,new Array[Int](0), new Array[Int](0))
-      }
+    )
   }
-
   /*
     takes all topic candidates for the surfaceForm1
     and associate them to surfaceForm2.
@@ -396,6 +380,31 @@ class IdioSpotlightModel(val pathToFolder:String){
 
   }
 
+  /**
+   *  given a SF returns the list of candidate Topics
+   */
+  def getCandidates(surfaceFormText:String):Set[String]={
+    val surfaceForm = this.idioSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText)
+    val candidates:Set[Candidate] = this.idioCandidateMapStore.candidateMap.getCandidates(surfaceForm)
+    val topicUris = candidates.map({ candidate:Candidate=>
+      candidate.resource.getFullUri
+    })
+    return topicUris
+  }
+
+  /*
+  * Adds a set of tokens to the token type store.
+  * It only generte reverse look ups once.
+  * */
+  def addSetOfTokens(contextWords:scala.collection.Set[String]){
+    val stemmedContextWords:scala.collection.Set[String] = contextWords.map{ contextword:String =>
+      this.idioTokenTypeStore.stemToken(contextword)}.toSet
+    this.idioTokenTypeStore.addSetOfTokens(stemmedContextWords)
+  }
+
+  /*
+  * Saves the context Store to a plain File
+  * */
   def exportContextStore(pathToFile:String){
     val writer = new PrintWriter(new File(pathToFile ))
     val dbpediaIds = this.idioDbpediaResourceStore.resStore.idFromURI.values().asScala

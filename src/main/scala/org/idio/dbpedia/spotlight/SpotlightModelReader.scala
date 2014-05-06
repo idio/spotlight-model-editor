@@ -47,6 +47,13 @@ object Main{
           }
         }
 
+        case "show-candidates" =>{
+          val surfaceForm:String= args(2)
+          val topicUris = spotlightModelReader.getCandidates(surfaceForm)
+          println("Candidate Topics for SF: "+ surfaceForm)
+          topicUris.foreach( { topicUri:String => println("\t"+topicUri) })
+        }
+
         // get the statistics for a surface form
         case "check" =>{
           val surfaceText = args(2)
@@ -72,6 +79,20 @@ object Main{
           spotlightModelReader.exportModels(pathToModelFolder)
         }
 
+        // Reads form a file a list of sf and make them not spottable
+        case "make-sf-not-spottable-from-list"=>{
+
+          val pathToFileWithBannedSF = args(2)
+          val sourceFile = scala.io.Source.fromFile(pathToFileWithBannedSF)
+
+          for(line<-sourceFile.getLines()){
+            val surfaceForm = line.trim()
+            spotlightModelReader.makeSFNotSpottable(surfaceForm)
+            println("reduced surfaceForm counts for: " + surfaceForm)
+          }
+          spotlightModelReader.exportModels(pathToModelFolder)
+        }
+
         // makes a piped(|) separated list of SF spottable.
         // this is done boosting its annotationProbability
         case "make-sf-spottable"=>{
@@ -81,7 +102,6 @@ object Main{
           }
           spotlightModelReader.exportModels(pathToModelFolder)
         }
-
 
         /*
         * Removes all the context words and context counts of a dbepdia topic
@@ -133,7 +153,7 @@ object Main{
             val dbpediaURI = splittedLine(0)
             val surfaceFormText = splittedLine(1)
             spotlightModelReader.removeAssociation(surfaceFormText, dbpediaURI)
-            println("removed association: "+dbpediaURI+" -- "+surfaceFormText)
+            println("removed association: " + dbpediaURI + " -- " + surfaceFormText)
           }
          spotlightModelReader.exportModels(pathToModelFolder)
         }
@@ -168,8 +188,6 @@ object Main{
                 val modelExplorer:ModelExplorerFromFile = new ModelExplorerFromFile(pathToModelFolder, pathToFileWithResources)
                 modelExplorer.checkEntitiesInFile()
               }
-
-
 
 
         }

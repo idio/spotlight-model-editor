@@ -26,6 +26,25 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
   }
 
   /*
+* Adds a list of surfaceforms directly to the low level maps.
+* Assumes that the surfaceForms in the list does not exist already in the low level maps
+* */
+  private def addListOfNewSurfaceForms(listOfNewSurfaceForms:List[String]):List[Int]={
+
+    val indexFirstNewSf = this.sfStore.stringForID.length
+    val indexLastNewSf = (this.sfStore.stringForID.length + listOfNewSurfaceForms.size)
+
+    this.sfStore.stringForID = this.sfStore.stringForID ++ listOfNewSurfaceForms
+
+    val defaultValueList = List.fill(listOfNewSurfaceForms.size)(1)
+
+    this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID ++ defaultValueList
+    this.sfStore.totalCountForID = this.sfStore.totalCountForID ++ defaultValueList
+
+    return List.range(indexFirstNewSf, indexLastNewSf)
+  }
+
+  /*
   * Adds a new surfaceForm to the surfaceFormStore.
   * It does NOT check whether it exists
   * returns the Id of the new SF
@@ -43,37 +62,42 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
   }
 
   /*
-  * Adds a set of surfaceForms to the surfaceFormStore in a singleBatch,
-  * It only adds sf which are not already in the store.
-  * returns a list with the Ids of the added SurfaceForms
-  * */
-  def addListOfSF(setOfSurfaceForms:HashSet[String]):ListBuffer[Int]={
+ * Adds a set of surfaceForms to the surfaceFormStore in a singleBatch,
+ * It only adds sf which are not already in the store.
+ * returns a list with the Ids of the added SurfaceForms
+ * */
+  def addSetOfSF(setOfSurfaceForms:scala.collection.Set[String]):List[Int]={
 
-    val listOfNewSurfaceFormIds:ListBuffer[Int] = ListBuffer[Int]()
-    val listOfNewSurfaceForms:ListBuffer[String] = ListBuffer[String]()
-
-    for(surfaceForm<-setOfSurfaceForms){
+    // Searching SF in the main Store
+    val searchSurfaceFormResult = setOfSurfaceForms.toSeq.par.map( surfaceForm=>
       try{
         val sf = this.sfStore.getSurfaceForm(surfaceForm)
-        this.boostCountsIfNeeded(sf.id)
         println("\t found..\t"+surfaceForm)
+        sf.id
       } catch{
         case e: SurfaceFormNotFoundException => {
-          this.addSF(surfaceForm)
-          listOfNewSurfaceForms += surfaceForm
+          surfaceForm
         }
       }
-    }
+    )
+
+    // Separating Existing SF from non existing
+    val (listOfNewSurfaceForms, listOfExistingSFIds) = searchSurfaceFormResult.par.partition( _.isInstanceOf[String] )
+
+    // Adding the non-existent SF to the low level maps
+    val listOfNewSurfaceFormIds:List[Int] = addListOfNewSurfaceForms(listOfNewSurfaceForms.toList.asInstanceOf[List[String]])
+
+    // making all new SF spottable(updating Probabilities)
+    val allSFIds:List[Int] = listOfExistingSFIds.toList.asInstanceOf[List[Int]] ++ listOfNewSurfaceFormIds
+    allSFIds.foreach(
+      surfaceFormId => boostCountsIfNeeded(surfaceFormId)
+    )
+
+    // Rebuilding reverse lookups
     println("\t updating the SF index")
     this.sfStore.createReverseLookup()
 
-    for(surfaceForm<-listOfNewSurfaceForms){
-      val sf = this.sfStore.getSurfaceForm(surfaceForm)
-      listOfNewSurfaceFormIds += sf.id
-      this.boostCountsIfNeeded(sf.id)
-    }
-
-   return listOfNewSurfaceFormIds
+    return listOfNewSurfaceFormIds
   }
 
   /*
@@ -145,6 +169,7 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
     // look for existing surfaceForm
     try{
       var surfaceForm = this.sfStore.getSurfaceForm(surfaceText)
+      this.boostCountsIfNeeded(surfaceForm.id)
       return surfaceForm.id
     } catch{
 
@@ -152,6 +177,7 @@ class IdioSurfaceFormStore(val pathtoFolder:String){
     }
     // create sf in case it cant be found
     var surfaceFormId = this.addSurfaceForm(surfaceText)
+    this.boostCountsIfNeeded(surfaceFormId)
 
     return surfaceFormId
   }

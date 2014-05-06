@@ -1,7 +1,6 @@
 package org.idio.dbpedia.spotlight.utils
 
 import org.idio.dbpedia.spotlight.IdioSpotlightModel
-import scala.collection.mutable.HashSet
 /**
  * Allows to update a Model (Sf, DbpediaResources, ContextWords) from a file
  * The format of each line of the file is:
@@ -10,68 +9,6 @@ import scala.collection.mutable.HashSet
  */
 class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
 
-  /*
-  * Parses an input line.
-  * Returns the SurfaceForm, DbpediaID, Types, ContextWords, ContextCounts
-  * */
-  def parseLine(line:String):(Array[String], String, Array[String], Array[String], Array[Int]) = {
-    println(line)
-    val splittedLine = line.trim.split("\t")
-    var dbpediaURI = splittedLine(0)
-    var surfaceForms = splittedLine(1).split('|')
-    //var types = splittedLine(2).split('|')
-    var types = new Array[String](0)
-
-    var contextWordsArray = new Array[String](0)
-    var contextCounts = new Array[Int](0)
-
-    if (splittedLine.size>2){
-        var contextWords = splittedLine(2)
-        var contextStringCounts = splittedLine(3).split('|')
-        contextWordsArray = contextWords.split('|')
-        contextCounts = new Array[Int](contextStringCounts.length)
-
-        // Cast Context Counts to Integers
-        for (counts<-contextStringCounts.zipWithIndex){
-          val index = counts._2
-          val countValue = counts._1
-          contextCounts(index) = countValue.toInt
-        }
-    }
-
-    val allSurfaceForms=new HashSet[String]()
-    for(surfaceForm<-surfaceForms){
-      allSurfaceForms.add(surfaceForm)
-      allSurfaceForms.add(surfaceForm.toLowerCase)
-    }
-    val allSurfaceFormsWithLower:Array[String]= allSurfaceForms.toArray
-
-    (allSurfaceFormsWithLower, dbpediaURI, types, contextWordsArray, contextCounts)
-  }
-
-  /*
-  * Parses the input File and outputs a set of SF and dbpedia URIs
-  * */
-  def parseFile(pathToFile:String):(HashSet[String], HashSet[String])={
-    val setOfSurfaceForms:HashSet[String] = new HashSet[String]()
-    val setOfDbpediaURIS:HashSet[String] = new HashSet[String]()
-
-    val source = scala.io.Source.fromFile(this.pathToFile)
-    val lines = source.getLines()
-
-    for (line<-lines){
-      val (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts) = this.parseLine(line)
-      //get all SurfaceForms into a Set
-      for(surfaceForm<-surfaceForms){
-        setOfSurfaceForms.add(surfaceForm)
-        setOfSurfaceForms.add(surfaceForm.toLowerCase)
-      }
-      //get all DbpediaUris into a Set
-      setOfDbpediaURIS.add(dbpediaURI)
-    }
-
-    return (setOfSurfaceForms, setOfDbpediaURIS)
-  }
 
   /*
   * loads everything using the entries in the file.
@@ -79,39 +16,54 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
   * if there is no context.mem it will load just the SF, and Dbpedia Resources.
   * */
   def loadNewEntriesFromFile(){
-    val (setOfSurfaceForms, setOfDbpediaURIS) = this.parseFile(this.pathToFile)
+
+    val fileParser = new ModelFileParser(this.pathToFile)
+    println("Parsing INPUT-FILE")
+
+    val (setOfSurfaceForms, setOfDbpediaURIS, lowerSfMap, parsedLines, setOfContextWords) = fileParser.parseFile()
+
+    println("Finished parsing INPUT-FILE")
 
     var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
 
-    println("adding all SF..."+ setOfSurfaceForms.size)
-    idioSpotlightModel.addListOfSurfaceForms(setOfSurfaceForms)
+    //get Set of lowercase SurfaceForms
+    val setOfLowercaseSurfaceForms = collection.immutable.HashSet[String](lowerSfMap.values.toList.flatten:_*)
 
-    val source = scala.io.Source.fromFile(this.pathToFile)
-    val lines = source.bufferedReader()
-    var line = lines.readLine()
+
+    // adding SFs, rebuilding reverse maps
+    println("adding SFs")
+    idioSpotlightModel.addSetOfSurfaceForms(setOfSurfaceForms ++ setOfLowercaseSurfaceForms)
+
 
     val contextFileWriter = new java.io.PrintWriter(this.pathToFile+"_just_context")
 
-    while (line!=null){
+    parsedLines.foreach{ parsedLine:Entry =>
 
-      val (surfaceForms, dbpediaURI, types, contextWordsArray, contextCounts) = parseLine(line)
+      // Gathering the UpperCaseSfs with the lower cases SF's in Store
+      val allSFBindsToTopics = parsedLine.upperCaseSurfaceForms ++ parsedLine.lowerCaseSF
 
-      for(surfaceForm<-surfaceForms){
+      allSFBindsToTopics.foreach{ surfaceForm:String =>
         println("SF: "+ surfaceForm)
-        println("Topic: "+ dbpediaURI)
-        println("Types: "+ types.mkString(" "))
-        println("Context: "+ contextWordsArray.mkString(" "))
+        println("Topic: "+ parsedLine.dbpediaURI)
+        println("Types: "+ parsedLine.types.mkString(" "))
+        println("Context: "+ parsedLine.contextWordsArray.mkString(" "))
 
+        // Updates the model connecting Sf-> Topic
+        // Topic -> Contxt Words
+        // Context words -> Context counts
+        val (surfaceFormId, dbpediaResourceId) = idioSpotlightModel.addNew(surfaceForm,
+          parsedLine.dbpediaURI,
+          parsedLine.types,
+          parsedLine.contextWordsArray,
+          parsedLine.contextCounts
+        )
 
-        val (surfaceFormId, dbpediaResourceId) = idioSpotlightModel.addNew(surfaceForm,dbpediaURI, types, contextWordsArray, contextCounts )
-
-        contextFileWriter.println(dbpediaResourceId+"\t"+contextWordsArray.mkString("|")+"\t"+contextCounts.mkString("|"))
+        contextFileWriter.println(dbpediaResourceId+"\t"+parsedLine.contextWordsArray.mkString("|")+"\t"+parsedLine.contextCounts.mkString("|"))
 
         println("----------------------------")
       }
-      line = lines.readLine()
+
     }
-    source.close()
     contextFileWriter.close()
     println("serializing the new model.....")
     idioSpotlightModel.exportModels(this.pathToModelFolder)
