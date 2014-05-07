@@ -6,8 +6,7 @@ a DBPedia topic or concept, thus improving the coverage of the topic extraction 
 In order to use the Model Editor, you will need:
 
 - (Oracle) Java 1.7
-- Scala >= 2.9.x
-- Compiling DBPedia Spotlight from source (see below)
+- Scala 2.9.x (If you want to run it interatively from a terminal)
 - Compiling Spotlight Model Editor (this tool) from source (see below)
 - A pre-computed language model (downloaded from [here](http://spotlight.sztaki.hu/downloads/) )
 
@@ -78,13 +77,13 @@ java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies
 
 example:
 ```
-java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
+java -Xmx15360M -Xms15360M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
 ```
 
 
 ### Searching a Topic
 
-- **command**: `search`
+- **command**: `search-topic`
 - **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
 - **arg2**: dbpediaURI
 - **result**: looks for a given `DbpediaId` in the Model and returns whether that topic exists or not in the model
@@ -96,7 +95,7 @@ java -jar .... search path/to/model Michael_Schumacher‎
 
 ### Getting Data about a SurfaceForm
 
-- **command**: `check`
+- **command**: `check-sf`
 - **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
 - **arg2**: surfaceForm
 - **result**:  outputs the topic candidates and statistics of the given surfaceForm
@@ -219,17 +218,19 @@ steps 5-6 could be applied while ignoring 1-4 when:
 Best way to play the models and modify them  is to use the scala console.
 
 ## Starting a scala console
-- make sure your scala is 2.9.2
+- make sure your scala is 2.9.X
 - start a scala console by doing:
 ```
-scala  -classpath /path/to/jar/idio-spotlight-model-0.1.0-jar-with-dependencies.jar  -J-Xmx4000M
+JAVA_OPTS="-Xmx15000M -Xms15000M" scala 
 ```
-
-`Xmx4000M` is the size of the java heap, this has to be big enough to be able to hold the models.
 
 ## Playing with the models
 
 Once you start a scala console you can use it like `ipython` to create instances of the scala classes we have, to load the models, check if dbpedia id's exist, add new dbpedia ids, add new surface forms etc..
+
+do:  `:cp pathTo/ModelEditor.jar`
+
+This will load the classes inside the model editor. After that you should be able to play with the classes inside the jar.
 
 Example:
 
