@@ -4,7 +4,7 @@
 
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore, MemoryCandidateMapStore}
 import org.dbpedia.spotlight.model.SurfaceForm
-import org.idio.dbpedia.spotlight.stores.IdioCandidateMapStore
+import org.idio.dbpedia.spotlight.stores.CustomCandidateMapStore
 import org.scalatest.mock.MockitoSugar.mock
 import org.junit.Test
 import org.junit.Assert._
@@ -26,15 +26,15 @@ class CandidateStoreTest {
     val destinySurfaceForm = new  SurfaceForm("sf2", 1, 50, 200)
 
 
-    var idioCandidateMapStore:IdioCandidateMapStore = new IdioCandidateMapStore(candidateMap, "", resStore)
+    var customCandidateMapStore:CustomCandidateMapStore = new CustomCandidateMapStore(candidateMap, "", resStore)
 
     // test copy candidates
-    idioCandidateMapStore.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
+    customCandidateMapStore.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
 
     val expectedCandidateCounts = collection.immutable.Map[Int, Int](1->50, 2->1, 3->100, 5->55)
 
     //check the candidate topics set
-    val candidateTopicsForDestinySurfaceForm = idioCandidateMapStore.candidateMap.candidates(1)
+    val candidateTopicsForDestinySurfaceForm = customCandidateMapStore.candidateMap.candidates(1)
     assertTrue(collection.immutable.Set[Int](candidateTopicsForDestinySurfaceForm:_*)==expectedCandidateCounts.keySet)
 
     //check the candidate counts

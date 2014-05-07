@@ -1,6 +1,6 @@
 package org.idio.dbpedia.spotlight.utils
 
-import org.idio.dbpedia.spotlight.IdioSpotlightModel
+import org.idio.dbpedia.spotlight.CustomSpotlightModel
 /**
  * Allows to update a Model (Sf, DbpediaResources, ContextWords) from a file
  * The format of each line of the file is:
@@ -23,11 +23,11 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
 
     println("Finished parsing INPUT-FILE")
 
-    var idioSpotlightModel: IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
+    var customSpotlightModel: CustomSpotlightModel = new CustomSpotlightModel(this.pathToModelFolder)
 
     // trying to add all set of SF's in a single go, so that the reverseMaps are just built once.
     println("adding SFs")
-    idioSpotlightModel.addSetOfSurfaceForms(setOfUpperCaseSF ++ setOfLowerCaseSF)
+    customSpotlightModel.addSetOfSurfaceForms(setOfUpperCaseSF ++ setOfLowerCaseSF)
 
     val contextFileWriter = new java.io.PrintWriter(this.pathToFile + "_just_context")
 
@@ -45,7 +45,7 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
         // Updates the model connecting Sf-> Topic
         // Topic -> Contxt Words
         // Context words -> Context counts
-        val (surfaceFormId, dbpediaResourceId) = idioSpotlightModel.addNew(surfaceForm,
+        val (surfaceFormId, dbpediaResourceId) = customSpotlightModel.addNew(surfaceForm,
           parsedLine.dbpediaURI,
           parsedLine.types,
           parsedLine.contextWordsArray,
@@ -59,7 +59,7 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
     }
     contextFileWriter.close()
     println("serializing the new model.....")
-    idioSpotlightModel.exportModels(this.pathToModelFolder)
+    customSpotlightModel.exportModels(this.pathToModelFolder)
     println("finished serializing the new model.....")
   }
 

@@ -8,8 +8,8 @@ import org.dbpedia.spotlight.db.memory.MemoryOntologyTypeStore;
 
 object Main {
 
-  def getSpotlightModel(pathToSpotlightModelFolder: String): IdioSpotlightModel = {
-    var spotlightModelReader = new IdioSpotlightModel(pathToSpotlightModelFolder)
+  def getSpotlightModel(pathToSpotlightModelFolder: String): CustomSpotlightModel = {
+    var spotlightModelReader = new CustomSpotlightModel(pathToSpotlightModelFolder)
     return spotlightModelReader
   }
 
@@ -31,12 +31,12 @@ object Main {
         }
 
         case "export-support" => {
-          spotlightModelReader.idioDbpediaResourceStore.printAllSupportValues()
+          spotlightModelReader.customDbpediaResourceStore.printAllSupportValues()
         }
 
         // prints all types in type store
         case "show-resource-types" => {
-          val typeStore = spotlightModelReader.idioDbpediaResourceStore.resStore.ontologyTypeStore.asInstanceOf[MemoryOntologyTypeStore]
+          val typeStore = spotlightModelReader.customDbpediaResourceStore.resStore.ontologyTypeStore.asInstanceOf[MemoryOntologyTypeStore]
           typeStore.idFromName.keySet().toArray.foreach { ontologyType =>
             println(ontologyType)
           }

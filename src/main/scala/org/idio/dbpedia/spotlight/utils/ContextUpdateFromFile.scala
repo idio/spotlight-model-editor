@@ -1,7 +1,7 @@
 package org.idio.dbpedia.spotlight.utils
 
-import org.idio.dbpedia.spotlight.stores.{ IdioTokenResourceStore, IdioContextStore }
-import org.idio.dbpedia.spotlight.IdioSpotlightModel
+import org.idio.dbpedia.spotlight.stores.{ CustomTokenResourceStore, CustomContextStore }
+import org.idio.dbpedia.spotlight.CustomSpotlightModel
 import java.util.Properties
 import java.io.{ FileInputStream, File }
 
@@ -45,7 +45,7 @@ class ContextUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
   * Links DbpediaURIS with Context words and exports the model.
   * */
   def loadContextWords() {
-    var idioSpotlightModel: IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
+    var customSpotlightModel: CustomSpotlightModel = new CustomSpotlightModel(this.pathToModelFolder)
     val source = scala.io.Source.fromFile(this.pathToFile)
     val lines = source.bufferedReader()
     var line = lines.readLine()
@@ -57,13 +57,13 @@ class ContextUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
       println("Context: " + contextWordsArray.mkString(" "))
       println("context Counts: " + contextCounts.mkString(" "))
 
-      idioSpotlightModel.addNewContextWords(dbpediaId, contextWordsArray, contextCounts)
+      customSpotlightModel.addNewContextWords(dbpediaId, contextWordsArray, contextCounts)
 
       line = lines.readLine()
     }
     source.close()
     println("serializing the new model.....")
-    idioSpotlightModel.exportModels(this.pathToModelFolder)
+    customSpotlightModel.exportModels(this.pathToModelFolder)
     println("finished serializing the new model.....")
   }
 

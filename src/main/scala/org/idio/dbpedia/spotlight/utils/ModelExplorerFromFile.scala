@@ -1,6 +1,6 @@
 package org.idio.dbpedia.spotlight.utils
 
-import org.idio.dbpedia.spotlight.IdioSpotlightModel
+import org.idio.dbpedia.spotlight.CustomSpotlightModel
 
 /**
  * Given a file, it gives an insight of what SF,DbpediaResources exists in a model
@@ -27,7 +27,7 @@ class ModelExplorerFromFile(pathToModelFolder: String, pathToFile: String) {
   * and checks whetheter the SF are linked to the DbpediaURIs
   * */
   def checkEntitiesInFile() {
-    var idioSpotlightModel: IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
+    var customSpotlightModel: CustomSpotlightModel = new CustomSpotlightModel(this.pathToModelFolder)
     val source = scala.io.Source.fromFile(this.pathToFile)
     val lines = source.bufferedReader()
     var line = lines.readLine()
@@ -44,27 +44,27 @@ class ModelExplorerFromFile(pathToModelFolder: String, pathToFile: String) {
       val (surfaceForms, dbpediaUri) = parseLine(line)
 
       var dbpediaId = -1
-      var isDbpediaResourceinModel = idioSpotlightModel.searchForDBpediaResource(dbpediaUri)
+      var isDbpediaResourceinModel = customSpotlightModel.searchForDBpediaResource(dbpediaUri)
 
       totalTopics = totalTopics + 1
 
       if (isDbpediaResourceinModel) {
-        dbpediaId = idioSpotlightModel.idioDbpediaResourceStore.resStore.idFromURI.get(dbpediaUri)
+        dbpediaId = customSpotlightModel.customDbpediaResourceStore.resStore.idFromURI.get(dbpediaUri)
         countsOfFoundTopics = countsOfFoundTopics + 1
       }
 
       for (surfaceForm <- surfaceForms) {
         totalSF = totalSF + 1
         var surfaceId = -1
-        val normalizedSF = idioSpotlightModel.idioSurfaceFormStore.sfStore.normalize(surfaceForm)
-        var isSFinModel = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.containsKey(surfaceForm) | idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.containsKey(normalizedSF)
+        val normalizedSF = customSpotlightModel.customSurfaceFormStore.sfStore.normalize(surfaceForm)
+        var isSFinModel = customSpotlightModel.customSurfaceFormStore.sfStore.idForString.containsKey(surfaceForm) | customSpotlightModel.customSurfaceFormStore.sfStore.idForString.containsKey(normalizedSF)
 
         var areSFandResourceLinked = false
 
         if (isSFinModel) {
           countsOfFoundSF = countsOfFoundSF + 1
           try {
-            surfaceId = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.get(surfaceForm)
+            surfaceId = customSpotlightModel.customSurfaceFormStore.sfStore.idForString.get(surfaceForm)
           } catch {
 
             case ex: Exception => {
@@ -72,14 +72,14 @@ class ModelExplorerFromFile(pathToModelFolder: String, pathToFile: String) {
               println("used normalized SF")
               println("normalized:" + normalizedSF)
               println("")
-              surfaceId = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.get(normalizedSF)
+              surfaceId = customSpotlightModel.customSurfaceFormStore.sfStore.idForString.get(normalizedSF)
             }
           }
 
         }
 
         try {
-          areSFandResourceLinked = idioSpotlightModel.idioCandidateMapStore.checkCandidateInSFCandidates(surfaceId, dbpediaId)
+          areSFandResourceLinked = customSpotlightModel.customCandidateMapStore.checkCandidateInSFCandidates(surfaceId, dbpediaId)
         } catch {
           case ex: Exception => {}
         }
