@@ -8,13 +8,13 @@ import org.idio.dbpedia.spotlight.IdioSpotlightModel
  * dbpediaURI tab surfaceForm1|surfaceForm2
  * Created by dav009 on 03/01/2014.
  */
-class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
+class ModelExplorerFromFile(pathToModelFolder: String, pathToFile: String) {
 
   /*
   * Parses an input line.
   * Returns the SurfaceForm, DbpediaID, Types, ContextWords, ContextCounts
   * */
-  def parseLine(line:String):(Array[String], String) = {
+  def parseLine(line: String): (Array[String], String) = {
     val splittedLine = line.trim.split("\t")
     var dbpediaUri = splittedLine(0)
     var surfaceForms = splittedLine(1).split('|')
@@ -26,8 +26,8 @@ class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
   * Checks if the SF, dbpediaUris specified in the input file exists
   * and checks whetheter the SF are linked to the DbpediaURIs
   * */
-  def checkEntitiesInFile(){
-    var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
+  def checkEntitiesInFile() {
+    var idioSpotlightModel: IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
     val source = scala.io.Source.fromFile(this.pathToFile)
     val lines = source.bufferedReader()
     var line = lines.readLine()
@@ -39,7 +39,7 @@ class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
     var totalTopics = 0
     var totalSFAndTopics = 0
 
-    while (line!=null){
+    while (line != null) {
 
       val (surfaceForms, dbpediaUri) = parseLine(line)
 
@@ -48,55 +48,54 @@ class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
 
       totalTopics = totalTopics + 1
 
-      if(isDbpediaResourceinModel){
+      if (isDbpediaResourceinModel) {
         dbpediaId = idioSpotlightModel.idioDbpediaResourceStore.resStore.idFromURI.get(dbpediaUri)
         countsOfFoundTopics = countsOfFoundTopics + 1
       }
 
+      for (surfaceForm <- surfaceForms) {
+        totalSF = totalSF + 1
+        var surfaceId = -1
+        val normalizedSF = idioSpotlightModel.idioSurfaceFormStore.sfStore.normalize(surfaceForm)
+        var isSFinModel = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.containsKey(surfaceForm) | idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.containsKey(normalizedSF)
 
-      for(surfaceForm<-surfaceForms){
-            totalSF  = totalSF + 1
-            var surfaceId = -1
-            val normalizedSF = idioSpotlightModel.idioSurfaceFormStore.sfStore.normalize(surfaceForm)
-            var isSFinModel = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.containsKey(surfaceForm) |  idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.containsKey(normalizedSF)
+        var areSFandResourceLinked = false
 
-            var areSFandResourceLinked = false
+        if (isSFinModel) {
+          countsOfFoundSF = countsOfFoundSF + 1
+          try {
+            surfaceId = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.get(surfaceForm)
+          } catch {
 
-            if (isSFinModel){
-              countsOfFoundSF = countsOfFoundSF + 1
-              try{
-                surfaceId = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.get(surfaceForm)
-              }catch{
-
-                case ex:Exception =>{
-                  println("")
-                  println("used normalized SF")
-                  println("normalized:"+ normalizedSF)
-                  println("")
-                  surfaceId = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.get(normalizedSF)
-                }
-              }
-
+            case ex: Exception => {
+              println("")
+              println("used normalized SF")
+              println("normalized:" + normalizedSF)
+              println("")
+              surfaceId = idioSpotlightModel.idioSurfaceFormStore.sfStore.idForString.get(normalizedSF)
             }
+          }
 
-            try{
-              areSFandResourceLinked = idioSpotlightModel.idioCandidateMapStore.checkCandidateInSFCandidates(surfaceId, dbpediaId)
-            } catch{
-              case ex:Exception=>{}
-            }
+        }
 
-            if(areSFandResourceLinked){
-              countsOfLinkedSFTopic = countsOfLinkedSFTopic + 1
-            }
+        try {
+          areSFandResourceLinked = idioSpotlightModel.idioCandidateMapStore.checkCandidateInSFCandidates(surfaceId, dbpediaId)
+        } catch {
+          case ex: Exception => {}
+        }
 
-            println("----------------------------")
-            println("SF: " + surfaceForm)
-            println("\t in model?\t\t" + isSFinModel)
-            println("Topic: " + dbpediaUri)
-            println("\t in model?\t\t" + isDbpediaResourceinModel)
-            println("is SF connected to the Topic?")
-            println("\t" + areSFandResourceLinked )
-            println("----------------------------")
+        if (areSFandResourceLinked) {
+          countsOfLinkedSFTopic = countsOfLinkedSFTopic + 1
+        }
+
+        println("----------------------------")
+        println("SF: " + surfaceForm)
+        println("\t in model?\t\t" + isSFinModel)
+        println("Topic: " + dbpediaUri)
+        println("\t in model?\t\t" + isDbpediaResourceinModel)
+        println("is SF connected to the Topic?")
+        println("\t" + areSFandResourceLinked)
+        println("----------------------------")
       }
       line = lines.readLine()
     }
@@ -111,6 +110,5 @@ class ModelExplorerFromFile(pathToModelFolder:String, pathToFile:String){
     println("expected number of topics and SF links: " + totalSF)
     source.close()
   }
-
 
 }

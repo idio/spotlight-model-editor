@@ -4,20 +4,18 @@ package org.idio.dbpedia.spotlight.stores
  * Created by dav009 on 23/12/2013.
  */
 
-import org.dbpedia.spotlight.db.memory.{MemoryResourceStore, MemoryStore, MemoryCandidateMapStore}
-import java.io.{File, FileInputStream}
+import org.dbpedia.spotlight.db.memory.{ MemoryResourceStore, MemoryStore, MemoryCandidateMapStore }
+import java.io.{ File, FileInputStream }
 import Array.concat
 import org.dbpedia.spotlight.model.SurfaceForm
 
-class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathtoFolder:String, val resStore:MemoryResourceStore){
+class IdioCandidateMapStore(var candidateMap: MemoryCandidateMapStore, val pathtoFolder: String, val resStore: MemoryResourceStore) {
 
-
-
-  def this(pathtoFolder:String, resStore:MemoryResourceStore){
-    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder,"candmap.mem")), resStore), pathtoFolder, resStore)
+  def this(pathtoFolder: String, resStore: MemoryResourceStore) {
+    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder, "candmap.mem")), resStore), pathtoFolder, resStore)
   }
 
-  def this(candidateMap:MemoryCandidateMapStore, resStore:MemoryResourceStore){
+  def this(candidateMap: MemoryCandidateMapStore, resStore: MemoryResourceStore) {
     this(candidateMap, "", resStore)
   }
 
@@ -28,32 +26,32 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
   * It looks if the given candidateID is inside the candidate array.
   * if it is not it will add it
   * */
-  def addOrCreate(surfaceFormID:Int, candidateID:Int, candidateCounts:Int){
+  def addOrCreate(surfaceFormID: Int, candidateID: Int, candidateCounts: Int) {
     // try to get it, create the candidate array in case it doesnt exist
-    try{
+    try {
       this.candidateMap.candidates(surfaceFormID)
-    }catch{
-      case e:Exception =>{
-         println("\tcreating candidate map array for " + surfaceFormID)
+    } catch {
+      case e: Exception => {
+        println("\tcreating candidate map array for " + surfaceFormID)
 
-         val candidates:Array[Int] = Array(candidateID)
-         val counts:Array[Int] = Array(candidateCounts)
-         this.createCandidateMapForSurfaceForm(surfaceFormID, candidates, counts)
+        val candidates: Array[Int] = Array(candidateID)
+        val counts: Array[Int] = Array(candidateCounts)
+        this.createCandidateMapForSurfaceForm(surfaceFormID, candidates, counts)
 
-         println("\tcandidates")
+        println("\tcandidates")
 
-        this.candidateMap.candidates(surfaceFormID).foreach{ candidate =>
+        this.candidateMap.candidates(surfaceFormID).foreach { candidate =>
           println("\t" + candidate)
         }
 
-         return true
+        return true
       }
     }
 
-    try{
+    try {
       this.candidateMap.candidates(surfaceFormID).size
-    }catch{
-      case e:Exception =>{
+    } catch {
+      case e: Exception => {
 
         println("\tcreating candidate map array for " + surfaceFormID)
 
@@ -62,16 +60,15 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
 
         println("\tcandidates")
 
-        this.candidateMap.candidates(surfaceFormID).foreach{ candidate =>
+        this.candidateMap.candidates(surfaceFormID).foreach { candidate =>
           println("\t" + candidate)
         }
 
       }
     }
 
-
     // if the candidate array exist, then check if the candidate Topic is inside
-    if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)){
+    if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)) {
       println("\tadding the candidate(" + candidateID + ") to candidates of " + surfaceFormID)
       this.addNewCandidateToSF(surfaceFormID, candidateID, candidateCounts)
     }
@@ -84,19 +81,19 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
   *
   * This is used when a surfaceForm is introduced to the model.
   * */
-  def createCandidateMapForSurfaceForm(surfaceFormID:Int, listOfCandidates:Array[Int], listOfCounts:Array[Int]){
-    this.candidateMap.candidates = Array concat(this.candidateMap.candidates, Array(listOfCandidates))
-    this.candidateMap.candidateCounts =  Array concat(this.candidateMap.candidateCounts, Array(listOfCounts))
+  def createCandidateMapForSurfaceForm(surfaceFormID: Int, listOfCandidates: Array[Int], listOfCounts: Array[Int]) {
+    this.candidateMap.candidates = Array concat (this.candidateMap.candidates, Array(listOfCandidates))
+    this.candidateMap.candidateCounts = Array concat (this.candidateMap.candidateCounts, Array(listOfCounts))
   }
 
   /*
 * returns the AVG candidate counts for a given SF
 * This value is used when creating a new association between a SF and a Topic
 * */
-  def getAVGSupportForSF(surfaceFormID:Int):Int = {
+  def getAVGSupportForSF(surfaceFormID: Int): Int = {
     val candidateCounts = this.candidateMap.candidateCounts(surfaceFormID)
-    if  (candidateCounts.isInstanceOf[Array[Int]]){
-      return (candidateCounts.sum  / candidateCounts.size.toDouble).toInt
+    if (candidateCounts.isInstanceOf[Array[Int]]) {
+      return (candidateCounts.sum / candidateCounts.size.toDouble).toInt
     }
     return 0
   }
@@ -104,10 +101,10 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
   /*
   * Checks if a candidateId is already in the candidate array of a surfaceForm.
   * */
-  def checkCandidateInSFCandidates(surfaceFormID:Int,candidateID:Int):Boolean = {
-    for (candidate:Int<-candidateMap.candidates(surfaceFormID)){
-        if (candidate == candidateID)
-            return true
+  def checkCandidateInSFCandidates(surfaceFormID: Int, candidateID: Int): Boolean = {
+    for (candidate: Int <- candidateMap.candidates(surfaceFormID)) {
+      if (candidate == candidateID)
+        return true
     }
     return false
   }
@@ -115,56 +112,56 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
   /*
   * increments the candidates Counts for a given surfaceForm and candidate
   * */
-  def updateCountsOfCandidate(surfaceFormID:Int, candidateID:Int, boostValue:Int){
+  def updateCountsOfCandidate(surfaceFormID: Int, candidateID: Int, boostValue: Int) {
     // update the candidate count value
     println("updating candidate count value")
-    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere{ case(x) => x==candidateID }
+    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
     this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray) += boostValue
   }
 
   /*
   * Add a new topic candidate to the list of candidates of a SurfaceForm
   * */
-  def addNewCandidateToSF(surfaceFormID:Int, candidateID:Int, candidateCounts:Int){
-      if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)){
-        this.candidateMap.candidates(surfaceFormID) = this.candidateMap.candidates(surfaceFormID) :+ candidateID
-        this.candidateMap.candidateCounts(surfaceFormID) = this.candidateMap.candidateCounts(surfaceFormID) :+ candidateCounts
-        return 1
-      }
-      return 0
+  def addNewCandidateToSF(surfaceFormID: Int, candidateID: Int, candidateCounts: Int) {
+    if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)) {
+      this.candidateMap.candidates(surfaceFormID) = this.candidateMap.candidates(surfaceFormID) :+ candidateID
+      this.candidateMap.candidateCounts(surfaceFormID) = this.candidateMap.candidateCounts(surfaceFormID) :+ candidateCounts
+      return 1
+    }
+    return 0
   }
 
   /*
   * Remove association between a SF and a DbpediaURI
   * */
-  def removeAssociation(surfaceFormID:Int, candidateID:Int){
-      val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere{ case(x) => x==candidateID }
-      this.candidateMap.candidates(surfaceFormID) = this.dropIndex(this.candidateMap.candidates(surfaceFormID), indexOfCandidateInArray)
-      this.candidateMap.candidateCounts(surfaceFormID) =this.dropIndex(this.candidateMap.candidateCounts(surfaceFormID), indexOfCandidateInArray)
+  def removeAssociation(surfaceFormID: Int, candidateID: Int) {
+    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
+    this.candidateMap.candidates(surfaceFormID) = this.dropIndex(this.candidateMap.candidates(surfaceFormID), indexOfCandidateInArray)
+    this.candidateMap.candidateCounts(surfaceFormID) = this.dropIndex(this.candidateMap.candidateCounts(surfaceFormID), indexOfCandidateInArray)
   }
 
   /*
   * get all candidates associated to sourceSurfaceForm
   * and associates them also to destinationSurfaceForm
   * */
-  def copyCandidates(sourceSurfaceForm:SurfaceForm, destinationSurfaceForm:SurfaceForm){
+  def copyCandidates(sourceSurfaceForm: SurfaceForm, destinationSurfaceForm: SurfaceForm) {
 
     // get the candidates associated to the sourceSF
     var newDestinationCandidates = this.candidateMap.candidates(sourceSurfaceForm.id).clone()
     var newDestinationCandidatesCounts = this.candidateMap.candidateCounts(sourceSurfaceForm.id).clone()
 
     // add the candidates associated to the destinationSF but not to the sourceSF
-    val setOfCandidatesTopics:collection.immutable.Set[Int] = collection.immutable.Set[Int](newDestinationCandidates:_*)
-    val currentDestinationCandidates =  this.candidateMap.candidates(destinationSurfaceForm.id).zip(this.candidateMap.candidateCounts(destinationSurfaceForm.id))
+    val setOfCandidatesTopics: collection.immutable.Set[Int] = collection.immutable.Set[Int](newDestinationCandidates: _*)
+    val currentDestinationCandidates = this.candidateMap.candidates(destinationSurfaceForm.id).zip(this.candidateMap.candidateCounts(destinationSurfaceForm.id))
 
+    currentDestinationCandidates.foreach {
+      case (topicId, count) =>
 
-    currentDestinationCandidates.foreach{ case (topicId, count)  =>
-
-      // if candidate is not already in the new candidate list then add it
-      if (!setOfCandidatesTopics.contains(topicId)){
-        newDestinationCandidates = newDestinationCandidates :+ topicId
-        newDestinationCandidatesCounts = newDestinationCandidatesCounts :+ count
-      }
+        // if candidate is not already in the new candidate list then add it
+        if (!setOfCandidatesTopics.contains(topicId)) {
+          newDestinationCandidates = newDestinationCandidates :+ topicId
+          newDestinationCandidatesCounts = newDestinationCandidatesCounts :+ count
+        }
 
     }
 
@@ -176,8 +173,8 @@ class IdioCandidateMapStore(var candidateMap:MemoryCandidateMapStore, val pathto
 
   /**
    *  Drops the 'i'th element of a list
-  */
-  def dropIndex(xs:Array[Int], n:Int):Array[Int]={
+   */
+  def dropIndex(xs: Array[Int], n: Int): Array[Int] = {
     return concat(xs.slice(0, n), xs.slice(n + 1, xs.length))
   }
 }

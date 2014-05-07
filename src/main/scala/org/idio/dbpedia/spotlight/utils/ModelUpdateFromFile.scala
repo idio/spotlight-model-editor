@@ -7,25 +7,23 @@ import org.idio.dbpedia.spotlight.IdioSpotlightModel
  * dbpediaURI tab surfaceForm1|surfaceForm2... tab contextW1|contextW2.. tab contextW1Count|contextW2Count..
  * Created by dav009 on 03/01/2014.
  */
-class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
-
+class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
 
   /*
   * loads everything using the entries in the file.
   * and exports a new model.
   * if there is no context.mem it will load just the SF, and Dbpedia Resources.
   * */
-  def loadNewEntriesFromFile(){
+  def loadNewEntriesFromFile() {
 
     val fileParser = new ModelFileParser(this.pathToFile)
     println("Parsing INPUT-FILE")
 
-    val (setOfUpperCaseSF, setOfLowerCaseSF ,setOfDbpediaURIS, lowerSfMap, parsedLines, setOfContextWords) = fileParser.parseFile()
+    val (setOfUpperCaseSF, setOfLowerCaseSF, setOfDbpediaURIS, lowerSfMap, parsedLines, setOfContextWords) = fileParser.parseFile()
 
     println("Finished parsing INPUT-FILE")
 
-    var idioSpotlightModel:IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
-
+    var idioSpotlightModel: IdioSpotlightModel = new IdioSpotlightModel(this.pathToModelFolder)
 
     // trying to add all set of SF's in a single go, so that the reverseMaps are just built once.
     println("adding SFs")
@@ -33,12 +31,12 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
 
     val contextFileWriter = new java.io.PrintWriter(this.pathToFile + "_just_context")
 
-    parsedLines.foreach{ parsedLine:Entry =>
+    parsedLines.foreach { parsedLine: Entry =>
 
       // Gathering the UpperCaseSfs with the lower cases SF's in Store
       val allSFBindsToTopics = parsedLine.upperCaseSurfaceForms ++ parsedLine.lowerCaseSF
 
-      allSFBindsToTopics.foreach{ surfaceForm:String =>
+      allSFBindsToTopics.foreach { surfaceForm: String =>
         println("SF: " + surfaceForm)
         println("Topic: " + parsedLine.dbpediaURI)
         println("Types: " + parsedLine.types.mkString(" "))
@@ -51,8 +49,7 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
           parsedLine.dbpediaURI,
           parsedLine.types,
           parsedLine.contextWordsArray,
-          parsedLine.contextCounts
-        )
+          parsedLine.contextCounts)
 
         contextFileWriter.println(dbpediaResourceId + "\t" + parsedLine.contextWordsArray.mkString("|") + "\t" + parsedLine.contextCounts.mkString("|"))
 
@@ -65,6 +62,5 @@ class ModelUpdateFromFile(pathToModelFolder:String, pathToFile:String){
     idioSpotlightModel.exportModels(this.pathToModelFolder)
     println("finished serializing the new model.....")
   }
-
 
 }
