@@ -14,6 +14,11 @@ import java.io.PrintWriter
 import scala.collection.JavaConverters._
 import org.idio.dbpedia.spotlight.stores._
 
+object Store extends Enumeration {
+  type Store = Value
+  val SurfaceStore, CandidateStore, ResourceStore, ContextStore, TokenStore = Value
+}
+
 class CustomSpotlightModel(val pathToFolder: String) {
 
   // Load the properties file
@@ -21,52 +26,61 @@ class CustomSpotlightModel(val pathToFolder: String) {
   val propertyFolder = new File(pathToFolder).getParent()
   properties.load(new FileInputStream(new File(propertyFolder, "model.properties")))
 
-  var customDbpediaResourceStore: CustomDbpediaResourceStore = null
-  var customCandidateMapStore: CustomCandidateMapStore = null
-  var customSurfaceFormStore: CustomSurfaceFormStore = null
-  var customTokenTypeStore: CustomTokenResourceStore = null
-  var customContextStore: CustomContextStore = null
+  val usedStores = scala.collection.mutable.HashSet[Store.Value]()
 
   /*
    The reason for all these Try/Catch is to allow loading the models locally.
    Allowing to load only the files which are needed as opposed to the whole model.
   */
   //load the Stores
-  try {
-    this.customDbpediaResourceStore = new CustomDbpediaResourceStore(pathToFolder)
+  lazy val customDbpediaResourceStore: CustomDbpediaResourceStore = try {
+    usedStores.add(Store.ResourceStore)
+    new CustomDbpediaResourceStore(pathToFolder)
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
+      null
     }
   }
 
-  try {
-    this.customCandidateMapStore = new CustomCandidateMapStore(pathToFolder, customDbpediaResourceStore.resStore)
+  lazy val customCandidateMapStore: CustomCandidateMapStore = try {
+    usedStores.add(Store.CandidateStore)
+    new CustomCandidateMapStore(pathToFolder, customDbpediaResourceStore.resStore)
   } catch {
     case ex: Exception => {
       println(ex.getMessage)
+      null
     }
   }
 
-  try {
-    this.customSurfaceFormStore = new CustomSurfaceFormStore(pathToFolder)
+  lazy val customSurfaceFormStore: CustomSurfaceFormStore = try {
+    usedStores.add(Store.SurfaceStore)
+    new CustomSurfaceFormStore(pathToFolder)
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
+      null
     }
   }
-  try {
-    this.customTokenTypeStore = new CustomTokenResourceStore(pathToFolder, properties.getProperty("stemmer"))
+
+  lazy val customTokenTypeStore: CustomTokenResourceStore = try {
+    usedStores.add(Store.TokenStore)
+     new CustomTokenResourceStore(pathToFolder, properties.getProperty("stemmer"))
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
+      null
     }
   }
+
+  lazy val customContextStore: CustomContextStore =
   try {
-    this.customContextStore = new CustomContextStore(pathToFolder, customTokenTypeStore.tokenStore)
+    usedStores.add(Store.ContextStore)
+    new CustomContextStore(pathToFolder, customTokenTypeStore.tokenStore)
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
+      null
     }
   }
 
@@ -75,8 +89,10 @@ class CustomSpotlightModel(val pathToFolder: String) {
   * */
   def exportModels(pathToFolder: String) {
     println("exporting models to.." + pathToFolder)
+
     try {
-      MemoryStore.dump(this.customDbpediaResourceStore.resStore, new File(pathToFolder, "res.mem"))
+      if(usedStores.contains(Store.ResourceStore))
+         MemoryStore.dump(this.customDbpediaResourceStore.resStore, new File(pathToFolder, "res.mem"))
     } catch {
       case ex: Exception => {
         println(ex.getMessage)
@@ -84,7 +100,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
 
     try {
-      MemoryStore.dump(this.customCandidateMapStore.candidateMap, new File(pathToFolder, "candmap.mem"))
+      if(usedStores.contains(Store.CandidateStore))
+          MemoryStore.dump(this.customCandidateMapStore.candidateMap, new File(pathToFolder, "candmap.mem"))
     } catch {
       case ex: Exception => {
         println(ex.getMessage)
@@ -92,7 +109,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
 
     try {
-      MemoryStore.dump(this.customSurfaceFormStore.sfStore, new File(pathToFolder, "sf.mem"))
+      if(usedStores.contains(Store.SurfaceStore))
+         MemoryStore.dump(this.customSurfaceFormStore.sfStore, new File(pathToFolder, "sf.mem"))
     } catch {
       case ex: Exception => {
         println(ex.getMessage)
@@ -100,7 +118,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
 
     try {
-      MemoryStore.dump(this.customTokenTypeStore.tokenStore, new File(pathToFolder, "tokens.mem"))
+      if(usedStores.contains(Store.TokenStore))
+         MemoryStore.dump(this.customTokenTypeStore.tokenStore, new File(pathToFolder, "tokens.mem"))
     } catch {
       case ex: Exception => {
         println(ex.getMessage)
@@ -108,7 +127,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
 
     try {
-      MemoryStore.dump(this.customContextStore.contextStore, new File(pathToFolder, "context.mem"))
+      if(usedStores.contains(Store.ContextStore))
+         MemoryStore.dump(this.customContextStore.contextStore, new File(pathToFolder, "context.mem"))
     } catch {
       case ex: Exception => {
         println(ex.getMessage)
