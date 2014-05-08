@@ -39,7 +39,7 @@ object Main {
       case ("surfaceform", "make-spottable") => {
 
         val surfaceTexts:Array[String] = {
-          if(commandLineConfig.file){
+          if(!commandLineConfig.file){
             commandLineConfig.argument.split('|')
           }else{
             val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
@@ -64,7 +64,7 @@ object Main {
       case ("surfaceform", "make-no-spottable") => {
 
         val surfaceTexts:Array[String] = {
-           if(commandLineConfig.file){
+           if(!commandLineConfig.file){
              commandLineConfig.argument.split('|')
            }else{
              val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
