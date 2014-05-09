@@ -185,7 +185,7 @@ java -jar .... surfaceform make-no-spottable path/to/model surfaceForm1\|surface
 ```
 
 ```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar surfaceform make-no-spottable path/to/model pathTo/File/withSF -f
+java -jar .... surfaceform make-no-spottable path/to/model pathTo/File/withSF -f
 ```
 
 ### Copy Candidates
