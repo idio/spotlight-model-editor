@@ -60,7 +60,6 @@ class CommandLineParser {
     head("Spotlight-model-editor")
 
     // Defining the commands and subcommands
-
     val surfaceFormCommand =  getSimpleCommand("surfaceform", "surface Forms commands")
 
     surfaceFormCommand.children(
@@ -81,7 +80,7 @@ class CommandLineParser {
 
     val associationCommand = getSimpleCommand("association", "surfaceforms and candidate topics commands")
     associationCommand.children(
-      getCommandSingleArg("remove-association", "file with pairs(topic-surfaceForm)", "remove associations between sf and topics")
+      getCommandSingleArg("remove", "file with pairs(topic-surfaceForm)", "remove associations between sf and topics")
     )
 
     val contextCommand =  getSimpleCommand("context", "context vectors commands")
