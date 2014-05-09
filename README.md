@@ -46,12 +46,15 @@ Turkish (located in the `tr` folder). Feel free to play with other languages, if
 
 1. Clone this repo
 2. go to the repo's folder
-3. do `mvn package`
+3. do `mvn package appassembler:assemble`
 4. call
 
 ```
-java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
+sh target/bin/model-editor explore path-to-turkish/tr/model/
 ```
+
+
+Step 3 generates a jar with all the dependencies in `target` folder. Then it generates a script with default values for calling the jar. The script calls the jar with default values for the heap (15g). If you want to override this value you can modify: (i) the pom `appassembler-maven-plugin` settings in the pom, or (ii) call the jar directly `java -xmx.. -jar ...` followed by the commands shown in this readme.
 
 ## Importing Project
 1. Get IntelliJ
@@ -62,11 +65,18 @@ java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar
 ## Editing a model
 start by freeing  as much ram as possible.
 
-Each of the following tools addressing a `command` refers to calling the jar as follows
+Each of the following tools addressing a `command` refers to calling the jar/script as follows
 
+using the generated script:
 ```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar <command> <subcommand> arg1 arg2
+sh target/bin/model-editor <command> <subcommand> arg1 arg2
 ```
+
+using the generated jar:
+```
+java -Xmx15g -Xms15g -jar target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar <command> <subcommand> arg1 arg2
+```
+
 
 
 ### Exploring a Model
@@ -77,7 +87,7 @@ java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies
 
 example:
 ```
-java -Xmx15360M -Xms15360M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
+sh target/bin/model-editor explore path-to-turkish/tr/model/
 ```
 
 ### Topics
@@ -98,7 +108,7 @@ All topic related actions are carried out using the `topic` command followed by 
 
 i.e :
 ```
-java -jar .... topic search path/to/model Michael_Schumacher‎
+sh target/bin/model-editor topic search path/to/model Michael_Schumacher‎
 ```
 
 #### Check the Context words and counts of a topic
@@ -109,7 +119,7 @@ java -jar .... topic search path/to/model Michael_Schumacher‎
 
 example:
 ```
-java -jar .... topic check-context /mnt/share/spotlight/en/model Barack_Obama\|United_States
+sh target/bin/model-editor topic check-context /mnt/share/spotlight/en/model Barack_Obama\|United_States
 ```
 
 #### Set the Context Words of a Topic
@@ -128,7 +138,7 @@ dbpediaUri <tab> contextWordsSeparatedByPipe <tab> countsSeparatedBytab
 
 example:
 ```
-java -jar .... topic clean-set-context /mnt/share/spotlight/en/model folder/fileWithContextChanges 
+sh target/bin/model-editor topic clean-set-context /mnt/share/spotlight/en/model folder/fileWithContextChanges 
 ```
 
 
@@ -152,7 +162,7 @@ All surface forms related actions are carried out using the `surfaceform` comman
 
 example :
 ```
-java -jar .... surfaceform stats ~/Downloads/tr/model/ evrimleri
+sh target/bin/model-editor surfaceform stats ~/Downloads/tr/model/ evrimleri
 ```
 outputs statistics for the surface form `evrimleri`
 
@@ -167,7 +177,7 @@ outputs statistics for the surface form `evrimleri`
 
 example :
 ```
-java -jar .... surfaceform candidates ~/Downloads/tr/model/ evrimleri
+sh target/bin/model-editor surfaceform candidates ~/Downloads/tr/model/ evrimleri
 ```
 would check the candidate topics for the surface form `evrimleri`
 
@@ -181,11 +191,11 @@ would check the candidate topics for the surface form `evrimleri`
 - **result**: Each `SF` won't be spottable anymore
 
 ```
-java -jar .... surfaceform make-no-spottable path/to/model surfaceForm1\|surfaceForm2\|
+sh target/bin/model-editor surfaceform make-no-spottable path/to/model surfaceForm1\|surfaceForm2\|
 ```
 
 ```
-java -jar .... surfaceform make-no-spottable path/to/model pathTo/File/withSF -f
+sh target/bin/model-editor surfaceform make-no-spottable path/to/model pathTo/File/withSF -f
 ```
 
 ### Copy Candidates
@@ -206,7 +216,7 @@ example:
 
 
 ```
-java -jar .... surfaceform copy-candidates path/to/model pathToFile
+sh target/bin/model-editor surfaceform copy-candidates path/to/model pathToFile
 ```
 
 ### Making a list of Surface Forms Spottable
@@ -224,11 +234,11 @@ example:
 
 
 ```
-java -jar .... surfaceform make-spottable path/to/model surfaceForm1\|surfaceForm2\|
+sh target/bin/model-editor surfaceform make-spottable path/to/model surfaceForm1\|surfaceForm2\|
 ```
 
 ```
-java -jar .... surfaceform make-spottable path/to/model pathTo/File/withSF -f
+sh target/bin/model-editor surfaceform make-spottable path/to/model pathTo/File/withSF -f
 ```
 
 
@@ -254,7 +264,7 @@ dbpediaURI <tab> Surface Form
 
 example:
 ```
-java -jar .... association remove /mnt/share/spotlight/en/model /path/to/file/file_with_associations
+sh target/bin/model-editor association remove /mnt/share/spotlight/en/model /path/to/file/file_with_associations
 ```
 
 ### Updating Model From File
@@ -267,26 +277,26 @@ dbpedia_id <tab> surfaceForm1|surfaceForm2... <tab> contextW1|contextW2... <tab>
 
 #### Insight
 Before doing actual changes to the model it might be useful to see how many `SF`,`dbpedia topics` and links between those two are missing.
-```java -jar .... file-update check path/to/en/model path_to_file/with/model/changes```.
+```sh target/bin/model-editor file-update check path/to/en/model path_to_file/with/model/changes```.
 
 #### Updating a model From File (All in One Go)
 make sure you have enough ram to hold all the models that should be around `-Xmx15000M`.
 do:
 
 ```
-java -jar .... file-update all path/to/en/model path_to_file/with/model/changes
+sh target/bin/model-editor file-update all path/to/en/model path_to_file/with/model/changes
 ```
 
 #### Updating a model From File (Two Steps)
 If you don't have enough ram you can update the `SF` and `DbpediaTopics` in one step and the `Context Words` in other, this will require less memory.
 
 1. go to the model folder and rename `context.mem` to `context2.mem` this will avoid the jar to avoid loading the `context store`
-2. calling the following command will update the `surfaceform store`, `resource store` and `candidate store`: ```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update all path/to/en/model path_to_file/with/model/changes```.
+2. calling the following command will update the `surfaceform store`, `resource store` and `candidate store`: ```sh target/bin/model-editor file-update all path/to/en/model path_to_file/with/model/changes```.
 3. a new file `path_to_file/with/model/changes_just_context` will be generated after running the previous command.This file contains dbpediaIds(internal model's indexes) to contextWords, and it can be processed in the following step.
 4. rename `context2.mem` to `context.mem`, and rename every other file in the model folder to something else.( if this is not done, the stores will be loaded and they will consume all your ram) 
 5. calling the following will update the `context store`: 
 ```
-java -jar .... file-update context path/to/en/model path_to_file/with/model/changes_just_context
+sh target/bin/model-editor file-update context path/to/en/model path_to_file/with/model/changes_just_context
 ```
 6. rename all files to their usual conventions and enjoy a fresh baked model
 
@@ -362,13 +372,12 @@ Given that the models are quite big (2 GB compressed), downloading, modifying an
 3. Clone the dbpedia model editor repo:
 `git clone git@github.com:idio/spotlight-model-editor.git`
 
-4. Install the necessary dbpedia spotlight .jar file and compile ```
+4. compile ```
 cd dbpedia-model-editor
-mvn install:install-file -Dfile=/usr/share/java/dbpedia-spotlight-0.6.jar -DgroupId=org.dbpedia -DartifactId=spotlight -Dversion=0.6 -Dpackaging=jar
 mvn package ```
 
 5. You can now use the model editor for a variety of tasks, for example, to remove SFs Topics associations stored in tab separated file, you can run (we assume the model is located in `/mnt/share/spotlight/`). 
-`sudo java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar association remove-association /mnt/share/spotlight/en/model ~/remove_associations`
+`sh target/bin/model-editor association remove-association /mnt/share/spotlight/en/model ~/remove_associations`
 The command would re-export the model, so you can just zip and upload the file to S3 to be used.
 
 6. Write the changes you made into a changelog, so we can duplicate them from scratch if needed [need to decide where to store changes] .
