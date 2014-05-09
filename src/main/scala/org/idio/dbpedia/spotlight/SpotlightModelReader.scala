@@ -116,12 +116,12 @@ object Main {
       case("topic", "clean-set-context") => {
 
         val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
-        sourceFile.getLines().foreach{ line =>
+        sourceFile.getLines().toArray.foreach{ line =>
           val Array(dbpediaURI, contextWords, contextCounts) = line.trim().split("\t")
           println("context words for.." + dbpediaURI + " will be deleted")
           println("context words for.." + dbpediaURI + " will be set as given in input")
-          val integerContextCounts = contextCounts.split("|").map(_.toInt)
-          spotlightModelReader.replaceAllContext(dbpediaURI, contextWords.split("|"), integerContextCounts)
+          val integerContextCounts = contextCounts.trim().split('|').map(_.toInt)
+          spotlightModelReader.replaceAllContext(dbpediaURI, contextWords.trim().split('|'), integerContextCounts)
         }
 
         println("exporting new model.....")
@@ -147,7 +147,7 @@ object Main {
 
 
       //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
-      case("association", "remove-association") => {
+      case("association", "remove") => {
 
         val pathToFileWithSFTopicPairs = commandLineConfig.argument
         val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
