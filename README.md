@@ -65,7 +65,7 @@ start by freeing  as much ram as possible.
 Each of the following tools addressing a `command` refers to calling the jar as follows
 
 ```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar <command> arg1 arg2 ... argN
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar <command> <subcommand> arg1 arg2
 ```
 
 
@@ -80,79 +80,168 @@ example:
 java -Xmx15360M -Xms15360M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar explore path-to-turkish/tr/model/
 ```
 
+### Topics
 
-### Searching a Topic
+All topic related actions are carried out using the `topic` command followed by one of the following subcommands:
 
-- **command**: `search-topic`
+ - `search` : checking if a topic is in the stores
+ - `check-context` : printing the context of a topic
+ - `clean-set-context` : cleaning and setting the context of a topic
+
+
+#### Searching a Topic
+- **command**: `topic`
+- **subcommand**: `search`
 - **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
 - **arg2**: dbpediaURI
 - **result**: looks for a given `DbpediaId` in the Model and returns whether that topic exists or not in the model
 
 i.e :
 ```
-java -jar .... search path/to/model Michael_Schumacher‎
+java -jar .... topic search path/to/model Michael_Schumacher‎
 ```
 
-### Getting Data about a SurfaceForm
-
-- **command**: `check-sf`
+#### Check the Context words and counts of a topic
+- **command**: `topic`
+- **subcommand**: `check-context`
 - **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
-- **arg2**: surfaceForm
-- **result**:  outputs the topic candidates and statistics of the given surfaceForm
-
-example :
-```
-java -Xmx4000M target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar check ~/Downloads/tr/model/ evrimleri
-```
-would check the candidate topics and statistics for the surface form `evrimleri`
-
-### Making a list of Surface Forms not Spottable
-
-- **command**: `make-sf-not-spottable`
-- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
-- **arg2**: list of Surface Forms separated by `|`. i.e: `how\|How\|Hello\ World`
-- **result**: Each `SF` in the piped separated list won't be spottable anymore
-
-```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar make-sf-not-spottable path/to/model listOfPipedSeparatedSurfaceForms
-```
-
-example: 
-
-```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar make-sf-not-spottable /mnt/share/spotlight/en/model how\|How\|QC\|the\ one\|The\ one\|The\ One
-```
-### Making a list of Surface Forms Spottable
-
-- **command**: `make-sf-spottable`
-- **arg1**: `pathToSpotlightModel/model`
-- **arg2**:  list of Surface Forms separated by `|`. i.e: `how\|How\|Hello\ World`
-- **result**: Each `SF` in the piped separated list will be spottable
-
-
-example: 
-
-```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar make-sf-spottable /mnt/share/spotlight/en/model adobe\|Adobe
-```
-
-### Set the Context Words of a Topic
-
-- **command**: `clean-set-context`
-- **arg1**: `pathToSpotlightModel/model`
-- **arg2**: dbpediaURI
-- **arg3**: list of Context Words separated by `|`. i.e: `Word1\|Word2`
-- **arg4**: list of context Counts separated by `|` i.e: `1|300`
-- **result**: The context words and counts for  `dbpediaURI` will be clear. The specified context Words will be stemmed and added with their respect counts to the context of the given `dbpediaURI`.
+- **arg2**: piped separated list of dbpediaUris
 
 example:
 ```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar clean-set-context /mnt/share/spotlight/en/model Barack_Obama President\|United\|States 10\|54\|3 
+java -jar .... topic check-context /mnt/share/spotlight/en/model Barack_Obama\|United_States
 ```
+
+#### Set the Context Words of a Topic
+
+- **command**: `topic`
+- **subcommand**: `clean-set-context`
+- **arg1**: `pathToSpotlightModel/model`
+- **arg2**: pathToFile
+- **result**: The context words and counts for the topics in the file will be cleared. The specified context Words will be stemmed and added with their respect counts to the context vector of the given topics.
+
+each line of the given input file should be like: 
+
+```
+dbpediaUri <tab> contextWordsSeparatedByPipe <tab> countsSeparatedBytab
+```
+
+example:
+```
+java -jar .... topic clean-set-context /mnt/share/spotlight/en/model folder/fileWithContextChanges 
+```
+
+
+### Surface Forms
+
+All surface forms related actions are carried out using the `surfaceform` command followed by one of the following subcommands:
+
+ - `stats` : printing stats of a surface form
+ - `candidates` : printing the list of candidates of a surface form
+ - `make-spottable` : making surfaceforms spottable
+ - `make-no-spottable` : making surfaceforms no spottable
+ - `copy-candidates` : adding to a `surfaceformA` all candidates of a `surfaceFormB`
+
+#### stats of a surface form
+
+- **subcommand**: `surfaceform`
+- **subcommand**: `stats`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: surfaceForm
+- **result**:  outputs statistics of the given surfaceForm
+
+example :
+```
+java -jar .... surfaceform stats ~/Downloads/tr/model/ evrimleri
+```
+outputs statistics for the surface form `evrimleri`
+
+
+#### getting the candidate topics of a surface form
+
+- **command**: `surfaceform`
+- **subcommand**: `candidates`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: surfaceForm
+- **result**:  outputs the candidate topics of a surface form
+
+example :
+```
+java -jar .... surfaceform candidates ~/Downloads/tr/model/ evrimleri
+```
+would check the candidate topics for the surface form `evrimleri`
+
+### Making a list of Surface Forms not Spottable
+- **command**: `surfaceform`
+- **subcommand**: `make-no-spottable`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: 
+     - list of Surface Forms separated by `|`. i.e: `how\|How\|Hello\ World`
+     - file containing a surfaceForm  per line ( if option `-f` is passed)
+- **result**: Each `SF` won't be spottable anymore
+
+```
+java -jar .... surfaceform make-no-spottable path/to/model surfaceForm1\|surfaceForm2\|
+```
+
+```
+java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar surfaceform make-no-spottable path/to/model pathTo/File/withSF -f
+```
+
+### Copy Candidates
+
+- **command**: `surfaceform`
+- **subcommand**: `copy-candidates`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: path to file containing pairs of surfaceForm. each line should be :
+       
+       ```
+        <originSurfaceForm> <tab> <destinySurfaceForm>
+       ```
+
+- **result**: copies the candidate topics from each `originSurfaceForm` as candidates topics to `destinySurfaceForm` 
+
+
+example: 
+
+
+```
+java -jar .... surfaceform copy-candidates path/to/model pathToFile
+```
+
+### Making a list of Surface Forms Spottable
+
+- **command**: `surfaceform`
+- **subcommand**: `make-spottable`
+- **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
+- **arg2**: 
+     - list of Surface Forms separated by `|`. i.e: `how\|How\|Hello\ World`
+     - file containing a surfaceForm  per line ( if option `-f` is passed)
+- **result**: Each `SF` will be spottable
+
+
+example: 
+
+
+```
+java -jar .... surfaceform make-spottable path/to/model surfaceForm1\|surfaceForm2\|
+```
+
+```
+java -jar .... surfaceform make-spottable path/to/model pathTo/File/withSF -f
+```
+
+
+### Associations
+
+All surface forms related actions are carried out using the `association` command followed by one of the following subcommands:
+
+ - `remove`
 
 ### Deleting Associations between SF and Topics
 
-- **command**: `remove-sf-topic-association`
+- **command**: `association`
+- **subcommand**: `remove`
 - **arg1**: `pathToSpotlightModel/model`
 - **arg2**: pathToInputFile
 - **result**: All associations between SFs and Topics in the given input file will be deleted from the model.
@@ -165,7 +254,7 @@ dbpediaURI <tab> Surface Form
 
 example:
 ```
-java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar remove-sf-topic-association /mnt/share/spotlight/en/model /path/to/file/file_with_associations
+java -jar .... association remove /mnt/share/spotlight/en/model /path/to/file/file_with_associations
 ```
 
 ### Updating Model From File
@@ -178,26 +267,26 @@ dbpedia_id <tab> surfaceForm1|surfaceForm2... <tab> contextW1|contextW2... <tab>
 
 #### Insight
 Before doing actual changes to the model it might be useful to see how many `SF`,`dbpedia topics` and links between those two are missing.
-```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-check path/to/en/model path_to_file/with/model/changes```.
+```java -jar .... file-update check path/to/en/model path_to_file/with/model/changes```.
 
 #### Updating a model From File (All in One Go)
 make sure you have enough ram to hold all the models that should be around `-Xmx15000M`.
 do:
 
 ```
-java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-sf-dbpedia path/to/en/model path_to_file/with/model/changes
+java -jar .... file-update all path/to/en/model path_to_file/with/model/changes
 ```
 
 #### Updating a model From File (Two Steps)
 If you don't have enough ram you can update the `SF` and `DbpediaTopics` in one step and the `Context Words` in other, this will require less memory.
 
 1. go to the model folder and rename `context.mem` to `context2.mem` this will avoid the jar to avoid loading the `context store`
-2. calling the following command will update the `surfaceform store`, `resource store` and `candidate store`: ```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-sf-dbpedia path/to/en/model path_to_file/with/model/changes```.
+2. calling the following command will update the `surfaceform store`, `resource store` and `candidate store`: ```java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update all path/to/en/model path_to_file/with/model/changes```.
 3. a new file `path_to_file/with/model/changes_just_context` will be generated after running the previous command.This file contains dbpediaIds(internal model's indexes) to contextWords, and it can be processed in the following step.
 4. rename `context2.mem` to `context.mem`, and rename every other file in the model folder to something else.( if this is not done, the stores will be loaded and they will consume all your ram) 
 5. calling the following will update the `context store`: 
 ```
-java -Xmx4000M -jar  target/idio-spotlight-model-0.1.0-jar-with-dependencies.jar file-update-context path/to/en/model path_to_file/with/model/changes_just_context
+java -jar .... file-update context path/to/en/model path_to_file/with/model/changes_just_context
 ```
 6. rename all files to their usual conventions and enjoy a fresh baked model
 
@@ -279,7 +368,7 @@ mvn install:install-file -Dfile=/usr/share/java/dbpedia-spotlight-0.6.jar -Dgrou
 mvn package ```
 
 5. You can now use the model editor for a variety of tasks, for example, to remove SFs Topics associations stored in tab separated file, you can run (we assume the model is located in `/mnt/share/spotlight/`). 
-`sudo java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar remove-sf-topic-association /mnt/share/spotlight/en/model ~/remove_associations`
+`sudo java -Xmx15360M -Xms15360M -jar idio-spotlight-model-0.1.0-jar-with-dependencies.jar association remove-association /mnt/share/spotlight/en/model ~/remove_associations`
 The command would re-export the model, so you can just zip and upload the file to S3 to be used.
 
 6. Write the changes you made into a changelog, so we can duplicate them from scratch if needed [need to decide where to store changes] .
