@@ -360,7 +360,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
         this.customCandidateMapStore.createCandidateMapForSurfaceForm(surfaceFormId, new Array[Int](0), new Array[Int](0)))
   }
   /*
-    takes all topic candidates for the surfaceForm1
+    Takes all topic candidates for the surfaceForm1
     and associate them to surfaceForm2.
     Assumes that both SurfaceForms exists in the model
   */

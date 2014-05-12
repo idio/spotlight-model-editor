@@ -19,7 +19,11 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
     val fileParser = new ModelFileParser(this.pathToFile)
     println("Parsing INPUT-FILE")
 
-    val (setOfUpperCaseSF, setOfLowerCaseSF, setOfDbpediaURIS, lowerSfMap, parsedLines, setOfContextWords) = fileParser.parseFile()
+    val (setOfUpperCaseSF,
+         setOfLowerCaseSF,
+         setOfDbpediaURIS,
+         lowerSfMap,
+         parsedLines, setOfContextWords) = fileParser.parseFile()
 
     println("Finished parsing INPUT-FILE")
 
@@ -51,7 +55,8 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
           parsedLine.contextWordsArray,
           parsedLine.contextCounts)
 
-        contextFileWriter.println(dbpediaResourceId + "\t" + parsedLine.contextWordsArray.mkString("|") + "\t" + parsedLine.contextCounts.mkString("|"))
+        contextFileWriter.println(dbpediaResourceId + "\t" + parsedLine.contextWordsArray.mkString("|") + "\t"
+                                        + parsedLine.contextCounts.mkString("|"))
 
         println("----------------------------")
       }

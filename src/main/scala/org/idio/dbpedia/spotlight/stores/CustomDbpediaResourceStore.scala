@@ -5,12 +5,13 @@ package org.idio.dbpedia.spotlight.stores
  */
 
 import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemoryResourceStore }
-import java.io.{ File, FileInputStream }
+import java.io.{FileInputStream, File}
 import org.dbpedia.spotlight.exceptions.DBpediaResourceNotFoundException
 
 class CustomDbpediaResourceStore(val pathtoFolder: String) {
 
-  var resStore: MemoryResourceStore = MemoryStore.loadResourceStore(new FileInputStream(new File(pathtoFolder, "res.mem")))
+  val resourceFile = new FileInputStream(new File(pathtoFolder, "res.mem"))
+  var resStore: MemoryResourceStore = MemoryStore.loadResourceStore(resourceFile)
 
   /*
   * Creates the specified DbpediaResource in the internal Arrays

@@ -25,7 +25,8 @@ class ModelFileParser(pathToFile: String) {
   val setOfLCSurfaceForms: HashSet[String] = new HashSet[String]()
 
   // All lower case SFs attached to the uppercase SFs
-  val lowerCasesMap: collection.mutable.HashMap[String, Array[String]] = new collection.mutable.HashMap[String, Array[String]]()
+  val lowerCasesMap: collection.mutable.HashMap[String, Array[String]] =
+                                                                new collection.mutable.HashMap[String, Array[String]]()
 
   // All dbpedia URis
   val setOfDbpediaURIS: HashSet[String] = new HashSet[String]()
@@ -109,7 +110,12 @@ class ModelFileParser(pathToFile: String) {
   /*
  * Parses the input File and outputs a set of SF and dbpedia URIs
  * */
-  def parseFile(): (HashSet[String], HashSet[String], HashSet[String], collection.mutable.HashMap[String, Array[String]], scala.collection.mutable.ArrayBuffer[Entry], collection.mutable.HashSet[String]) = {
+  def parseFile(): (HashSet[String],
+                    HashSet[String],
+                    HashSet[String],
+                    collection.mutable.HashMap[String, Array[String]],
+                    scala.collection.mutable.ArrayBuffer[Entry],
+                    collection.mutable.HashSet[String]) = {
 
     val source = scala.io.Source.fromFile(this.pathToFile)
     val lines = source.getLines()
@@ -138,7 +144,12 @@ class ModelFileParser(pathToFile: String) {
 
     source.close()
 
-    return (this.setOfUCSurfaceForms, setOfLCSurfaceForms, this.setOfDbpediaURIS, lowerCasesMap, this.parsedLines, this.setOfContextWords)
+    return (this.setOfUCSurfaceForms,
+            this.setOfLCSurfaceForms,
+            this.setOfDbpediaURIS,
+            this.lowerCasesMap,
+            this.parsedLines,
+            this.setOfContextWords)
   }
 
 }

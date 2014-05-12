@@ -110,7 +110,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore, val pat
   }
 
   /*
-  * increments the candidates Counts for a given surfaceForm and candidate
+  * Increments the candidates Counts for a given surfaceForm and candidate
   * */
   def updateCountsOfCandidate(surfaceFormID: Int, candidateID: Int, boostValue: Int) {
     // update the candidate count value
