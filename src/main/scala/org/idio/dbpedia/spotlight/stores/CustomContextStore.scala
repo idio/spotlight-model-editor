@@ -26,7 +26,8 @@ import java.io.{ File, FileInputStream }
 
 class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTypeStore) {
 
-  var contextStore: MemoryContextStore = MemoryStore.loadContextStore(new FileInputStream(new File(pathtoFolder, "context.mem")), this.tokenStore)
+  val contextMemFile = new FileInputStream(new File(pathtoFolder, "context.mem"))
+  var contextStore: MemoryContextStore = MemoryStore.loadContextStore(contextMemFile, this.tokenStore)
 
   /*
   * Creates a context Array for a new DbpediaResource.

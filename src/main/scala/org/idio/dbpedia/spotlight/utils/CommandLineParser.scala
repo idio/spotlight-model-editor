@@ -46,7 +46,9 @@ class CommandLineParser {
     /*
      * Returns a command with a single argument being mandatory.
      * */
-    def getCommandSingleArg(commandName: String, argumentHelp: String, commandHelp: String): scopt.OptionDef[Unit, CommandLineConfig]={
+    def getCommandSingleArg(commandName: String,
+                            argumentHelp: String,
+                            commandHelp: String): scopt.OptionDef[Unit, CommandLineConfig]={
       val returnCommand = getSimpleCommand(commandName, commandHelp)
 
       returnCommand.children (
@@ -63,7 +65,9 @@ class CommandLineParser {
     /*
      * Returns a command accepting the file flag
      * */
-    def getCommandAcceptingFileAsSingleArg(commandName: String, argumentHelp: String, commandHelp: String): scopt.OptionDef[Unit, CommandLineConfig]={
+    def getCommandAcceptingFileAsSingleArg(commandName: String,
+                                           argumentHelp: String,
+                                           commandHelp: String): scopt.OptionDef[Unit, CommandLineConfig]={
       val returnCommand = getCommandSingleArg(commandName, argumentHelp, commandHelp)
 
       returnCommand.children(
@@ -80,17 +84,32 @@ class CommandLineParser {
     val surfaceFormCommand =  getSimpleCommand("surfaceform", "surface Forms commands")
 
     surfaceFormCommand.children(
-      getCommandAcceptingFileAsSingleArg("make-spottable", "list of surfaceforms(piped separated) or file with one sf per line", "make a list of sf spottable"),
-      getCommandAcceptingFileAsSingleArg("make-no-spottable", "list of surfaceforms(piped separated) or file with one sf per line"  , "make a list of sf not spottable"),
-      getCommandSingleArg("stats", "surface form", "outputs statistics about a surface form"),
-      getCommandSingleArg("candidates", "surface form", "outputs the candidates of a sf"),
-      getCommandSingleArg("copy-candidates", "file", "copy candidates from origin surfaceforms to destiny surface forms")
+      getCommandAcceptingFileAsSingleArg("make-spottable",
+                                         "list of surfaceforms(piped separated) or file with one sf per line",
+                                          "make a list of sf spottable"),
+
+      getCommandAcceptingFileAsSingleArg("make-no-spottable",
+                                         "list of surfaceforms(piped separated) or file with one sf per line",
+                                         "make a list of sf not spottable"),
+      getCommandSingleArg("stats",
+                          "surface form",
+                          "outputs statistics about a surface form"),
+
+      getCommandSingleArg("candidates",
+                          "surface form",
+                          "outputs the candidates of a sf"),
+
+      getCommandSingleArg("copy-candidates",
+                          "file",
+                          "copy candidates from origin surfaceforms to destiny surface forms")
 
     )
 
     val topicCommand =  getSimpleCommand("topic", "Topic (Dbpedia Uris) related Commands")
     topicCommand.children(
-      getCommandSingleArg("clean-set-context","file", "cleans the context of topics given in the file and set the given vectors" ),
+      getCommandSingleArg("clean-set-context",
+                          "file",
+                          "cleans the context of topics given in the file and set the given vectors" ),
       getCommandSingleArg("check-context", "dbpediaURI", "outputs the context of a topic"),
       getCommandSingleArg("search", "dbpediaURI", "outputs whether a topic is in the store or not")
     )
@@ -108,9 +127,17 @@ class CommandLineParser {
 
     val addCommand =  getSimpleCommand("file-update", "doing big updates via file")
     addCommand.children(
-      getCommandSingleArg("all", "file with associations and contexts", "updates the stores adding all sf,associations, and contexts words defined in the file"),
-      getCommandSingleArg("only-context", "file with topics and contexts", "updates the contexts of the topics augmenting their context with the given counts and words"),
-      getCommandSingleArg("check", "file with topics and contexts", "checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.")
+      getCommandSingleArg("all",
+                          "file with associations and contexts",
+                          "updates the stores adding all sf,associations, and contexts words defined in the file"),
+
+      getCommandSingleArg("only-context",
+                          "file with topics and contexts",
+                          "updates the contexts of the topics augmenting their context with the given counts and words"),
+
+      getCommandSingleArg("check",
+                          "file with topics and contexts",
+                          "checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.")
     )
 
     val exploreCommand =  getSimpleCommand("explore", "shows some surface forms and their statistics")

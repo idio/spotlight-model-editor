@@ -71,7 +71,8 @@ class ModelExplorerFromFile(pathToModelFolder: String, pathToFile: String) {
         totalSF = totalSF + 1
         var surfaceId = -1
         val normalizedSF = customSpotlightModel.customSurfaceFormStore.sfStore.normalize(surfaceForm)
-        var isSFinModel = customSpotlightModel.customSurfaceFormStore.sfStore.idForString.containsKey(surfaceForm) | customSpotlightModel.customSurfaceFormStore.sfStore.idForString.containsKey(normalizedSF)
+        var isSFinModel = customSpotlightModel.customSurfaceFormStore.sfStore.idForString.containsKey(surfaceForm) |
+                          customSpotlightModel.customSurfaceFormStore.sfStore.idForString.containsKey(normalizedSF)
 
         var areSFandResourceLinked = false
 
@@ -93,7 +94,8 @@ class ModelExplorerFromFile(pathToModelFolder: String, pathToFile: String) {
         }
 
         try {
-          areSFandResourceLinked = customSpotlightModel.customCandidateMapStore.checkCandidateInSFCandidates(surfaceId, dbpediaId)
+          areSFandResourceLinked = customSpotlightModel.customCandidateMapStore.checkCandidateInSFCandidates(surfaceId,
+                                                                                                             dbpediaId)
         } catch {
           case ex: Exception => {}
         }

@@ -27,7 +27,8 @@ import java.io.{ File, FileInputStream }
 
 class CustomSurfaceFormStore(val pathtoFolder: String) {
 
-  var sfStore: MemorySurfaceFormStore = MemoryStore.loadSurfaceFormStore(new FileInputStream(new File(pathtoFolder, "sf.mem")))
+  val sfMemFile = new FileInputStream(new File(pathtoFolder, "sf.mem"))
+  var sfStore: MemorySurfaceFormStore = MemoryStore.loadSurfaceFormStore(sfMemFile)
 
   /*
   * Updates the internal arrays for a new SurfaceForm

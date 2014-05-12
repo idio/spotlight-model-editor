@@ -28,7 +28,8 @@ import scala.collection.mutable.HashMap
 
 class CustomTokenResourceStore(val pathtoFolder: String, stemmerLanguage: String) {
 
-  var tokenStore: MemoryTokenTypeStore = MemoryStore.loadTokenTypeStore(new FileInputStream(new File(pathtoFolder, "tokens.mem")))
+  val tokenMemFile = new FileInputStream(new File(pathtoFolder, "tokens.mem"))
+  var tokenStore: MemoryTokenTypeStore = MemoryStore.loadTokenTypeStore(tokenMemFile)
   var stemmer: SnowballStemmer = new SnowballStemmer(stemmerLanguage)
 
   /*

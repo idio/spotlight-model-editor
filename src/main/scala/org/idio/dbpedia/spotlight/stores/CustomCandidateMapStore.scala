@@ -26,10 +26,14 @@ import java.io.{ File, FileInputStream }
 import Array.concat
 import org.dbpedia.spotlight.model.SurfaceForm
 
-class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore, val pathtoFolder: String, val resStore: MemoryResourceStore) {
+class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
+                              val pathtoFolder: String,
+                              val resStore:
+                              MemoryResourceStore) {
 
   def this(pathtoFolder: String, resStore: MemoryResourceStore) {
-    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder, "candmap.mem")), resStore), pathtoFolder, resStore)
+    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder, "candmap.mem")), resStore),
+                                           pathtoFolder, resStore)
   }
 
   def this(candidateMap: MemoryCandidateMapStore, resStore: MemoryResourceStore) {
