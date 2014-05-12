@@ -24,11 +24,13 @@ package org.idio.dbpedia.spotlight.stores
 import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemorySurfaceFormStore }
 import org.dbpedia.spotlight.exceptions.SurfaceFormNotFoundException
 import java.io.{ File, FileInputStream }
+import scala.collection.immutable
 
-class CustomSurfaceFormStore(val pathtoFolder: String) {
+class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQuantiziedCountStore) extends QuantiziedMemoryStore{
 
+  quantizedCountStore = countStore
   val sfMemFile = new FileInputStream(new File(pathtoFolder, "sf.mem"))
-  var sfStore: MemorySurfaceFormStore = MemoryStore.loadSurfaceFormStore(sfMemFile)
+  var sfStore: MemorySurfaceFormStore = MemoryStore.loadSurfaceFormStore(sfMemFile, quantizedCountStore.quantizedStore)
 
   /*
   * Updates the internal arrays for a new SurfaceForm
@@ -36,9 +38,12 @@ class CustomSurfaceFormStore(val pathtoFolder: String) {
   private def addSF(surfaceText: String) {
     println("\t adding a new surface form..." + surfaceText)
     this.sfStore.stringForID = this.sfStore.stringForID :+ surfaceText
+
+    val defaultQuantiziedValue: Short = getQuantiziedCounts(1)
+
     // the counts for the new surface form is the avg of the counts for the other surface forms
-    this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID :+ 1
-    this.sfStore.totalCountForID = this.sfStore.totalCountForID :+ 1
+    this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID :+ defaultQuantiziedValue
+    this.sfStore.totalCountForID = this.sfStore.totalCountForID :+ defaultQuantiziedValue
   }
 
   /*
@@ -52,7 +57,8 @@ class CustomSurfaceFormStore(val pathtoFolder: String) {
 
     this.sfStore.stringForID = this.sfStore.stringForID ++ listOfNewSurfaceForms
 
-    val defaultValueList = List.fill(listOfNewSurfaceForms.size)(1)
+    val defaultQuantiziedValue: Short = getQuantiziedCounts(1)
+    val defaultValueList = List.fill(listOfNewSurfaceForms.size)(defaultQuantiziedValue)
 
     this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID ++ defaultValueList
     this.sfStore.totalCountForID = this.sfStore.totalCountForID ++ defaultValueList
@@ -119,10 +125,15 @@ class CustomSurfaceFormStore(val pathtoFolder: String) {
   * makes the SF annotationProbability equals to 0.27, this is done by rising the annotatedCounts
   * */
   def boostCountsIfNeeded(surfaceFormID: Int) {
-    val annotationProbability = this.sfStore.annotatedCountForID(surfaceFormID) / this.sfStore.totalCountForID(surfaceFormID).toDouble
-    if (annotationProbability < 0.27) {
-      var newAnnotatedCount = (0.27 * this.sfStore.totalCountForID(surfaceFormID).toDouble).toInt + 1
-      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
+
+    val annotatedCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.annotatedCountForID(surfaceFormID))
+    val totalCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.totalCountForID(surfaceFormID))
+
+    val annotationProbability = annotatedCountsForSurfaceForm / totalCountsForSurfaceForm.toDouble
+    if (annotationProbability < 0.5) {
+      var newAnnotatedCount = (0.5 * totalCountsForSurfaceForm.toDouble).toInt + 1
+      val newAnnotatedCountQuantizied = getQuantiziedCounts(newAnnotatedCount)
+      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCountQuantizied
     }
   }
 
@@ -147,14 +158,18 @@ class CustomSurfaceFormStore(val pathtoFolder: String) {
   * Makes the SF annotationProbability equals to 0.1, this is done by reducing the annotatedCounts
   * */
   def decreaseSpottingProbabilityById(surfaceFormID: Int, spotProbability: Double) {
-    val annotationProbability = this.sfStore.annotatedCountForID(surfaceFormID) / this.sfStore.totalCountForID(surfaceFormID).toDouble
-    if (this.sfStore.totalCountForID(surfaceFormID) < 2) {
-      this.sfStore.totalCountForID(surfaceFormID) = 10
+
+    val annotatedCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.annotatedCountForID(surfaceFormID))
+    val totalCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.totalCountForID(surfaceFormID)).toDouble
+
+    val annotationProbability = annotatedCountsForSurfaceForm / totalCountsForSurfaceForm.toDouble
+    if (annotatedCountsForSurfaceForm < 2) {
+      this.sfStore.totalCountForID(surfaceFormID) = getQuantiziedCounts(10)
     }
 
     if (annotationProbability > spotProbability) {
-      var newAnnotatedCount = (spotProbability * this.sfStore.totalCountForID(surfaceFormID).toDouble).toInt + 1
-      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
+      var newAnnotatedCount = (spotProbability * totalCountsForSurfaceForm).toInt + 1
+      this.sfStore.annotatedCountForID(surfaceFormID) = getQuantiziedCounts(newAnnotatedCount)
     }
 
   }
@@ -179,20 +194,105 @@ class CustomSurfaceFormStore(val pathtoFolder: String) {
   * otherwise it creates it, rebuild the internal index, and return the SF ID
   * */
   def getAddSurfaceForm(surfaceText: String): Int = {
-
-    // look for existing surfaceForm
-    try {
-      var surfaceForm = this.sfStore.getSurfaceForm(surfaceText)
-      this.boostCountsIfNeeded(surfaceForm.id)
-      return surfaceForm.id
-    } catch {
-
-      case e: SurfaceFormNotFoundException => println("creating surface form...")
-    }
-    // create sf in case it cant be found
-    var surfaceFormId = this.addSurfaceForm(surfaceText)
-    this.boostCountsIfNeeded(surfaceFormId)
-
-    return surfaceFormId
+    getAddUpperCaseSurfaceForm(surfaceText)
   }
+
+  /*
+    Receives a set of Sfs, returns a map from Sf-> surfaceForm Id for those Sf which could be found
+    in the main SurfaceForm Store
+    */
+  def findSetOfSurfaceFormsInMainStore(setOfSurfaceForms: Set[String]):immutable.HashMap[String, Int]={
+
+    val listOfSurfaceFormIdentifierTuples: Seq[(String, Int)] = setOfSurfaceForms.map{surfaceForm:String =>
+      val identifier = this.sfStore.idForString.get(surfaceForm)
+      if (identifier != null){
+        Option((surfaceForm, identifier.asInstanceOf[scala.Int]))
+      }else{
+        None
+      } }.flatten.toSeq
+
+    immutable.HashMap[String, Int](listOfSurfaceFormIdentifierTuples:_*)
+  }
+
+  /*
+    * Adds a lower case only if it doesnt exist.
+    * If it exists it adds the candidaditaes SF to the list
+    *
+    * Note: **WARNING** IT ASSUMMES THAT sfStore reverseMap is updated
+    * */
+  def addLowerCaseSurfaceForm(surfaceText: String, candidatesSF: Array[String]) {
+
+    /* Each lowercase surface Form has a list of Candidate Uppercase SF. i.e:
+          "real time bidding" can have the following candidates SF's "RTB" , "Real Time Bidding"
+      adding the candidate upperCaseSurfaceForms to the main Store is necessary so they have
+      an identifier so we can bind lowercases SFs to its candidates.
+    */
+    val setOfCandidatesSF = scala.collection.mutable.HashSet[String](candidatesSF:_*)
+    val listOfUppercaseSfIds = setOfCandidatesSF.map{ upperCaseSurfaceFormStore: String  =>
+      this.getAddUpperCaseSurfaceForm(upperCaseSurfaceFormStore)
+    }
+
+    // the lowercase SF might have already had candidates, so get them
+    var candidateSurfaceForms = this.sfStore.lowercaseMap.get(surfaceText)
+
+    /*
+    * the first element of the candidates is actually the lowercase SF's count
+    * (a bit tricky, but it is defined by that in the spotlight's code)
+    * so here I just add a default value of one, in case it didn't have any candidate before
+    * */
+    if (candidateSurfaceForms==null){
+      candidateSurfaceForms = Array[Int](1)
+    }
+
+    print("Adding lower case\n")
+    print("\t sf:"+surfaceText+"\n")
+    print("\t candidateSize: "+candidatesSF.size +"\n")
+    print("\n")
+
+    // Concatenate the old candidates with the new ones
+    val allCandidatesSF = scala.collection.mutable.HashSet[Int]((candidateSurfaceForms.tail++listOfUppercaseSfIds):_*).toArray
+
+    // Find a  good value for the counts (based on the counts of the candidates surface form)
+    val quantiziedCandidateCounts = allCandidatesSF.map{ candidateSfId: Int => this.sfStore.totalCountForID(candidateSfId)}
+
+    val lowercaseCounts:Array[Int] = Array[Int](quantiziedCandidateCounts.map{
+      quantiziedCandidateCount:Short => this.getCountFromQuantiziedValue(quantiziedCandidateCount)}.min)
+
+    // update the lowercase store.
+    this.sfStore.lowercaseMap.put(surfaceText, lowercaseCounts++allCandidatesSF  )
+
+  }
+
+
+  /*
+   * Given a map having lowerCaseSF as keys and list of UppercaseSF as values
+   * it will update the internal lowerSurfaceForm maps.
+   * */
+  def addMapOfLowerCaseSurfaceForms(mapOfLowerCaseSfs:collection.mutable.HashMap[String, Array[String]]){
+    mapOfLowerCaseSfs.foreach{
+      case(lowerSf, candidatesUppercaseSF) =>
+        this.addLowerCaseSurfaceForm(lowerSf, candidatesUppercaseSF)
+    }
+  }
+
+    /*
+   * getAdd a SF with at least a letter uppercase
+   * */
+    def getAddUpperCaseSurfaceForm(surfaceText:String):Int ={
+      // look for existing surfaceForm
+      try{
+        var surfaceForm = this.sfStore.getSurfaceForm(surfaceText)
+        this.boostCountsIfNeeded(surfaceForm.id)
+        return surfaceForm.id
+      } catch{
+
+        case e: SurfaceFormNotFoundException => println("creating surface form...")
+      }
+      // create sf in case it cant be found
+      var surfaceFormId = this.addSurfaceForm(surfaceText)
+      this.boostCountsIfNeeded(surfaceFormId)
+
+      return surfaceFormId
+    }
+
 }

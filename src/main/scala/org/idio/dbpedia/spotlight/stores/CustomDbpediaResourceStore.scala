@@ -24,11 +24,14 @@ package org.idio.dbpedia.spotlight.stores
 import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemoryResourceStore }
 import java.io.{FileInputStream, File}
 import org.dbpedia.spotlight.exceptions.DBpediaResourceNotFoundException
+import org.idio.dbpedia.spotlight.stores.CustomQuantiziedCountStore
 
-class CustomDbpediaResourceStore(val pathtoFolder: String) {
+class CustomDbpediaResourceStore(val pathtoFolder: String,
+                                 val countStore: CustomQuantiziedCountStore) extends QuantiziedMemoryStore {
 
+  quantizedCountStore = countStore
   val resourceFile = new FileInputStream(new File(pathtoFolder, "res.mem"))
-  var resStore: MemoryResourceStore = MemoryStore.loadResourceStore(resourceFile)
+  var resStore: MemoryResourceStore = MemoryStore.loadResourceStore(resourceFile, quantizedCountStore.quantizedStore)
 
   /*
   * Creates the specified DbpediaResource in the internal Arrays
@@ -36,12 +39,19 @@ class CustomDbpediaResourceStore(val pathtoFolder: String) {
   private def addDbpediaURI(uri: String, support: Int, types: Array[String]) {
     //URI i.e: Click-through_rate
     //Types: ToDo: Currently we don't handle the types as they should be
-    this.resStore.supportForID = Array concat (resStore.supportForID, Array(support))
+
+    val quantizedCounts:Short= getQuantiziedCounts(support)
+
+    this.resStore.supportForID = Array concat (resStore.supportForID, Array(quantizedCounts))
     this.resStore.uriForID = Array concat (resStore.uriForID, Array(uri))
 
     var dbpediaTypesForResource: Array[Array[java.lang.Short]] = this.getTypesIds(types)
 
     this.resStore.typesForID = Array concat (resStore.typesForID, dbpediaTypesForResource)
+  }
+
+  def setSupport(resourceId:Int, support:Int){
+    this.resStore.supportForID(resourceId) = getQuantiziedCounts(support)
   }
 
   /*
@@ -81,7 +91,7 @@ class CustomDbpediaResourceStore(val pathtoFolder: String) {
   def printAllSupportValues() {
     this.resStore.idFromURI.keySet().toArray.foreach { uri =>
       val id = this.resStore.idFromURI.get(uri)
-      val support = this.resStore.supportForID(id)
+      val support = getCountFromQuantiziedValue(this.resStore.supportForID(id))
       println(uri + "\t" + support)
     }
   }

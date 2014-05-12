@@ -21,6 +21,8 @@
 package org.idio.dbpedia.spotlight.utils
 
 import org.idio.dbpedia.spotlight.CustomSpotlightModel
+import scala.collection.immutable
+
 /**
  * Allows to update a Model (Sf, DbpediaResources, ContextWords) from a file
  * The format of each line of the file is:
@@ -48,16 +50,36 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
 
     var customSpotlightModel: CustomSpotlightModel = new CustomSpotlightModel(this.pathToModelFolder)
 
+    //the SurfaceFormStore might internally contain lowercases already!
+    //This checks if some of the lowercases being added are in stringForID
+    val lowerCasesAlreadyInMainSFStore:immutable.HashMap[String,Int] =
+                                                customSpotlightModel.getLowerCasesSFInStore(lowerSfMap.keySet.toSet)
+
+
     // trying to add all set of SF's in a single go, so that the reverseMaps are just built once.
-    println("adding SFs")
-    customSpotlightModel.addSetOfSurfaceForms(setOfUpperCaseSF ++ setOfLowerCaseSF)
+    println("adding SFs to Main SF Store")
+    customSpotlightModel.addSetOfSurfaceForms(setOfUpperCaseSF ++ lowerCasesAlreadyInMainSFStore.keySet)
+
+    println("adding Lowercase SFs to lowercase store")
+    // adding lower case SF, rebuilding lowercase map
+    customSpotlightModel.addMapOfLowerCaseSurfaceForms(lowerSfMap)
 
     val contextFileWriter = new java.io.PrintWriter(this.pathToFile + "_just_context")
 
     parsedLines.foreach { parsedLine: Entry =>
 
-      // Gathering the UpperCaseSfs with the lower cases SF's in Store
-      val allSFBindsToTopics = parsedLine.upperCaseSurfaceForms ++ parsedLine.lowerCaseSF
+       //lowercases Sf existing in the main SurfaceForm Store need to add the topic as candidate
+       val lineLowerCaseSFsInMainStore = parsedLine.lowerCaseSF.map{ lowerCaseSurfaceForm:String =>
+        lowerCasesAlreadyInMainSFStore.get(lowerCaseSurfaceForm) match {
+          case Some(sfId) => Option[String](lowerCaseSurfaceForm)
+          case None => None
+         }
+       }.flatten
+
+       // Gathering the UpperCaseSfs with the lower cases SF's in Store
+       val allSFBindsToTopics = parsedLine.upperCaseSurfaceForms ++ lineLowerCaseSFsInMainStore
+
+
 
       allSFBindsToTopics.foreach { surfaceForm: String =>
         println("SF: " + surfaceForm)
@@ -68,7 +90,8 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
         // Updates the model connecting Sf-> Topic
         // Topic -> Context Words
         // Context words -> Context counts
-        val (surfaceFormId, dbpediaResourceId) = customSpotlightModel.addNew(surfaceForm,
+        val (surfaceFormId, dbpediaResourceId) = customSpotlightModel.addNew(
+          surfaceForm,
           parsedLine.dbpediaURI,
           parsedLine.types,
           parsedLine.contextWordsArray,
