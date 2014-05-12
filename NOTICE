@@ -1,0 +1,8 @@
+spotlight-model-editor is a Scala tool for tweaking dbpedia spotlight models.
+Copyright 2014 Idio
+
+Third Party Dependencies:
+
+Dbpedia Spotlight 0.6
+Apache Public License 2.0
+https://github.com/dbpedia-spotlight/dbpedia-spotlight
