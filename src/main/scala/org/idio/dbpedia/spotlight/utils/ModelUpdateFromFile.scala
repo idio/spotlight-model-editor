@@ -1,3 +1,23 @@
+/**
+ * Copyright 2014 Idio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @author David Przybilla david.przybilla@idioplatform.com
+ **/
+
 package org.idio.dbpedia.spotlight.utils
 
 import org.idio.dbpedia.spotlight.CustomSpotlightModel
@@ -5,7 +25,6 @@ import org.idio.dbpedia.spotlight.CustomSpotlightModel
  * Allows to update a Model (Sf, DbpediaResources, ContextWords) from a file
  * The format of each line of the file is:
  * dbpediaURI tab surfaceForm1|surfaceForm2... tab contextW1|contextW2.. tab contextW1Count|contextW2Count..
- * Created by dav009 on 03/01/2014.
  */
 class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
 

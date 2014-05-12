@@ -1,7 +1,15 @@
 # Spotlight Model's Editor
 
-Idio's Spotlight Model Editor allows you to create associations between word forms and 
-a DBPedia topic or concept, thus improving the coverage of the topic extraction tool we use.
+Idio's Spotlight Model Editor allows you to manually tweak dbpedia spotlight's models.
+Thus it allows you to manually:
+
+  - Add new Surface Forms
+  - Add new Topics
+  - Create associations between surface forms and dbpedia uris
+  - Remove associations between surface forms and dbpedia uris
+  - Make surface forms spottable
+  - Make surface forms no spottable
+  - Modify the context vectors
 
 In order to use the Model Editor, you will need:
 
@@ -382,3 +390,8 @@ The command would re-export the model, so you can just zip and upload the file t
 
 6. Write the changes you made into a changelog, so we can duplicate them from scratch if needed [need to decide where to store changes] .
 
+## License
+
+Copyright 2014 Idio
+
+Licensed under the Apache License, Version 2.0: [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
