@@ -6,3 +6,23 @@ Third Party Dependencies:
 Dbpedia Spotlight 0.6
 Apache Public License 2.0
 https://github.com/dbpedia-spotlight/dbpedia-spotlight
+
+Scala
+Scala License
+http://www.scala-lang.org/node/146
+
+Scopt
+MIT License
+https://github.com/scopt/scopt
+
+Mockito
+MIT License
+https://code.google.com/p/mockito/
+
+JUnit
+License: Eclipse Public License - v 1.0
+https://github.com/junit-team/junit
+
+Scala-Test
+Apache Software License, Version 2.0
+http://www.scalatest.org/
