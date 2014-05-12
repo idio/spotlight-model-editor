@@ -41,7 +41,7 @@ lazy val quantizedStore:MemoryQuantizedCountStore= MemoryStore.loadQuantizedCoun
                                                          new FileInputStream(new File(pathtoFolder, "quantized_counts.mem")))
 
 lazy val resStore:MemoryResourceStore = MemoryStore.loadResourceStore(
-                                                      new FileInputStream(new File(pathtoFolder, "res.mem")))
+                                                      new FileInputStream(new File(pathtoFolder, "res.mem")), quantizedStore)
 
 lazy val sfStore:MemorySurfaceFormStore = MemoryStore.loadSurfaceFormStore(
                                                       new FileInputStream(new File(pathtoFolder, "sf.mem")), quantizedStore)
