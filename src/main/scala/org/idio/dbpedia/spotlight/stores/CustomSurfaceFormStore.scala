@@ -33,6 +33,20 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
   var sfStore: MemorySurfaceFormStore = MemoryStore.loadSurfaceFormStore(sfMemFile, quantizedCountStore.quantizedStore)
 
   /*
+  *  Given a lowercase surface form it returns the list of string candidate surface forms
+  *  returns the counts of a sf, and the list of candidates surface forms
+  * */
+  def findInLowerCaseSurfaceForm(surfaceText: String): (Option[Int], Option[Array[String]]) = {
+    if (sfStore.lowercaseMap.containsKey(surfaceText)){
+        val candidates = sfStore.lowercaseMap.get(surfaceText)
+        val counts = candidates(0)
+       (Some(counts), Some(candidates.slice(1,candidates.size).map(sfStore.stringForID)))
+    }else{
+      (None, None)
+   }
+  }
+
+  /*
   * Updates the internal arrays for a new SurfaceForm
   * */
   private def addSF(surfaceText: String) {

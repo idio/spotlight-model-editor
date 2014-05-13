@@ -201,6 +201,23 @@ object Main {
         modelExplorer.checkEntitiesInFile()
       }
 
+      // looking if a sf is spottable by the fsa
+      case("fsa", "find") => {
+        val surfaceForms = commandLineConfig.argument.split('|')
+        surfaceForms.foreach{ surfaceForm:String =>
+               val spots:Array[String] = spotlightModelReader.getFSASpots(surfaceForm)
+               println("------------------------")
+               println(surfaceForm)
+               println("\tspots:")
+               spots.foreach{
+                   spot: String =>
+                     println("\t\t" + spot)
+               }
+               println("--------------------------")
+        }
+
+      }
+
     }
 
   }

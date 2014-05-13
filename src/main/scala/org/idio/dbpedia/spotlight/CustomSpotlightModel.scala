@@ -34,6 +34,7 @@ import org.dbpedia.spotlight.db.model.{Stemmer, TextTokenizer}
 import org.dbpedia.spotlight.db.tokenize.LanguageIndependentTokenizer
 import org.dbpedia.spotlight.db.stem.SnowballStemmer
 import org.dbpedia.spotlight.db.FSASpotter
+import org.idio.dbpedia.spotlight.utils.CustomTokenizer
 
 object Store extends Enumeration {
   type Store = Value
@@ -117,6 +118,18 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
   }
 
+  lazy val tokenizer:CustomTokenizer = new CustomTokenizer(customTokenTypeStore)
+
+  lazy val customFSAStore: CustomFSAStore =
+    try {
+      new CustomFSAStore(pathToFolder, customTokenTypeStore, tokenizer)
+    } catch {
+      case ex: FileNotFoundException => {
+        println(ex.getMessage)
+        null
+      }
+    }
+
   /*
   * Serializes the current model in the given folder
   * */
@@ -189,11 +202,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
         usedStores.contains(Store.SurfaceStore) ||
         usedStores.contains(Store.ContextStore) ){
             println("Creating FSA....")
-            val locale = new Locale("en", "US")
-            val stemmer: Stemmer = new SnowballStemmer("EnglishStemmer")
-            val tokenizer: TextTokenizer = new LanguageIndependentTokenizer(Set[String](), stemmer, locale, this.customTokenTypeStore.tokenStore)
             this.customSurfaceFormStore.sfStore.quantizedCountStore = this.customQuantizedCountStore.quantizedStore
-            val fsaDict = FSASpotter.buildDictionary(this.customSurfaceFormStore.sfStore, tokenizer)
+            val fsaDict = FSASpotter.buildDictionary(this.customSurfaceFormStore.sfStore, tokenizer.tokenizer)
             MemoryStore.dump(fsaDict, new File(propertyFolder, "fsa_dict.mem"))
       }
     }catch{
@@ -359,10 +369,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
   }
 
-  /*
-  * Prints the statistics for a surfaceForm and its candidates
-  * */
-  def getStatsForSurfaceForm(surfaceFormText: String) {
+  // Print the stats of a surface form in the Main SF Store
+  def getStatsForSFInUppercaseSf(surfaceFormText: String){
     val surfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText)
 
     println("Surface form id:" + surfaceForm.id)
@@ -388,6 +396,32 @@ class CustomSpotlightModel(val pathToFolder: String) {
       println("\t\t" + surfaceForm.annotatedCount)
       println("\tPrior")
       println("\t\t" + dbpediaResource.prior)
+    }
+  }
+
+  // Print the stats of a surface form in the lowercase surface form store
+  def getStatsForSFInLowercaseSf(surfaceFormText: String){
+    val (counts, candidatesUpperSF) = this.customSurfaceFormStore.findInLowerCaseSurfaceForm(surfaceFormText)
+    println("-------------------------------")
+    println(surfaceFormText)
+    println("\tcounts:" + counts.getOrElse(0))
+    println("\tSURFACE FORM IN LOWERCASE STORE")
+    println("")
+    println("candidates")
+    for (candidate <- candidatesUpperSF.getOrElse(Array[String]())) {
+      println("\t"+ candidate)
+    }
+  }
+
+  /*
+  * Prints the statistics for a surfaceForm and its candidates
+  * */
+  def getStatsForSurfaceForm(surfaceFormText: String) {
+
+    try{
+       getStatsForSFInUppercaseSf(surfaceFormText)
+    }catch{
+      case e: Exception => getStatsForSFInLowercaseSf(surfaceFormText)
     }
   }
 
@@ -538,6 +572,11 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   def getLowerCasesSFInStore(setOfLowerCasesSF:Set[String])={
     this.customSurfaceFormStore.findSetOfSurfaceFormsInMainStore(setOfLowerCasesSF)
+  }
+
+  // returns the spots returned by the fsa for the given sf
+  def getFSASpots(surfaceForm:String): Array[String] = {
+    return customFSAStore.getFSASpots(surfaceForm)
   }
 
 }
