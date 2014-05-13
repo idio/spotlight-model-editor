@@ -304,7 +304,7 @@ If you don't have enough ram you can update the `SF` and `DbpediaTopics` in one 
 4. rename `context2.mem` to `context.mem`, and rename every other file in the model folder to something else.( if this is not done, the stores will be loaded and they will consume all your ram) 
 5. calling the following will update the `context store`: 
 ```
-sh target/bin/model-editor file-update context path/to/en/model path_to_file/with/model/changes_just_context
+sh target/bin/model-editor file-update context-only path/to/en/model path_to_file/with/model/changes_just_context
 ```
 6. rename all files to their usual conventions and enjoy a fresh baked model
 

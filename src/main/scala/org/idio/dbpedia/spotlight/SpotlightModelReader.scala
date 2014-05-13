@@ -201,7 +201,7 @@ object Main {
       }
 
       // update context words from file
-      case("file-update", "only-context") => {
+      case("file-update", "context-only") => {
         val pathToFileWithAdditions =  commandLineConfig.argument
         val modelUpdater: ContextUpdateFromFile = new ContextUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
         modelUpdater.loadContextWords()

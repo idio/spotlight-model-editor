@@ -131,7 +131,7 @@ class CommandLineParser {
                           "file with associations and contexts",
                           "updates the stores adding all sf,associations, and contexts words defined in the file"),
 
-      getCommandSingleArg("only-context",
+      getCommandSingleArg("context-only",
                           "file with topics and contexts",
                           "updates the contexts of the topics augmenting their context with the given counts and words"),
 
