@@ -403,14 +403,19 @@ class CustomSpotlightModel(val pathToFolder: String) {
   def getStatsForSFInLowercaseSf(surfaceFormText: String){
     println("Looking in lowercase SF store.....")
     val (counts, candidatesUpperSF) = this.customSurfaceFormStore.findInLowerCaseSurfaceForm(surfaceFormText)
-    println("-------------------------------")
-    println(surfaceFormText)
-    println("\tcounts:" + counts.getOrElse(0))
-    println("")
-    println("candidates in uppercase SurfaceForm Store: ")
-    for (candidate <- candidatesUpperSF.getOrElse(Array[String]())) {
-      println("\t"+ candidate)
+    if(candidatesUpperSF.isDefined){
+        println("-------------------------------")
+        println(surfaceFormText)
+        println("\tcounts:" + counts.getOrElse(0))
+        println("")
+        println("candidates in uppercase SurfaceForm Store: ")
+        for (candidate <- candidatesUpperSF.getOrElse(Array[String]())) {
+          println("\t" + candidate)
+        }
+    }else{
+      println("NOT FOUND")
     }
+
   }
 
   /*
