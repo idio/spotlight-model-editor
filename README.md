@@ -157,7 +157,7 @@ All surface forms related actions are carried out using the `surfaceform` comman
  - `stats` : printing stats of a surface form
  - `candidates` : printing the list of candidates of a surface form
  - `make-spottable` : making surfaceforms spottable
- - `make-no-spottable` : making surfaceforms no spottable
+ - `make-unspottable` : making surfaceforms no spottable
  - `copy-candidates` : adding to a `surfaceformA` all candidates of a `surfaceFormB`
 
 #### stats of a surface form
@@ -191,7 +191,7 @@ would check the candidate topics for the surface form `evrimleri`
 
 ### Making a list of Surface Forms not Spottable
 - **command**: `surfaceform`
-- **subcommand**: `make-no-spottable`
+- **subcommand**: `make-unspottable`
 - **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
 - **arg2**: 
      - list of Surface Forms separated by `|`. i.e: `how\|How\|Hello\ World`
@@ -199,11 +199,11 @@ would check the candidate topics for the surface form `evrimleri`
 - **result**: Each `SF` won't be spottable anymore
 
 ```
-sh target/bin/model-editor surfaceform make-no-spottable path/to/model surfaceForm1\|surfaceForm2\|
+sh target/bin/model-editor surfaceform make-unspottable path/to/model surfaceForm1\|surfaceForm2\|
 ```
 
 ```
-sh target/bin/model-editor surfaceform make-no-spottable path/to/model pathTo/File/withSF -f
+sh target/bin/model-editor surfaceform make-unspottable path/to/model pathTo/File/withSF -f
 ```
 
 ### Copy Candidates

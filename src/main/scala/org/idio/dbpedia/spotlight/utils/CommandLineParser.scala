@@ -88,7 +88,7 @@ class CommandLineParser {
                                          "list of surfaceforms(piped separated) or file with one sf per line",
                                           "make a list of sf spottable"),
 
-      getCommandAcceptingFileAsSingleArg("make-no-spottable",
+      getCommandAcceptingFileAsSingleArg("make-unspottable",
                                          "list of surfaceforms(piped separated) or file with one sf per line",
                                          "make a list of sf not spottable"),
       getCommandSingleArg("stats",

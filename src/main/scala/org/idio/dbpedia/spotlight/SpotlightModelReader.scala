@@ -79,7 +79,7 @@ object Main {
 
       // makes a piped(|) separated list of SF not spottable.
       // this is done reducing its annotationProbability
-      case ("surfaceform", "make-no-spottable") => {
+      case ("surfaceform", "make-unspottable") => {
 
         val surfaceTexts:Array[String] = {
            if(!commandLineConfig.file){
