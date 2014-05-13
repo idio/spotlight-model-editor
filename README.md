@@ -280,6 +280,22 @@ example:
 sh target/bin/model-editor association remove /mnt/share/spotlight/en/model /path/to/file/file_with_associations
 ```
 
+### FSA
+
+#### Checking if a SF is spottable via FSA
+
+- **command**: `fsa`
+- **subcommand**: `find`
+- **arg1**: `pathToSpotlightModel/model`
+- **arg2**: piped separated list of surface forms
+- **result**: the FSA spots for each surface forms
+
+
+example:
+```
+sh target/bin/model-editor fsa find /mnt/share/spotlight/en/model Nintendo\ Wii\|barack
+```
+
 ### Updating Model From File
 When updating the model with lots of `SF`, `Topics` and `Context Words` best is to do it from a file.
 each line of the file should follow the format:
