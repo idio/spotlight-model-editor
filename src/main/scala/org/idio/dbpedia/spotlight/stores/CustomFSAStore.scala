@@ -27,13 +27,16 @@ import opennlp.tools.util.Span
 import org.dbpedia.spotlight.model.{Text, Token}
 import org.idio.dbpedia.spotlight.utils.CustomTokenizer
 
-class CustomFSAStore(val modelFolder: String, val customTokenStore: CustomTokenResourceStore, val customTokenizer: CustomTokenizer) {
+class CustomFSAStore(val modelFolder: String,
+                     val customTokenStore: CustomTokenResourceStore,
+                     val customTokenizer: CustomTokenizer) {
 
 
-  val fsaDictionary = MemoryStore.loadFSADictionary(new FileInputStream(new File(modelFolder, "fsa_dict.mem")))
+  val fsaDictionary = MemoryStore.loadFSADictionary(new FileInputStream(new File(new File(modelFolder).getParent,
+                                                    "fsa_dict.mem")))
 
 
-  private def transverse(sentence:Seq[Token]):  Array[Span] ={
+  private def transverse(sentence:Seq[Token]): Array[Span] ={
 
     var spans = Array[Span]()
     val ids = sentence.map(_.tokenType.id)
