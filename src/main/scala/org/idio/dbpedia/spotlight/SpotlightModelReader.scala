@@ -204,8 +204,8 @@ object Main {
       // looking if a sf is spottable by the fsa
       case("fsa", "find") => {
         val surfaceForms = commandLineConfig.argument.split('|')
-        surfaceForms.foreach{ surfaceForm:String =>
-               val spots:Array[String] = spotlightModelReader.getFSASpots(surfaceForm)
+        surfaceForms.foreach{ surfaceForm: String =>
+               val spots: Array[String] = spotlightModelReader.getFSASpots(surfaceForm)
                println("------------------------")
                println(surfaceForm)
                println("\tspots:")
