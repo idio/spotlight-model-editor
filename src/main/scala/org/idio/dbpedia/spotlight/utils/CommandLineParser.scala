@@ -140,7 +140,9 @@ class CommandLineParser {
                           "checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.")
     )
 
-    val exploreCommand =  getSimpleCommand("explore", "shows some surface forms and their statistics")
+    val exploreCommand =  getCommandSingleArg("explore",
+                                              "shows some surface forms and their statistics",
+                                              "number of surface forms to explore")
 
   }
 

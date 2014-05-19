@@ -174,9 +174,10 @@ object Main {
         spotlightModelReader.exportContextStore(pathToFile)
       }
 
-      // Output the properties for 40 Surface forms.
+      // Output the properties of a defined number of surface forms
       case("explore", "") =>{
-        spotlightModelReader.showSomeSurfaceForms()
+        val numberOfSurfaceForms = commandLineConfig.argument.toInt
+        spotlightModelReader.showSomeSurfaceForms(numberOfSurfaceForms)
       }
 
       // update model from file

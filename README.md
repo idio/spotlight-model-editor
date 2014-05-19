@@ -58,8 +58,10 @@ Turkish (located in the `tr` folder). Feel free to play with other languages, if
 4. call
 
 ```
-sh target/bin/model-editor explore path-to-model/en/model/
+sh target/bin/model-editor explore path-to-model/en/model/ 20
 ```
+
+it should print the stats for 20 surface forms
 
 
 Step 3 generates a jar with all the dependencies in `target` folder. Then it generates a script with default values for calling the jar. The script calls the jar with default values for the heap (15g). If you want to override this value you can modify: (i) the pom `appassembler-maven-plugin` settings in the pom, or (ii) call the jar directly `java -xmx.. -jar ...` followed by the commands shown in this readme.
@@ -91,11 +93,12 @@ java -Xmx15g -Xms15g -jar target/idio-spotlight-model-0.1.0-jar-with-dependencie
 
 - **command**: `explore`
 - **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
-- **result**: outputs 40 SurfaceForms with their respective candidates, priors and statistics
+- **arg2**: number of surface forms
+- **result**: outputs arg2 number of SurfaceForms with their respective candidates, priors and statistics
 
 example:
 ```
-sh target/bin/model-editor explore path-to-turkish/tr/model/
+sh target/bin/model-editor explore path-to-turkish/tr/model/ 40
 ```
 
 ### Topics

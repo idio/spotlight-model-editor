@@ -329,8 +329,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
   /*
   * Prints the first 40 surface forms and their respective candidates
   */
-  def showSomeSurfaceForms() {
-    val someSurfaceForms = this.customSurfaceFormStore.sfStore.iterateSurfaceForms.slice(0, 40)
+  def showSomeSurfaceForms(numberOfSurfaceForms: Int) {
+    val someSurfaceForms = this.customSurfaceFormStore.sfStore.iterateSurfaceForms.slice(0, numberOfSurfaceForms)
     for (surfaceForm <- someSurfaceForms) {
       println(surfaceForm.name + "-" + surfaceForm.id)
       for (candidate <- this.customCandidateMapStore.candidateMap.getCandidates(surfaceForm)) {
