@@ -38,7 +38,7 @@ object Main {
 
     parsingResult match {
       case Some(commandLineConfig) => runCommand(commandLineConfig)
-      case None => println("please enter a valid command...")
+      case None => println("Please enter a valid command...")
     }
   }
 
@@ -48,67 +48,54 @@ object Main {
     val subCommand: String = commandLineConfig.commands.lift(1).getOrElse("")
     val pathToModelFolder: String = commandLineConfig.pathToModelFolder
 
-    lazy val spotlightModelReader = Main.getSpotlightModel(commandLineConfig.pathToModelFolder)
+    lazy val spotlightModelReader = Main.getSpotlightModel(pathToModelFolder)
 
     (mainCommand, subCommand) match{
 
-      // makes a piped(|) separated list of SF spottable.
-      // this is done boosting its annotationProbability
-      case ("surfaceform", "make-spottable") => {
+      case("surfaceform", "make-spottable") | ("surfaceform", "make-unspottable") => {
 
         val surfaceTexts:Array[String] = {
           if(!commandLineConfig.file){
             commandLineConfig.argument.split('|')
           }else{
             val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
-            sourceFile.getLines().toArray.map{ line =>
-              val surfaceForm = line.trim()
-              surfaceForm
-            }
-
+            sourceFile.getLines().toArray.map{ _.trim()}
           }
         }
 
-        surfaceTexts.foreach{ surfaceForm:String =>
-          println("making  spottable:"+ surfaceForm)
+        subCommand match {
+
+            // Force a list of surface forms to be spottable
+            case "make-spottable" => {
+              surfaceTexts.foreach{ surfaceForm:String =>
+                println("Making  spottable:"+ surfaceForm)
+                spotlightModelReader.makeSFSpottable(surfaceForm)
+              }
+            }
+
+            // Lower the prob of a list of surfaceforms
+            case "make-unspottable" => {
+              surfaceTexts.foreach{ surfaceForm:String =>
+                println("Making unspottable:"+ surfaceForm)
+                spotlightModelReader.makeSFNotSpottable(surfaceForm)
+              }
+            }
+
         }
-        surfaceTexts.foreach(spotlightModelReader.makeSFSpottable)
-        println("exporting new model.....")
+
+        println("Exporting new model.....")
         spotlightModelReader.exportModels(pathToModelFolder)
       }
 
-      // makes a piped(|) separated list of SF not spottable.
-      // this is done reducing its annotationProbability
-      case ("surfaceform", "make-unspottable") => {
-
-        val surfaceTexts:Array[String] = {
-           if(!commandLineConfig.file){
-             commandLineConfig.argument.split('|')
-           }else{
-             val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
-             sourceFile.getLines().toArray.map{ line =>
-               val surfaceForm = line.trim()
-               surfaceForm
-             }
-           }
-        }
-
-        surfaceTexts.foreach{ surfaceForm:String =>
-          println("making not spottable:"+ surfaceForm)
-        }
-        surfaceTexts.foreach(spotlightModelReader.makeSFNotSpottable)
-        println("exporting new model.....")
-        spotlightModelReader.exportModels(pathToModelFolder)
-      }
-
-      // show statistics about a sf
+      // Show statistics about a sf
       case ("surfaceform", "stats") => {
         val surfaceText = commandLineConfig.argument
-        println("getting statistics for surfaceText.....")
+        println("Getting statistics for surfaceText.....")
         spotlightModelReader.getStatsForSurfaceForm(surfaceText)
       }
 
-      // shows the candidates of a surface form
+
+      // Show the candidates of a surface form
       case ("surfaceform", "candidates") => {
         val surfaceForm: String = commandLineConfig.argument
         val topicUris = spotlightModelReader.getCandidates(surfaceForm)
@@ -116,33 +103,32 @@ object Main {
         topicUris.foreach({ topicUri: String => println("\t" + topicUri) })
       }
 
-      // copies the candidates of a sf to another sf
+      // Copy the candidates of a SF to another Sf
       case ("surfaceform", "copy-candidates") => {
         val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
         sourceFile.getLines().foreach{ line =>
-          val Array(sourceSurfaceForm, destinySurfaceForm) = line.trim().split("\t")
-          spotlightModelReader.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
+          val Array(sourceSurfaceForm, destinationSurfaceForm) = line.trim().split("\t")
+          spotlightModelReader.copyCandidates(sourceSurfaceForm, destinationSurfaceForm)
         }
-        println("exporting new model.....")
+        println("Exporting new model.....")
         spotlightModelReader.exportModels(pathToModelFolder)
       }
 
       /*
       * Removes all the context words and context counts of a dbepdia topic
-      * and sets the context words and cotnext counts specified in the command line
+      * and sets the context words and context counts specified in the command line
       * */
       case("topic", "clean-set-context") => {
 
         val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
         sourceFile.getLines().toArray.foreach{ line =>
           val Array(dbpediaURI, contextWords, contextCounts) = line.trim().split("\t")
-          println("context words for.." + dbpediaURI + " will be deleted")
-          println("context words for.." + dbpediaURI + " will be set as given in input")
+          println("Context words for.." + dbpediaURI + " will be deleted and set as given in input")
           val integerContextCounts = contextCounts.trim().split('|').map(_.toInt)
           spotlightModelReader.replaceAllContext(dbpediaURI, contextWords.trim().split('|'), integerContextCounts)
         }
 
-        println("exporting new model.....")
+        println("Exporting new model.....")
         spotlightModelReader.exportModels(pathToModelFolder)
       }
 
@@ -152,7 +138,7 @@ object Main {
         dbpediaURIS.foreach(spotlightModelReader.prettyPrintContext)
       }
 
-      // checks whether a dbpedia URI exists or not
+      // Check whether a dbpedia URI exists or not
       case("topic", "search") => {
         val dbpediaURI = commandLineConfig.argument
         val searchResult: Boolean = spotlightModelReader.searchForDBpediaResource(dbpediaURI)
@@ -164,7 +150,7 @@ object Main {
       }
 
 
-      //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
+      // Check existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
       case("association", "remove") => {
 
         val pathToFileWithSFTopicPairs = commandLineConfig.argument
@@ -175,20 +161,20 @@ object Main {
           val dbpediaURI = splittedLine(0)
           val surfaceFormText = splittedLine(1)
           spotlightModelReader.removeAssociation(surfaceFormText, dbpediaURI)
-          println("removed association: " + dbpediaURI + " -- " + surfaceFormText)
+          println("Removed association: " + dbpediaURI + " -- " + surfaceFormText)
         }
-        println("exporting new model.....")
+        println("Exporting new model.....")
         spotlightModelReader.exportModels(pathToModelFolder)
       }
 
-      // exports context to a file
+      // Export context to a file
       case("context", "export") =>{
-        println("exporting contexts.....")
+        println("Exporting contexts.....")
         val pathToFile = commandLineConfig.argument
         spotlightModelReader.exportContextStore(pathToFile)
       }
 
-      // outputs the properties for 40 Surface forms.
+      // Output the properties for 40 Surface forms.
       case("explore", "") =>{
         spotlightModelReader.showSomeSurfaceForms()
       }
@@ -200,14 +186,14 @@ object Main {
         modelUpdater.loadNewEntriesFromFile()
       }
 
-      // update context words from file
+      // Update context words from file
       case("file-update", "context-only") => {
         val pathToFileWithAdditions =  commandLineConfig.argument
         val modelUpdater: ContextUpdateFromFile = new ContextUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
         modelUpdater.loadContextWords()
       }
 
-      //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
+      // Check the existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
       case("file-update", "check") => {
         val pathToFileWithResources = commandLineConfig.argument
         val modelExplorer: ModelExplorerFromFile = new ModelExplorerFromFile(pathToModelFolder, pathToFileWithResources)
@@ -218,8 +204,4 @@ object Main {
 
   }
 
-
-
-
   }
-
