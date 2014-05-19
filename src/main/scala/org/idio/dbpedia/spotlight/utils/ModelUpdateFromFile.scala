@@ -36,7 +36,7 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
   def loadNewEntriesFromFile() {
 
     val fileParser = new ModelFileParser(this.pathToFile)
-    println("Parsing INPUT-FILE")
+    println("Parsing " + this.pathToFile )
 
     val (setOfUpperCaseSF,
          setOfLowerCaseSF,
@@ -44,7 +44,7 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
          lowerSfMap,
          parsedLines, setOfContextWords) = fileParser.parseFile()
 
-    println("Finished parsing INPUT-FILE")
+    println("Finished parsing .." + this.pathToFile)
 
     var customSpotlightModel: CustomSpotlightModel = new CustomSpotlightModel(this.pathToModelFolder)
 
@@ -66,7 +66,7 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
         println("Context: " + parsedLine.contextWordsArray.mkString(" "))
 
         // Updates the model connecting Sf-> Topic
-        // Topic -> Contxt Words
+        // Topic -> Context Words
         // Context words -> Context counts
         val (surfaceFormId, dbpediaResourceId) = customSpotlightModel.addNew(surfaceForm,
           parsedLine.dbpediaURI,

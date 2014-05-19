@@ -70,9 +70,11 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     }
 
     try {
+      // checking if the surfaceForm actually has a candidates array already
       this.candidateMap.candidates(surfaceFormID).size
     } catch {
       case e: Exception => {
+        // creating the candidate array in case the sf did not have one before
 
         println("\tcreating candidate map array for " + surfaceFormID)
 

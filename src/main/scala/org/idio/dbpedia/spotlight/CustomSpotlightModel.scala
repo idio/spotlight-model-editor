@@ -166,6 +166,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
     // create or get the surfaceForm
     val surfaceFormID: Int = this.customSurfaceFormStore.getAddSurfaceForm(surfaceFormText)
     this.customSurfaceFormStore.boostCountsIfNeeded(surfaceFormID)
+    // These default values are related to the default values for support filters for the annotation endpoint
     var defaultSupportForDbpediaResource: Int = 11
     val defaultSupportForCandidate: Int = 30
 
@@ -174,14 +175,14 @@ class CustomSpotlightModel(val pathToFolder: String) {
     // calculate the default support value based on the current support for the candidates for the given SF
     try {
       val candidates: Array[Int] = this.customCandidateMapStore.candidateMap.candidates(surfaceFormID)
-      var avgSupport: Double = 0.0
+      var sumSupport: Double = 0.0
       for (candidate <- candidates) {
         val dbpediaResource = this.customDbpediaResourceStore.resStore.getResource(candidate)
-        avgSupport = avgSupport + dbpediaResource.support
+        sumSupport = sumSupport + dbpediaResource.support
       }
-      val calculatedSupport = (avgSupport / candidates.length).toInt
-      if (calculatedSupport > defaultSupportForDbpediaResource) {
-        defaultSupportForDbpediaResource = calculatedSupport
+      val avgSupport = (sumSupport / candidates.length).toInt
+      if (avgSupport > defaultSupportForDbpediaResource) {
+        defaultSupportForDbpediaResource = avgSupport
       }
 
       avgSupportCandidate = math.max(defaultSupportForCandidate, this.customCandidateMapStore.getAVGSupportForSF(surfaceFormID)) + 10
@@ -244,7 +245,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   /*
   * Removes all the context words and context counts of a dbepdia topic
-  * and sets the context words and cotnext counts specified in the command line.
+  * and sets the context words and context counts specified in the command line.
   *
   * */
   def replaceAllContext(dbpediaURI: String, contextWords: Array[String], contextCounts: Array[Int]) {
@@ -289,7 +290,6 @@ class CustomSpotlightModel(val pathToFolder: String) {
     var counts: Array[Int] = this.customContextStore.contextStore.counts(dbpediaResourceID)
     println("Contexts for " + dbpediaResourceURI + " Id:" + dbpediaResourceID)
     for (i <- 0 to tokens.size - 1) {
-      this.customTokenTypeStore.tokenStore.idFromToken
       println("\t" + this.customTokenTypeStore.tokenStore.getTokenTypeByID(tokens(i)) + "--" + counts(i))
     }
   }
@@ -300,13 +300,13 @@ class CustomSpotlightModel(val pathToFolder: String) {
   def getStatsForSurfaceForm(surfaceFormText: String) {
     val surfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText)
 
-    println("surface form id:" + surfaceForm.id)
+    println("Surface form id:" + surfaceForm.id)
     println("")
-    println("annotated count of SF:")
+    println("Annotated count of SF:")
     println("\t" + surfaceForm.annotatedCount)
-    println("total counts of SF:")
+    println("Total counts of SF:")
     println("\t" + surfaceForm.totalCount)
-    println("annotation probability")
+    println("Annotation probability")
     println("\t" + surfaceForm.annotationProbability)
 
     val candidates: Set[Candidate] = this.customCandidateMapStore.candidateMap.getCandidates(surfaceForm)
@@ -316,12 +316,12 @@ class CustomSpotlightModel(val pathToFolder: String) {
       println("---------------" + candidate + "---------------------")
       val dbpediaResource = candidate.resource
       println(dbpediaResource.getFullUri)
-      println("\tid:" + candidate)
-      println("\tsupport")
+      println("\tId:" + candidate)
+      println("\tSupport")
       println("\t\t" + dbpediaResource.support)
-      println("\tannotated_count")
+      println("\tAnnotated_count")
       println("\t\t" + surfaceForm.annotatedCount)
-      println("\tprior")
+      println("\tPrior")
       println("\t\t" + dbpediaResource.prior)
     }
   }
@@ -349,7 +349,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
   }
 
   /*
-  *  Makes a SF not spottable by reducing its annotationProbability to 0.1
+  *  Makes a SF unspottable by reducing its annotationProbability to 0.1
   * */
   def makeSFNotSpottable(surfaceText: String) {
     if (!surfaceText.contains(" "))
@@ -359,7 +359,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
   }
 
   /*
-*  Makes a SF  spottable by reducing its annotationProbability to 0.1
+*  Makes a SF spottable by reducing its annotationProbability to 0.1
 * */
   def makeSFSpottable(surfaceText: String) {
     this.customSurfaceFormStore.boostCountsIfNeededByString(surfaceText)
@@ -384,9 +384,9 @@ class CustomSpotlightModel(val pathToFolder: String) {
   def copyCandidates(surfaceTextSource: String, surfaceTextDestination: String) {
 
     val sourceSurfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceTextSource)
-    val destinySurfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceTextDestination)
+    val destinationSurfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceTextDestination)
 
-    this.customCandidateMapStore.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
+    this.customCandidateMapStore.copyCandidates(sourceSurfaceForm, destinationSurfaceForm)
 
   }
 
@@ -402,17 +402,17 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
     } catch {
       case e: Exception => {
-        println("\t given dbpediaURI or SF: " + dbpediaURI + " , " + surfaceFormText + " could not be found")
+        println("\t Given dbpediaURI or SF: " + dbpediaURI + " , " + surfaceFormText + " could not be found")
       }
       case e: ArrayIndexOutOfBoundsException => {
-        println("\t no association between " + surfaceFormText + " and " + dbpediaURI + " existed before")
+        println("\t No association between " + surfaceFormText + " and " + dbpediaURI + " existed before")
       }
     }
 
   }
 
   /**
-   *  given a SF returns the list of candidate Topics
+   *  Given a SF return the list of candidate Topics
    */
   def getCandidates(surfaceFormText: String): Set[String] = {
     val surfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText)
@@ -425,7 +425,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   /*
   * Adds a set of tokens to the token type store.
-  * It only generte reverse look ups once.
+  * It only generates reverse look ups once.
   * */
   def addSetOfTokens(contextWords: scala.collection.Set[String]) {
     val stemmedContextWords: scala.collection.Set[String] = contextWords.map { contextword: String =>
@@ -456,7 +456,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
       } catch {
         case e: Exception => {
-          println("\t not found context for" + dbpediaTopicID)
+          println("\t Not Context found for" + dbpediaTopicID)
         }
       }
     }

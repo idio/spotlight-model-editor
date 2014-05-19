@@ -35,7 +35,7 @@ class CustomDbpediaResourceStore(val pathtoFolder: String) {
   * */
   private def addDbpediaURI(uri: String, support: Int, types: Array[String]) {
     //URI i.e: Click-through_rate
-    //Types: ??
+    //Types: ToDo: Currently we don't handle the types as they should be
     this.resStore.supportForID = Array concat (resStore.supportForID, Array(support))
     this.resStore.uriForID = Array concat (resStore.uriForID, Array(uri))
 
@@ -64,7 +64,7 @@ class CustomDbpediaResourceStore(val pathtoFolder: String) {
   }
 
   /*
-  * Adds a new Dbpedia Resource to teh store, and rebuilds the indexes.
+  * Adds a new Dbpedia Resource to the store, and rebuilds the indexes.
   * It does NOT check previous existance
   * */
   def addDbpediaResource(uri: String, support: Int, types: Array[String]): Int = {

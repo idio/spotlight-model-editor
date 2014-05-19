@@ -119,9 +119,9 @@ class ModelFileParser(pathToFile: String) {
           val currentBindForLowerCaseSF = lowerCasesMap.getOrElse(lowercaseSf, Array[String]())
           lowerCasesMap.put(lowercaseSf, HashSet[String]((currentBindForLowerCaseSF ++ setOfUpperCaseSF): _*).toArray)
           if (lowerCasesMap.get(lowercaseSf).get.size < 1) {
-            println("warning...this SF won't be able to be matched to an Uppercase SF")
+            println("Warning...this SF won't be able to be matched to an Uppercase SF")
             println("\t\"" + lowercaseSf + "\"")
-            println("\tsize:" + lowerCasesMap.get(lowercaseSf).size)
+            println("\tSize:" + lowerCasesMap.get(lowercaseSf).size)
           }
         }
     }
