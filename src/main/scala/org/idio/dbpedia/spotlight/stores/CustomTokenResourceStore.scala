@@ -117,12 +117,8 @@ class CustomTokenResourceStore(val pathtoFolder: String, stemmerLanguage: String
     (contextWords, contextCounts).zipped foreach { (word, counts) =>
       {
         val stemmedWord: String = this.stemToken(word)
-        var currentCount = 0
-        if (contextTokenMap.contains(stemmedWord)) {
-          currentCount = contextTokenMap.get(stemmedWord).get
-        }
+        val currentCount = contextTokenMap.getOrElse(stemmedWord, 0)
         contextTokenMap.put(stemmedWord, currentCount + counts)
-
       }
     }
     return contextTokenMap
