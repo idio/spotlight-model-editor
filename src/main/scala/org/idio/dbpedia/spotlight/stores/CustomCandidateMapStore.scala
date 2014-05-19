@@ -25,6 +25,7 @@ import org.dbpedia.spotlight.db.memory.{ MemoryResourceStore, MemoryStore, Memor
 import java.io.{ File, FileInputStream }
 import Array.concat
 import org.dbpedia.spotlight.model.SurfaceForm
+import org.idio.dbpedia.spotlight.utils.ArrayUtils
 
 class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
                               val pathtoFolder: String,
@@ -159,8 +160,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   * */
   def removeAssociation(surfaceFormID: Int, candidateID: Int) {
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
-    this.candidateMap.candidates(surfaceFormID) = this.dropIndex(this.candidateMap.candidates(surfaceFormID), indexOfCandidateInArray)
-    this.candidateMap.candidateCounts(surfaceFormID) = this.dropIndex(this.candidateMap.candidateCounts(surfaceFormID), indexOfCandidateInArray)
+    this.candidateMap.candidates(surfaceFormID) = ArrayUtils.dropIndex(this.candidateMap.candidates(surfaceFormID), indexOfCandidateInArray)
+    this.candidateMap.candidateCounts(surfaceFormID) = ArrayUtils.dropIndex(this.candidateMap.candidateCounts(surfaceFormID), indexOfCandidateInArray)
   }
 
   /*
@@ -194,10 +195,6 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
 
   }
 
-  /**
-   *  Drops the 'i'th element of a list
-   */
-  def dropIndex(xs: Array[Int], n: Int): Array[Int] = {
-    return concat(xs.slice(0, n), xs.slice(n + 1, xs.length))
-  }
+
+
 }

@@ -22,6 +22,7 @@ package org.idio.dbpedia.spotlight.stores
 
 import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemoryContextStore, MemoryTokenTypeStore }
 import java.io.{ File, FileInputStream }
+import org.idio.dbpedia.spotlight.utils.ArrayUtils
 
 
 class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTypeStore) {
@@ -73,11 +74,8 @@ class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTy
 
     val indexOftokenId = this.contextStore.tokens(dbpediaResourceID).indexWhere { case (x) => x == tokenID }
     //remove from the tokens array
-    this.contextStore.tokens(dbpediaResourceID) = this.contextStore.tokens(dbpediaResourceID).take(indexOftokenId) ++ this.contextStore.tokens(dbpediaResourceID).drop(indexOftokenId + 1)
-
-    //remove from counts array
-    this.contextStore.counts(dbpediaResourceID) = this.contextStore.counts(dbpediaResourceID).take(indexOftokenId) ++ this.contextStore.counts(dbpediaResourceID).drop(indexOftokenId + 1)
-
+    this.contextStore.tokens(dbpediaResourceID) = ArrayUtils.dropIndex(this.contextStore.tokens(dbpediaResourceID), indexOftokenId)
+    this.contextStore.counts(dbpediaResourceID) = ArrayUtils.dropIndex(this.contextStore.counts(dbpediaResourceID), indexOftokenId)
   }
 
 }
