@@ -1,10 +1,26 @@
 /**
- * Created by dav009 on 24/04/2014.
+ * Copyright 2014 Idio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+/**
+ * @author David Przybilla david.przybilla@idioplatform.com
+ **/
 
 import org.dbpedia.spotlight.db.memory.{MemoryResourceStore, MemoryCandidateMapStore}
 import org.dbpedia.spotlight.model.SurfaceForm
-import org.idio.dbpedia.spotlight.IdioCandidateMapStore
+import org.idio.dbpedia.spotlight.stores.CustomCandidateMapStore
 import org.scalatest.mock.MockitoSugar.mock
 import org.junit.Test
 import org.junit.Assert._
@@ -26,15 +42,15 @@ class CandidateStoreTest {
     val destinySurfaceForm = new  SurfaceForm("sf2", 1, 50, 200)
 
 
-    var idioCandidateMapStore:IdioCandidateMapStore = new IdioCandidateMapStore(candidateMap, "", resStore)
+    var customCandidateMapStore:CustomCandidateMapStore = new CustomCandidateMapStore(candidateMap, "", resStore)
 
     // test copy candidates
-    idioCandidateMapStore.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
+    customCandidateMapStore.copyCandidates(sourceSurfaceForm, destinySurfaceForm)
 
     val expectedCandidateCounts = collection.immutable.Map[Int, Int](1->50, 2->1, 3->100, 5->55)
 
     //check the candidate topics set
-    val candidateTopicsForDestinySurfaceForm = idioCandidateMapStore.candidateMap.candidates(1)
+    val candidateTopicsForDestinySurfaceForm = customCandidateMapStore.candidateMap.candidates(1)
     assertTrue(collection.immutable.Set[Int](candidateTopicsForDestinySurfaceForm:_*)==expectedCandidateCounts.keySet)
 
     //check the candidate counts

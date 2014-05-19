@@ -1,180 +1,208 @@
-package org.idio.dbpedia.spotlight
+/**
+ * Copyright 2014 Idio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
- * Created by dav009 on 19/12/2013.
- */
-import org.dbpedia.spotlight.db.memory.{MemoryResourceStore,MemoryStore,MemoryCandidateMapStore,MemorySurfaceFormStore}
-import org.dbpedia.spotlight.exceptions.SurfaceFormNotFoundException
-import org.idio.dbpedia.spotlight.utils.{ContextUpdateFromFile, ModelUpdateFromFile, ModelExplorerFromFile}
+ * @author David Przybilla david.przybilla@idioplatform.com
+ **/
+
+package org.idio.dbpedia.spotlight
+
+
+import org.idio.dbpedia.spotlight.utils._
 import org.dbpedia.spotlight.db.memory.MemoryOntologyTypeStore;
-import java.io.{FileInputStream, File}
 
+object Main {
 
-
-object Main{
-
-  def getSpotlightModel(pathToSpotlightModelFolder:String):IdioSpotlightModel = {
-    var spotlightModelReader = new IdioSpotlightModel(pathToSpotlightModelFolder)
+  def getSpotlightModel(pathToSpotlightModelFolder: String): CustomSpotlightModel = {
+    var spotlightModelReader = new CustomSpotlightModel(pathToSpotlightModelFolder)
     return spotlightModelReader
   }
 
-  def main(args:Array[String]){
-    val action:String= args(0)
-    val pathToModelFolder = args(1)
+  def main(args: Array[String]) {
 
-    if (!action.contains("file")){
-      // reads the dbpedia models
-      println("reading models...")
-      val spotlightModelReader =  Main.getSpotlightModel(pathToModelFolder)
+    val commandLineParser = new CommandLineParser()
+    val parsingResult:Option[CommandLineConfig] = commandLineParser.parse(args)
 
-      action match{
+    parsingResult match {
+      case Some(commandLineConfig) => runCommand(commandLineConfig)
+      case None => println("Please enter a valid command...")
+    }
+  }
 
-        case "export-context"=>{
-          println("exporting contexts.....")
-          val pathToFile = args(2)
-          spotlightModelReader.exportContextStore(pathToFile)
-        }
+  def runCommand(commandLineConfig:CommandLineConfig){
 
-        case "export-support" =>{
-          spotlightModelReader.idioDbpediaResourceStore.printAllSupportValues()
-        }
+    val mainCommand: String = commandLineConfig.commands(0)
+    val subCommand: String = commandLineConfig.commands.lift(1).getOrElse("")
+    val pathToModelFolder: String = commandLineConfig.pathToModelFolder
 
-        // prints all types in type store
-        case "show-resource-types" =>{
-          val typeStore = spotlightModelReader.idioDbpediaResourceStore.resStore.ontologyTypeStore.asInstanceOf[MemoryOntologyTypeStore]
-          for(ontologyType<-typeStore.idFromName.keySet().toArray){
-            println(ontologyType)
-          }
-        }
+    lazy val spotlightModelReader = Main.getSpotlightModel(pathToModelFolder)
 
-        // get the statistics for a surface form
-        case "check" =>{
-          val surfaceText = args(2)
-          println("getting statistics for surfaceText.....")
-          spotlightModelReader.getStatsForSurfaceForm(surfaceText)
-        }
+    (mainCommand, subCommand) match{
 
-        //show context words
-        case "show-context" =>{
-          val dbpediaURIS = args(2).split('|')
-          for (dbpediaURI<-dbpediaURIS){
-            spotlightModelReader.prettyPrintContext(dbpediaURI)
-          }
-        }
+      case("surfaceform", "make-spottable") | ("surfaceform", "make-unspottable") => {
 
-        // makes a piped(|) separated list of SF not spottable.
-        // this is done reducing its annotationProbability
-        case "make-sf-not-spottable"=>{
-          val surfaceTexts = args(2).split('|')
-          for (surfaceText<-surfaceTexts){
-            spotlightModelReader.makeSFNotSpottable(surfaceText)
-          }
-          spotlightModelReader.exportModels(pathToModelFolder)
-        }
-
-        // makes a piped(|) separated list of SF spottable.
-        // this is done boosting its annotationProbability
-        case "make-sf-spottable"=>{
-          val surfaceTexts = args(2).split('|')
-          for (surfaceText<-surfaceTexts){
-            spotlightModelReader.makeSFSpottable(surfaceText)
-          }
-          spotlightModelReader.exportModels(pathToModelFolder)
-        }
-
-
-        /*
-        * Removes all the context words and context counts of a dbepdia topic
-        * and sets the context words and cotnext counts specified in the command line
-        * */
-        case "clean-set-context" =>{
-          var dbpediaURI = args(2)
-          var contextWords = args(3).split('|')
-          var contextCounts =args(4).split('|') map(_.toInt)
-          println("context words for.."+dbpediaURI+" will be deleted")
-          println("context words for.."+dbpediaURI+" will be set as given in input")
-          spotlightModelReader.replaceAllContext(dbpediaURI, contextWords, contextCounts)
-          println("exporting new model.....")
-          spotlightModelReader.exportModels(pathToModelFolder)
-        }
-
-        // checks whether a dbpedia URI exists or not
-        case "search" =>{
-          val dbpediaURI = args(2)
-          println("getting statistics for surfaceText.....")
-          val searchResult:Boolean = spotlightModelReader.searchForDBpediaResource(dbpediaURI)
-          if (searchResult){
-            println(dbpediaURI+" exists")
+        val surfaceTexts:Array[String] = {
+          if(!commandLineConfig.file){
+            commandLineConfig.argument.split('|')
           }else{
-            println(dbpediaURI+" NOT FOUND")
+            val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
+            sourceFile.getLines().toArray.map{ _.trim()}
           }
         }
 
-        /*
-          takes all topic candidates for the surfaceForm1
-          and associate them to surfaceForm2.
-          Assumes that both SurfaceForms exists in the model
-        */
-        case "copy-candidates" =>{
-          val surfaceFormTextSource = args(2)
-          val surfaceFormTextDestiny = args(3)
+        subCommand match {
 
-          spotlightModelReader.copyCandidates(surfaceFormTextSource, surfaceFormTextDestiny)
-          spotlightModelReader.exportModels(pathToModelFolder)
+            // Force a list of surface forms to be spottable
+            case "make-spottable" => {
+              surfaceTexts.foreach{ surfaceForm:String =>
+                println("Making  spottable:"+ surfaceForm)
+                spotlightModelReader.makeSFSpottable(surfaceForm)
+              }
+            }
+
+            // Lower the prob of a list of surfaceforms
+            case "make-unspottable" => {
+              surfaceTexts.foreach{ surfaceForm:String =>
+                println("Making unspottable:"+ surfaceForm)
+                spotlightModelReader.makeSFNotSpottable(surfaceForm)
+              }
+            }
+
         }
 
-        //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
-        case "remove-sf-topic-association" =>{
-          val pathToFileWithSFTopicPairs = args(2)
-          val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
+        println("Exporting new model.....")
+        spotlightModelReader.exportModels(pathToModelFolder)
+      }
 
-          for(line<-sourceFile.getLines()){
-            val splittedLine = line.trim().split("\t")
-            val dbpediaURI = splittedLine(0)
-            val surfaceFormText = splittedLine(1)
-            spotlightModelReader.removeAssociation(surfaceFormText, dbpediaURI)
-            println("removed association: "+dbpediaURI+" -- "+surfaceFormText)
-          }
-         spotlightModelReader.exportModels(pathToModelFolder)
+      // Show statistics about an sf
+      case ("surfaceform", "stats") => {
+        val surfaceText = commandLineConfig.argument
+        println("Getting statistics for surfaceText.....")
+        spotlightModelReader.getStatsForSurfaceForm(surfaceText)
+      }
+
+
+      // Show the candidates of a surface form
+      case ("surfaceform", "candidates") => {
+        val surfaceForm: String = commandLineConfig.argument
+        val topicUris = spotlightModelReader.getCandidates(surfaceForm)
+        println("Candidate Topics for SF: " + surfaceForm)
+        topicUris.foreach({ topicUri: String => println("\t" + topicUri) })
+      }
+
+      // Copy the candidates of an SF to another Sf
+      case ("surfaceform", "copy-candidates") => {
+        val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
+        sourceFile.getLines().foreach{ line =>
+          val Array(sourceSurfaceForm, destinationSurfaceForm) = line.trim().split("\t")
+          spotlightModelReader.copyCandidates(sourceSurfaceForm, destinationSurfaceForm)
+        }
+        println("Exporting new model.....")
+        spotlightModelReader.exportModels(pathToModelFolder)
+      }
+
+      /*
+      * Removes all the context words and context counts of a dbepdia topic
+      * and sets the context words and context counts specified in the command line
+      * */
+      case("topic", "clean-set-context") => {
+
+        val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
+        sourceFile.getLines().toArray.foreach{ line =>
+          val Array(dbpediaURI, contextWords, contextCounts) = line.trim().split("\t")
+          println("Context words for.." + dbpediaURI + " will be deleted and set as given in input")
+          val integerContextCounts = contextCounts.trim().split('|').map(_.toInt)
+          spotlightModelReader.replaceAllContext(dbpediaURI, contextWords.trim().split('|'), integerContextCounts)
         }
 
-        // outputs the properties for 40 Surface forms.
-        case "explore" =>{
-          spotlightModelReader.showSomeSurfaceForms()
+        println("Exporting new model.....")
+        spotlightModelReader.exportModels(pathToModelFolder)
+      }
+
+      //show context words
+      case("topic", "check-context") => {
+        val dbpediaURIS = commandLineConfig.argument.split('|')
+        dbpediaURIS.foreach(spotlightModelReader.prettyPrintContext)
+      }
+
+      // Check whether a dbpedia URI exists or not
+      case("topic", "search") => {
+        val dbpediaURI = commandLineConfig.argument
+        val searchResult: Boolean = spotlightModelReader.searchForDBpediaResource(dbpediaURI)
+        if (searchResult) {
+          println(dbpediaURI + " exists")
+        } else {
+          println(dbpediaURI + " NOT FOUND")
         }
       }
 
-    }else{
 
-        action match{
+      // Check existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
+      case("association", "remove") => {
 
-              // update model from file
-              case "file-update-sf-dbpedia" => {
-                val pathToFileWithAdditions = args(2)
-                val modelUpdater:ModelUpdateFromFile = new ModelUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
-                modelUpdater.loadNewEntriesFromFile()
-              }
+        val pathToFileWithSFTopicPairs = commandLineConfig.argument
+        val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
 
-              // update context words from file
-              case "file-update-context" =>{
-                val pathToFileWithAdditions = args(2)
-                val modelUpdater:ContextUpdateFromFile = new ContextUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
-                modelUpdater.loadContextWords()
-              }
-
-              //checks existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
-              case "file-check" =>{
-                val pathToFileWithResources = args(2)
-                val modelExplorer:ModelExplorerFromFile = new ModelExplorerFromFile(pathToModelFolder, pathToFileWithResources)
-                modelExplorer.checkEntitiesInFile()
-              }
-
-
-
-
+        sourceFile.getLines().foreach { line =>
+          val splitLine = line.trim().split("\t")
+          val dbpediaURI = splitLine(0)
+          val surfaceFormText = splitLine(1)
+          spotlightModelReader.removeAssociation(surfaceFormText, dbpediaURI)
+          println("Removed association: " + dbpediaURI + " -- " + surfaceFormText)
         }
+        println("Exporting new model.....")
+        spotlightModelReader.exportModels(pathToModelFolder)
+      }
+
+      // Export context to a file
+      case("context", "export") =>{
+        println("Exporting contexts.....")
+        val pathToFile = commandLineConfig.argument
+        spotlightModelReader.exportContextStore(pathToFile)
+      }
+
+      // Output the properties of a defined number of surface forms
+      case("explore", "") =>{
+        val numberOfSurfaceForms = commandLineConfig.argument.toInt
+        spotlightModelReader.showSomeSurfaceForms(numberOfSurfaceForms)
+      }
+
+      // update model from file
+      case("file-update", "all") => {
+        val pathToFileWithAdditions = commandLineConfig.argument
+        val modelUpdater: ModelUpdateFromFile = new ModelUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
+        modelUpdater.loadNewEntriesFromFile()
+      }
+
+      // Update context words from file
+      case("file-update", "context-only") => {
+        val pathToFileWithAdditions =  commandLineConfig.argument
+        val modelUpdater: ContextUpdateFromFile = new ContextUpdateFromFile(pathToModelFolder, pathToFileWithAdditions)
+        modelUpdater.loadContextWords()
+      }
+
+      // Check the existence of Dbpedia's Ids, SF, and links between SF's and Dbpedia's ids.
+      case("file-update", "check") => {
+        val pathToFileWithResources = commandLineConfig.argument
+        val modelExplorer: ModelExplorerFromFile = new ModelExplorerFromFile(pathToModelFolder, pathToFileWithResources)
+        modelExplorer.checkEntitiesInFile()
+      }
 
     }
 
   }
-}
+
+  }
