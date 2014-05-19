@@ -386,31 +386,6 @@ In order to use it:
 
 
 
-## Practical tips for updating a model
-
-Given that the models are quite big (2 GB compressed), downloading, modifying and uploading them would be very
- time consuming from your local machine. Plus, the operations require a lot of ram, so you better boot a dev instance, and do the changes from there.
- Here's a list of steps.
-
-1. Create the new instance:
-`knife ec2 server create -r "role[spotlight]" -I ami-6d3f9704 -G default -x ubuntu --node-name "dev-spotlight" --environment "development" -f m2.xlarge --availability-zone us-east-1d --secret-file path/to/secret/file`
-
-2. ssh into the new instance and install dependencies:
-`sudo apt-get install openjdk-6-jdk maven scala unzip`
-
-3. Clone the dbpedia model editor repo:
-`git clone git@github.com:idio/spotlight-model-editor.git`
-
-4. compile ```
-cd dbpedia-model-editor
-mvn package ```
-
-5. You can now use the model editor for a variety of tasks, for example, to remove SFs Topics associations stored in tab separated file, you can run (we assume the model is located in `/mnt/share/spotlight/`). 
-`sh target/bin/model-editor association remove-association /mnt/share/spotlight/en/model ~/remove_associations`
-The command would re-export the model, so you can just zip and upload the file to S3 to be used.
-
-6. Write the changes you made into a changelog, so we can duplicate them from scratch if needed [need to decide where to store changes] .
-
 ## License
 
 Copyright 2014 Idio
