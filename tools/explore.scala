@@ -27,29 +27,33 @@
 * once in the scala console type: :load pathToScript/explore.scala
 *
 * */
-:cp /usr/share/java/dbpedia-spotlight-0.6.jar
+:cp /usr/share/java/dbpedia-spotlight-0.7.jar
 import java.io.{File, FileInputStream}
 import org.dbpedia.spotlight.db.memory.{MemoryStore, MemoryContextStore, MemorySurfaceFormStore,
-                                        MemoryResourceStore, MemoryCandidateMapStore, MemoryTokenTypeStore}
+                                        MemoryResourceStore, MemoryCandidateMapStore, MemoryTokenTypeStore,
+                                        MemoryQuantizedCountStore}
 import org.dbpedia.spotlight.model.{Candidate, SurfaceForm, DBpediaResource}
  
 val pathtoFolder= "/mnt/share/spotlight/en/model"
 
 //Loading all the stores
+lazy val quantizedStore:MemoryQuantizedCountStore= MemoryStore.loadQuantizedCountStore(
+                                                         new FileInputStream(new File(pathtoFolder, "quantized_counts.mem")))
+
 lazy val resStore:MemoryResourceStore = MemoryStore.loadResourceStore(
-                                                      new FileInputStream(new File(pathtoFolder,"res.mem")))
+                                                      new FileInputStream(new File(pathtoFolder, "res.mem")), quantizedStore)
 
 lazy val sfStore:MemorySurfaceFormStore = MemoryStore.loadSurfaceFormStore(
-                                                      new FileInputStream(new File(pathtoFolder,"sf.mem")))
+                                                      new FileInputStream(new File(pathtoFolder, "sf.mem")), quantizedStore)
 
 lazy val candidateMap:MemoryCandidateMapStore = MemoryStore.loadCandidateMapStore(
-                                                    new FileInputStream(new File(pathtoFolder,"candmap.mem")),
-                                                    resStore)
+                                                    new FileInputStream(new File(pathtoFolder, "candmap.mem")),
+                                                    resStore, quantizedStore)
 
 // make sure you give enough heap if you are ever using any of these two following stores:
 lazy val tokenStore:MemoryTokenTypeStore = MemoryStore.loadTokenTypeStore(
-                                                    new FileInputStream(new File(pathtoFolder,"tokens.mem")))
+                                                    new FileInputStream(new File(pathtoFolder, "tokens.mem")))
 
 lazy val contextStore:MemoryContextStore = MemoryStore.loadContextStore(
-                                                    new FileInputStream(new File(pathtoFolder,"context.mem")),
-                                                    tokenStore)
+                                                    new FileInputStream(new File(pathtoFolder, "context.mem")),
+                                                    tokenStore, quantizedStore)

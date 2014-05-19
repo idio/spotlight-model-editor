@@ -24,16 +24,21 @@ import org.dbpedia.spotlight.model.{ Candidate, TokenType, OntologyType }
 import org.dbpedia.spotlight.db.memory.MemoryStore
 import java.io.File
 import java.io.{ FileNotFoundException, FileInputStream }
-import java.util.Properties
+import java.util.{Locale, Properties}
 import collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import java.io.PrintWriter
 import scala.collection.JavaConverters._
 import org.idio.dbpedia.spotlight.stores._
+import org.dbpedia.spotlight.db.model.{Stemmer, TextTokenizer}
+import org.dbpedia.spotlight.db.tokenize.LanguageIndependentTokenizer
+import org.dbpedia.spotlight.db.stem.SnowballStemmer
+import org.dbpedia.spotlight.db.FSASpotter
+import org.idio.dbpedia.spotlight.utils.CustomTokenizer
 
 object Store extends Enumeration {
   type Store = Value
-  val SurfaceStore, CandidateStore, ResourceStore, ContextStore, TokenStore = Value
+  val SurfaceStore, CandidateStore, ResourceStore, ContextStore, TokenStore, QuantiziedStore = Value
 }
 
 class CustomSpotlightModel(val pathToFolder: String) {
@@ -50,9 +55,21 @@ class CustomSpotlightModel(val pathToFolder: String) {
    Allowing to load only the files which are needed as opposed to the whole model.
   */
   //load the Stores
+
+  lazy val customQuantizedCountStore: CustomQuantiziedCountStore = try{
+    usedStores.add(Store.QuantiziedStore)
+    new CustomQuantiziedCountStore(pathToFolder)
+  }catch{
+    case ex: FileNotFoundException =>{
+      println(ex.getMessage)
+      null
+    }
+  }
+
+
   lazy val customDbpediaResourceStore: CustomDbpediaResourceStore = try {
     usedStores.add(Store.ResourceStore)
-    new CustomDbpediaResourceStore(pathToFolder)
+    new CustomDbpediaResourceStore(pathToFolder, customQuantizedCountStore)
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
@@ -62,7 +79,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   lazy val customCandidateMapStore: CustomCandidateMapStore = try {
     usedStores.add(Store.CandidateStore)
-    new CustomCandidateMapStore(pathToFolder, customDbpediaResourceStore.resStore)
+    new CustomCandidateMapStore(pathToFolder, customDbpediaResourceStore.resStore, customQuantizedCountStore)
   } catch {
     case ex: Exception => {
       println(ex.getMessage)
@@ -72,7 +89,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   lazy val customSurfaceFormStore: CustomSurfaceFormStore = try {
     usedStores.add(Store.SurfaceStore)
-    new CustomSurfaceFormStore(pathToFolder)
+    new CustomSurfaceFormStore(pathToFolder, customQuantizedCountStore)
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
@@ -93,7 +110,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
   lazy val customContextStore: CustomContextStore =
   try {
     usedStores.add(Store.ContextStore)
-    new CustomContextStore(pathToFolder, customTokenTypeStore.tokenStore)
+    new CustomContextStore(pathToFolder, customTokenTypeStore.tokenStore, customQuantizedCountStore)
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
@@ -101,11 +118,32 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
   }
 
+  lazy val tokenizer:CustomTokenizer = new CustomTokenizer(customTokenTypeStore)
+
+  lazy val customFSAStore: CustomFSAStore =
+    try {
+      new CustomFSAStore(pathToFolder, customTokenTypeStore, tokenizer)
+    } catch {
+      case ex: FileNotFoundException => {
+        println(ex.getMessage)
+        null
+      }
+    }
+
   /*
   * Serializes the current model in the given folder
   * */
   def exportModels(pathToFolder: String) {
     println("exporting models to.." + pathToFolder)
+
+    try{
+      if(usedStores.contains(Store.QuantiziedStore))
+         MemoryStore.dump(this.customQuantizedCountStore.quantizedStore, new File(pathToFolder,"quantized_counts.mem"))
+    }catch{
+      case ex: Exception =>{
+        println(ex.getMessage)
+      }
+    }
 
     try {
       if(usedStores.contains(Store.ResourceStore))
@@ -135,8 +173,13 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
 
     try {
-      if(usedStores.contains(Store.TokenStore))
+      if(usedStores.contains(Store.TokenStore) ||
+         usedStores.contains(Store.SurfaceStore) ||
+         usedStores.contains(Store.ContextStore) ){
+         this.customSurfaceFormStore.sfStore.quantizedCountStore = this.customQuantizedCountStore.quantizedStore
+         this.customTokenTypeStore.addAllTokensInSurfaceFormStore(this.customSurfaceFormStore.sfStore)
          MemoryStore.dump(this.customTokenTypeStore.tokenStore, new File(pathToFolder, "tokens.mem"))
+      }
     } catch {
       case ex: Exception => {
         println(ex.getMessage)
@@ -144,16 +187,41 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
 
     try {
-      if(usedStores.contains(Store.ContextStore))
+      if(usedStores.contains(Store.ContextStore)){
+         this.customContextStore.sortTokensInContextStore()
          MemoryStore.dump(this.customContextStore.contextStore, new File(pathToFolder, "context.mem"))
+      }
     } catch {
       case ex: Exception => {
         println(ex.getMessage)
       }
     }
 
+    try{
+      if(usedStores.contains(Store.TokenStore) ||
+        usedStores.contains(Store.SurfaceStore) ||
+        usedStores.contains(Store.ContextStore) ){
+            println("Creating FSA....")
+            this.customSurfaceFormStore.sfStore.quantizedCountStore = this.customQuantizedCountStore.quantizedStore
+            val fsaDict = FSASpotter.buildDictionary(this.customSurfaceFormStore.sfStore, tokenizer.tokenizer)
+            MemoryStore.dump(fsaDict, new File(propertyFolder, "fsa_dict.mem"))
+      }
+    }catch{
+      case ex: Exception =>{
+        println(ex.getMessage)
+      }
+    }
+
     println("finished exporting models to.." + pathToFolder)
 
+  }
+
+  def getQuantiziedCounts(count:Int):Short ={
+    return this.customQuantizedCountStore.quantizedStore.addCount(count)
+  }
+
+  def getCountFromQuantiziedValue(quantiziedValue:Short):Int ={
+    return this.customQuantizedCountStore.quantizedStore.getCount(quantiziedValue)
   }
 
   /*
@@ -167,7 +235,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
     val surfaceFormID: Int = this.customSurfaceFormStore.getAddSurfaceForm(surfaceFormText)
     this.customSurfaceFormStore.boostCountsIfNeeded(surfaceFormID)
     // These default values are related to the default values for support filters for the annotation endpoint
-    var defaultSupportForDbpediaResource: Int = 11
+    var defaultSupportForDbpediaResource: Int = 30
     val defaultSupportForCandidate: Int = 30
 
     var avgSupportCandidate = defaultSupportForCandidate
@@ -287,17 +355,22 @@ class CustomSpotlightModel(val pathToFolder: String) {
   def prettyPrintContext(dbpediaResourceURI: String) {
     val dbpediaResourceID: Int = this.customDbpediaResourceStore.resStore.getResourceByName(dbpediaResourceURI).id
     var tokens: Array[Int] = this.customContextStore.contextStore.tokens(dbpediaResourceID)
-    var counts: Array[Int] = this.customContextStore.contextStore.counts(dbpediaResourceID)
+    var quantiziedCounts:Array[Short] = this.customContextStore.contextStore.counts(dbpediaResourceID)
+
+    val counts:Array[Int] = new Array[Int](quantiziedCounts.size)
+    // transforming from quantizied values to real counts
+    for(i<- 0 until quantiziedCounts.size){
+      counts(i) = getCountFromQuantiziedValue(quantiziedCounts(i))
+    }
+
     println("Contexts for " + dbpediaResourceURI + " Id:" + dbpediaResourceID)
     for (i <- 0 to tokens.size - 1) {
       println("\t" + this.customTokenTypeStore.tokenStore.getTokenTypeByID(tokens(i)) + "--" + counts(i))
     }
   }
 
-  /*
-  * Prints the statistics for a surfaceForm and its candidates
-  * */
-  def getStatsForSurfaceForm(surfaceFormText: String) {
+  // Print the stats of a surface form in the Main SF Store
+  def getStatsForSFInUppercaseSf(surfaceFormText: String){
     val surfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText)
 
     println("Surface form id:" + surfaceForm.id)
@@ -323,6 +396,37 @@ class CustomSpotlightModel(val pathToFolder: String) {
       println("\t\t" + surfaceForm.annotatedCount)
       println("\tPrior")
       println("\t\t" + dbpediaResource.prior)
+    }
+  }
+
+  // Print the stats of a surface form in the lowercase surface form store
+  def getStatsForSFInLowercaseSf(surfaceFormText: String){
+    println("Looking in lowercase SF store.....")
+    val (counts, candidatesUpperSF) = this.customSurfaceFormStore.findInLowerCaseSurfaceForm(surfaceFormText)
+    if(candidatesUpperSF.isDefined){
+        println("-------------------------------")
+        println(surfaceFormText)
+        println("\tcounts:" + counts.getOrElse(0))
+        println("")
+        println("candidates in uppercase SurfaceForm Store: ")
+        for (candidate <- candidatesUpperSF.getOrElse(Array[String]())) {
+          println("\t" + candidate)
+        }
+    }else{
+      println("NOT FOUND")
+    }
+
+  }
+
+  /*
+  * Prints the statistics for a surfaceForm and its candidates
+  * */
+  def getStatsForSurfaceForm(surfaceFormText: String) {
+
+    try{
+       getStatsForSFInUppercaseSf(surfaceFormText)
+    }catch{
+      case e: Exception => getStatsForSFInLowercaseSf(surfaceFormText)
     }
   }
 
@@ -461,6 +565,23 @@ class CustomSpotlightModel(val pathToFolder: String) {
       }
     }
     writer.close()
+  }
+
+  /*
+   * Given a map having lowerCaseSF as keys and list of UppercaseSF as values
+   * it will update the internal lowerSurfaceForm maps.
+   * */
+  def addMapOfLowerCaseSurfaceForms(mapOfLowerCaseSfs:collection.mutable.HashMap[String, Array[String]]){
+    this.customSurfaceFormStore.addMapOfLowerCaseSurfaceForms(mapOfLowerCaseSfs)
+  }
+
+  def getLowerCasesSFInStore(setOfLowerCasesSF:Set[String])={
+    this.customSurfaceFormStore.findSetOfSurfaceFormsInMainStore(setOfLowerCasesSF)
+  }
+
+  // returns the spots returned by the fsa for the given sf
+  def getFSASpots(surfaceForm:String): Array[String] = {
+    return customFSAStore.getFSASpots(surfaceForm)
   }
 
 }

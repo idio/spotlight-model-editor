@@ -29,16 +29,18 @@ import org.idio.dbpedia.spotlight.utils.ArrayUtils
 
 class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
                               val pathtoFolder: String,
-                              val resStore:
-                              MemoryResourceStore) {
+                              val resStore:MemoryResourceStore,
+                              val countStore: CustomQuantiziedCountStore) extends QuantiziedMemoryStore {
 
-  def this(pathtoFolder: String, resStore: MemoryResourceStore) {
-    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder, "candmap.mem")), resStore),
-                                           pathtoFolder, resStore)
+  quantizedCountStore = countStore
+
+  def this(pathtoFolder: String, resStore: MemoryResourceStore, countStore: CustomQuantiziedCountStore) {
+    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder, "candmap.mem")), resStore, countStore.quantizedStore),
+                                           pathtoFolder, resStore, countStore)
   }
 
-  def this(candidateMap: MemoryCandidateMapStore, resStore: MemoryResourceStore) {
-    this(candidateMap, "", resStore)
+  def this(candidateMap: MemoryCandidateMapStore, resStore: MemoryResourceStore, countStore: CustomQuantiziedCountStore) {
+    this(candidateMap, "", resStore, countStore)
   }
 
   /*
@@ -49,6 +51,9 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   * if it is not it will add it
   * */
   def addOrCreate(surfaceFormID: Int, candidateID: Int, candidateCounts: Int) {
+
+    val quantiziedCandidateCounts:Short = getQuantiziedCounts(candidateCounts)
+
     // try to get it, create the candidate array in case it doesnt exist
     try {
       this.candidateMap.candidates(surfaceFormID)
@@ -56,8 +61,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
       case e: Exception => {
         println("\tcreating candidate map array for " + surfaceFormID)
 
-        val candidates: Array[Int] = Array(candidateID)
-        val counts: Array[Int] = Array(candidateCounts)
+        val candidates: Array[Int] = Array[Int](candidateID)
+        val counts: Array[Int] = Array[Int](candidateCounts)
         this.createCandidateMapForSurfaceForm(surfaceFormID, candidates, counts)
 
         println("\tcandidates")
@@ -80,7 +85,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
         println("\tcreating candidate map array for " + surfaceFormID)
 
         this.candidateMap.candidates(surfaceFormID) = Array[Int](candidateID)
-        this.candidateMap.candidateCounts(surfaceFormID) = Array[Int](candidateCounts)
+        this.candidateMap.candidateCounts(surfaceFormID) = Array[Short](quantiziedCandidateCounts)
 
         println("\tcandidates")
 
@@ -107,7 +112,16 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   * */
   def createCandidateMapForSurfaceForm(surfaceFormID: Int, listOfCandidates: Array[Int], listOfCounts: Array[Int]) {
     this.candidateMap.candidates = Array concat (this.candidateMap.candidates, Array(listOfCandidates))
-    this.candidateMap.candidateCounts = Array concat (this.candidateMap.candidateCounts, Array(listOfCounts))
+
+    // transofrming the counts into quantized equivalents
+    val listOfQuantizedCounts:Array[Short] = new Array[Short](listOfCounts.size)
+
+    for(i <- 0 until listOfCounts.size){
+      val currentCount = listOfCounts(i)
+      listOfQuantizedCounts(i) = getQuantiziedCounts(currentCount)
+    }
+
+    this.candidateMap.candidateCounts = Array concat (this.candidateMap.candidateCounts, Array(listOfQuantizedCounts))
   }
 
   /*
@@ -116,8 +130,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
 * */
   def getAVGSupportForSF(surfaceFormID: Int): Int = {
     val candidateCounts = this.candidateMap.candidateCounts(surfaceFormID)
-    if (candidateCounts.isInstanceOf[Array[Int]]) {
-      return (candidateCounts.sum / candidateCounts.size.toDouble).toInt
+    if (candidateCounts.isInstanceOf[Array[Short]]) {
+      return (candidateCounts.map(x => this.getCountFromQuantiziedValue(x)).sum  / candidateCounts.size.toDouble).toInt
     }
     return 0
   }
@@ -140,7 +154,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     // update the candidate count value
     println("updating candidate count value")
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
-    this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray) += boostValue
+    val newQuantizedCount:Short = getQuantiziedCounts(boostValue)
+    this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray) = newQuantizedCount
   }
 
   /*
@@ -149,7 +164,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   def addNewCandidateToSF(surfaceFormID: Int, candidateID: Int, candidateCounts: Int) {
     if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)) {
       this.candidateMap.candidates(surfaceFormID) = this.candidateMap.candidates(surfaceFormID) :+ candidateID
-      this.candidateMap.candidateCounts(surfaceFormID) = this.candidateMap.candidateCounts(surfaceFormID) :+ candidateCounts
+      val quantizedCount: Short = getQuantiziedCounts(candidateCounts)
+      this.candidateMap.candidateCounts(surfaceFormID) = this.candidateMap.candidateCounts(surfaceFormID) :+ quantizedCount
       return 1
     }
     return 0
@@ -194,7 +210,5 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     this.candidateMap.candidateCounts(destinationSurfaceForm.id) = newDestinationCandidatesCounts
 
   }
-
-
-
 }
+

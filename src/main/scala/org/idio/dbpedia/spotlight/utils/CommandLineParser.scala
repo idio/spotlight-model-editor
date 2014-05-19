@@ -144,6 +144,13 @@ class CommandLineParser {
                                               "shows some surface forms and their statistics",
                                               "number of surface forms to explore")
 
+    val fsaCommand = getSimpleCommand("fsa", "querying the finate state automata")
+    fsaCommand.children(
+      getCommandSingleArg("find",
+        "piped separated list of surfaceforms",
+        "checks if each of the given surfaceform ends in a final valid state in the FSA")
+    )
+
   }
 
   def parse(args:  Array[String]): Option[CommandLineConfig] ={

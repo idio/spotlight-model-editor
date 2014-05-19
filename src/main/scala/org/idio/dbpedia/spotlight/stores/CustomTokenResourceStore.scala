@@ -21,16 +21,22 @@
 package org.idio.dbpedia.spotlight.stores
 
 
-import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemoryTokenTypeStore }
+import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemoryTokenTypeStore, MemorySurfaceFormStore}
 import java.io.{ File, FileInputStream }
 import org.dbpedia.spotlight.db.stem.SnowballStemmer
 import scala.collection.mutable.HashMap
+import java.util.Locale
+import org.dbpedia.spotlight.db.tokenize.LanguageIndependentStringTokenizer
+import org.dbpedia.spotlight.db.model.StringTokenizer
+import org.dbpedia.spotlight.model.SurfaceForm
 
 class CustomTokenResourceStore(val pathtoFolder: String, stemmerLanguage: String) {
 
   val tokenMemFile = new FileInputStream(new File(pathtoFolder, "tokens.mem"))
   var tokenStore: MemoryTokenTypeStore = MemoryStore.loadTokenTypeStore(tokenMemFile)
   var stemmer: SnowballStemmer = new SnowballStemmer(stemmerLanguage)
+  val locale = new Locale("en", "")
+  val tokenizer:StringTokenizer = new LanguageIndependentStringTokenizer(locale, stemmer)
 
   /*
   * Prints the Tokens in the Store
@@ -59,7 +65,7 @@ class CustomTokenResourceStore(val pathtoFolder: String, stemmerLanguage: String
     }
 
     this.tokenStore.tokenForId = this.tokenStore.tokenForId :+ token
-    this.tokenStore.counts = this.tokenStore.counts :+ 1
+    this.tokenStore.counts = this.tokenStore.counts :+ 20
 
     return this.tokenStore.tokenForId.size - 1
   }
@@ -122,6 +128,21 @@ class CustomTokenResourceStore(val pathtoFolder: String, stemmerLanguage: String
       }
     }
     return contextTokenMap
+  }
+
+  /*
+  * Updates the Token Store by adding all tokens in the SF's specified in the main Surface Form Store
+  * */
+  def addAllTokensInSurfaceFormStore(surfaceFormStore: MemorySurfaceFormStore){
+    println("Adding all surface form tokens to the TokenStore...")
+
+    val tokens:Seq[String] = surfaceFormStore.iterateSurfaceForms.grouped(100000).toList.par.flatMap(_.map{
+      sf: SurfaceForm =>
+      //Tokenize all SFs first
+        tokenizer.tokenize(sf.name)
+    }).seq.flatten
+
+    tokens.map( token => this.getOrCreateToken(token) )
   }
 
 }

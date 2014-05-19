@@ -25,10 +25,13 @@ import java.io.{ File, FileInputStream }
 import org.idio.dbpedia.spotlight.utils.ArrayUtils
 
 
-class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTypeStore) {
+class CustomContextStore(val pathtoFolder: String,
+                         val tokenStore: MemoryTokenTypeStore,
+                         val countStore: CustomQuantiziedCountStore) extends QuantiziedMemoryStore {
 
+  quantizedCountStore = countStore
   val contextMemFile = new FileInputStream(new File(pathtoFolder, "context.mem"))
-  var contextStore: MemoryContextStore = MemoryStore.loadContextStore(contextMemFile, this.tokenStore)
+  var contextStore: MemoryContextStore = MemoryStore.loadContextStore(contextMemFile, this.tokenStore, quantizedCountStore.quantizedStore)
 
   /*
   * Creates a context Array for a new DbpediaResource.
@@ -41,7 +44,8 @@ class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTy
     } catch {
       case ex: Exception => {
         println("\t creating default context array for")
-        this.contextStore.counts = this.contextStore.counts :+ Array[Int](1)
+        val defaultQuantiziedCount:Short = getQuantiziedCounts(1)
+        this.contextStore.counts = this.contextStore.counts :+ Array[Short](defaultQuantiziedCount)
         this.contextStore.tokens = this.contextStore.tokens :+ Array[Int](0)
       }
     }
@@ -54,7 +58,8 @@ class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTy
   def addContext(dbpediaResourceID: Int, tokenID: Int, count: Int) {
     // check if the token is already in the context, if so dont do anything.
     if (!(this.contextStore.tokens(dbpediaResourceID) contains tokenID)) {
-      this.contextStore.counts(dbpediaResourceID) = this.contextStore.counts(dbpediaResourceID) :+ count
+      val quantiziedCount:Short = getQuantiziedCounts(count)
+      this.contextStore.counts(dbpediaResourceID) = this.contextStore.counts(dbpediaResourceID) :+ quantiziedCount
       this.contextStore.tokens(dbpediaResourceID) = this.contextStore.tokens(dbpediaResourceID) :+ tokenID
     }
   }
@@ -63,7 +68,7 @@ class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTy
   * Empty the context Words and context counts of a dbpedia Topic
   * */
   def cleanContextWords(dbpediaID: Int) {
-    this.contextStore.counts(dbpediaID) = new Array[Int](0)
+    this.contextStore.counts(dbpediaID) = new Array[Short](0)
     this.contextStore.tokens(dbpediaID) = new Array[Int](0)
   }
 
@@ -76,6 +81,19 @@ class CustomContextStore(val pathtoFolder: String, val tokenStore: MemoryTokenTy
     //remove from the tokens array
     this.contextStore.tokens(dbpediaResourceID) = ArrayUtils.dropIndex(this.contextStore.tokens(dbpediaResourceID), indexOftokenId)
     this.contextStore.counts(dbpediaResourceID) = ArrayUtils.dropIndex(this.contextStore.counts(dbpediaResourceID), indexOftokenId)
+  }
+
+  /**
+   * Iterates the Context Store sorting the tokens by their token Id.
+   */
+  def sortTokensInContextStore(){
+    for((currentTokens, i) <- contextStore.tokens.zipWithIndex ){
+      if (currentTokens.isInstanceOf[Array[Int]] && currentTokens.size > 1){
+        val (sortedTokens, counts) = currentTokens.zip(contextStore.counts(i)).sortBy(_._1).unzip
+        contextStore.tokens(i) = sortedTokens.toArray
+        contextStore.counts(i) = counts.toArray
+      }
+    }
   }
 
 }
