@@ -349,7 +349,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
   }
 
   /*
-  *  Makes a SF unspottable by reducing its annotationProbability to 0.1
+  *  Makes an SF unspottable by reducing its annotationProbability to 0.1
   * */
   def makeSFNotSpottable(surfaceText: String) {
     if (!surfaceText.contains(" "))
@@ -359,7 +359,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
   }
 
   /*
-*  Makes a SF spottable by reducing its annotationProbability to 0.1
+*  Makes an SF spottable by reducing its annotationProbability to 0.1
 * */
   def makeSFSpottable(surfaceText: String) {
     this.customSurfaceFormStore.boostCountsIfNeededByString(surfaceText)
@@ -367,7 +367,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   /*
   * Updates the SurfaceStore by adding the SF in the Set in a single Batch.
-  * If a SF is already in the stores it wont be added.
+  * If an SF is already in the stores it wont be added.
   * */
   def addSetOfSurfaceForms(setOfSF: scala.collection.Set[String]) {
     val listOfNewSurfaceFormIds = this.customSurfaceFormStore.addSetOfSF(setOfSF)
@@ -391,7 +391,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
   }
 
   /*
-  * Removes the link between a SF and a Dbpedia Topic
+  * Removes the link between an SF and a Dbpedia Topic
   * */
   def removeAssociation(surfaceFormText: String, dbpediaURI: String) {
     try {
@@ -412,7 +412,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
   }
 
   /**
-   *  Given a SF return the list of candidate Topics
+   *  Given an SF return the list of candidate Topics
    */
   def getCandidates(surfaceFormText: String): Set[String] = {
     val surfaceForm = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceFormText)

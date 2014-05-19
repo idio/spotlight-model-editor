@@ -112,7 +112,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
 
   /*
 * returns the AVG candidate counts for a given SF
-* This value is used when creating a new association between a SF and a Topic
+* This value is used when creating a new association between an SF and a Topic
 * */
   def getAVGSupportForSF(surfaceFormID: Int): Int = {
     val candidateCounts = this.candidateMap.candidateCounts(surfaceFormID)
@@ -156,7 +156,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   }
 
   /*
-  * Remove association between a SF and a DbpediaURI
+  * Remove association between an SF and a DbpediaURI
   * */
   def removeAssociation(surfaceFormID: Int, candidateID: Int) {
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }

@@ -87,7 +87,7 @@ object Main {
         spotlightModelReader.exportModels(pathToModelFolder)
       }
 
-      // Show statistics about a sf
+      // Show statistics about an sf
       case ("surfaceform", "stats") => {
         val surfaceText = commandLineConfig.argument
         println("Getting statistics for surfaceText.....")
@@ -103,7 +103,7 @@ object Main {
         topicUris.foreach({ topicUri: String => println("\t" + topicUri) })
       }
 
-      // Copy the candidates of a SF to another Sf
+      // Copy the candidates of an SF to another Sf
       case ("surfaceform", "copy-candidates") => {
         val sourceFile = scala.io.Source.fromFile(commandLineConfig.argument)
         sourceFile.getLines().foreach{ line =>

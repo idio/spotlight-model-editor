@@ -93,11 +93,11 @@ class CommandLineParser {
                                          "make a list of sf not spottable"),
       getCommandSingleArg("stats",
                           "surface form",
-                          "outputs statistics about a surface form"),
+                          "outputs statistics about a Surface Form"),
 
       getCommandSingleArg("candidates",
                           "surface form",
-                          "outputs the candidates of a sf"),
+                          "outputs the candidates of an SF"),
 
       getCommandSingleArg("copy-candidates",
                           "file",
