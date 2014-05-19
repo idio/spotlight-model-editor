@@ -157,9 +157,9 @@ object Main {
         val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
 
         sourceFile.getLines().foreach { line =>
-          val splittedLine = line.trim().split("\t")
-          val dbpediaURI = splittedLine(0)
-          val surfaceFormText = splittedLine(1)
+          val splitLine = line.trim().split("\t")
+          val dbpediaURI = splitLine(0)
+          val surfaceFormText = splitLine(1)
           spotlightModelReader.removeAssociation(surfaceFormText, dbpediaURI)
           println("Removed association: " + dbpediaURI + " -- " + surfaceFormText)
         }
