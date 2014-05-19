@@ -210,4 +210,5 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     this.candidateMap.candidateCounts(destinationSurfaceForm.id) = newDestinationCandidatesCounts
 
   }
+}
 
