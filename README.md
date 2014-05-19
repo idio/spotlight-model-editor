@@ -8,13 +8,13 @@ Thus it allows you to manually:
   - Create associations between surface forms and dbpedia uris
   - Remove associations between surface forms and dbpedia uris
   - Make surface forms spottable
-  - Make surface forms no spottable
+  - Make surface forms unspottable
   - Modify the context vectors
 
 In order to use the Model Editor, you will need:
 
 - (Oracle) Java 1.7
-- Scala 2.9.x (If you want to run it interatively from a terminal)
+- Scala 2.9.x (If you want to run it interactively from a terminal)
 - Compiling Spotlight Model Editor (this tool) from source (see below)
 - A pre-computed language model (downloaded from [here](http://spotlight.sztaki.hu/downloads/) )
 
@@ -58,7 +58,7 @@ Turkish (located in the `tr` folder). Feel free to play with other languages, if
 4. call
 
 ```
-sh target/bin/model-editor explore path-to-turkish/tr/model/
+sh target/bin/model-editor explore path-to-model/en/model/
 ```
 
 
@@ -136,13 +136,15 @@ sh target/bin/model-editor topic check-context /mnt/share/spotlight/en/model Bar
 - **subcommand**: `clean-set-context`
 - **arg1**: `pathToSpotlightModel/model`
 - **arg2**: pathToFile
-- **result**: The context words and counts for the topics in the file will be cleared. The specified context Words will be stemmed and added with their respect counts to the context vector of the given topics.
+- **result**: The context words and counts for the topics in the file will be cleared. The specified context Words will be stemmed and added with their respective counts to the context vector of the given topics.
 
 each line of the given input file should be like: 
 
 ```
-dbpediaUri <tab> contextWordsSeparatedByPipe <tab> countsSeparatedBytab
+dbpediaUri <tab> contextWordsSeparatedByPipe <tab> countsSeparatedByPipe
 ```
+
+the size of `contextWordsSeparatedByPipe` and `countsSeparatedByPipe` should be the same
 
 example:
 ```
@@ -157,7 +159,7 @@ All surface forms related actions are carried out using the `surfaceform` comman
  - `stats` : printing stats of a surface form
  - `candidates` : printing the list of candidates of a surface form
  - `make-spottable` : making surfaceforms spottable
- - `make-unspottable` : making surfaceforms no spottable
+ - `make-unspottable` : making surfaceforms unspottable
  - `copy-candidates` : adding to a `surfaceformA` all candidates of a `surfaceFormB`
 
 #### stats of a surface form
@@ -189,7 +191,7 @@ sh target/bin/model-editor surfaceform candidates ~/Downloads/tr/model/ evrimler
 ```
 would check the candidate topics for the surface form `evrimleri`
 
-### Making a list of Surface Forms not Spottable
+### Making a list of Surface Forms Unspottable
 - **command**: `surfaceform`
 - **subcommand**: `make-unspottable`
 - **arg1**: path to dbpedia spotlight model,`/mnt/share/spotlight/en/model`
@@ -288,7 +290,7 @@ Before doing actual changes to the model it might be useful to see how many `SF`
 ```sh target/bin/model-editor file-update check path/to/en/model path_to_file/with/model/changes```.
 
 #### Updating a model From File (All in One Go)
-make sure you have enough ram to hold all the models that should be around `-Xmx15000M`.
+make sure you have enough ram to hold all the models that should be around 15g.
 do:
 
 ```
