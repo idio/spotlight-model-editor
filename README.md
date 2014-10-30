@@ -11,6 +11,12 @@ Thus it allows you to manually:
   - Make surface forms unspottable
   - Modify the context vectors
 
+
+- The default branches(Development/Master) work on Spotlight 0.6 models. If you downloaded your model from: http://spotlight.sztaki.hu/downloads/version-0.1/ then it is an 0.6 model.
+
+- The branch [feature/code-clean-up-0-7](https://github.com/idio/spotlight-model-editor/tree/feature/code-clean-up-0-7) works on Spotlight 0.7 models. If you downloaded your model from: http://spotlight.sztaki.hu/downloads/ then it is an 0.7 model.
+
+
 In order to use the Model Editor, you will need:
 
 - (Oracle) Java 1.7
