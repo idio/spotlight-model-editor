@@ -374,6 +374,10 @@ In order to use it:
     - `tokenStore`: token type store
     - `contextStore`: context token store
 
+## Join idio!
+If you are interested in Knowledge Mining, NLP or Software Engineering you should take a look at our [jobs page](http://idio.github.io/jobs/).
+We're always on the lookout for awesome people to join our team.
+
 ## License
 
 Copyright 2014 Idio
