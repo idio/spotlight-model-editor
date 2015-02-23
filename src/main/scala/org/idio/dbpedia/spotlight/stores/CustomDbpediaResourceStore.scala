@@ -38,16 +38,16 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   * */
   private def addDbpediaURI(uri: String, support: Int, types: Array[String]) {
     //URI i.e: Click-through_rate
-    //Types: ToDo: Currently we don't handle the types as they should be
+    //Types: TODO: Currently we don't handle the types as they should be
 
     val quantizedCounts:Short= getQuantiziedCounts(support)
-
+    // Adds support for new Id
     this.resStore.supportForID = Array concat (resStore.supportForID, Array(quantizedCounts))
+    // Adds uri for new Id
     this.resStore.uriForID = Array concat (resStore.uriForID, Array(uri))
+    // Adds types for new ID
+    setOntologyTypes(this.resStore.getResourceByName(uri).id, types)
 
-    var dbpediaTypesForResource: Array[Array[java.lang.Short]] = this.getTypesIds(types)
-
-    this.resStore.typesForID = Array concat (resStore.typesForID, dbpediaTypesForResource)
   }
 
   def setSupport(resourceId:Int, support:Int){
@@ -63,6 +63,7 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
     try {
       val resourceID = this.resStore.getResourceByName(uri).id
       println("\tfound dbpedia resource for:" + uri + "--" + resourceID)
+      setOntologyTypes(resourceID, types)
       return resourceID
     } catch {
 
@@ -100,8 +101,8 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   * Given a list of string of types it return a list wth types ids:
   * i.e: [dbpdia:person, dbpedia:location] => [100, 392]..
   * */
-  def getTypesIds(dbpediaTypes: Array[String]): Array[Array[java.lang.Short]] = {
-    var dbpediaTypesForResource2 = new Array[Array[java.lang.Short]](1)
+  def getTypesIds(dbpediaTypes: Array[String]): Array[java.lang.Short] = {
+    //var dbpediaTypesForResource2 = new Array[Array[java.lang.Short]](1)
     var dbpediaTypesForResource: Array[java.lang.Short] = new Array[java.lang.Short](dbpediaTypes.length)
 
     for (i <- 0 to dbpediaTypes.length - 1) {
@@ -115,8 +116,13 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
       }
     }
 
-    dbpediaTypesForResource2(0) = dbpediaTypesForResource.filter(_ != null)
-    return dbpediaTypesForResource2
+    //dbpediaTypesForResource2(0) = dbpediaTypesForResource.filter(_ != null)
+    return dbpediaTypesForResource.filter(_ != null)
   }
+
+  def setOntologyTypes(resourceID:Int, ontologyTypes:Array[String]) {
+    this.resStore.typesForID(resourceID)  = (this.resStore.typesForID(resourceID) ++ this.getTypesIds(ontologyTypes)).distinct
+  }
+
 
 }
