@@ -107,11 +107,15 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
     for (i <- 0 to dbpediaTypes.length - 1) {
       var currentType: String = dbpediaTypes(i)
       if (!currentType.equals("")) {
-        dbpediaTypesForResource(i) = resStore.ontologyTypeStore.getOntologyTypeByName(currentType).id
+
+        try dbpediaTypesForResource(i) = resStore.ontologyTypeStore.getOntologyTypeByName(currentType).id
+        catch {
+          case ex: NullPointerException => {println("Could not find a type in Ontology Store for: " + currentType)}
+        }
       }
     }
 
-    dbpediaTypesForResource2(0) = dbpediaTypesForResource
+    dbpediaTypesForResource2(0) = dbpediaTypesForResource.filter(_ != null)
     return dbpediaTypesForResource2
   }
 
