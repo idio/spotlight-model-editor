@@ -36,7 +36,7 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   /*
   * Creates the specified DbpediaResource in the internal Arrays
   * */
-  private def addDbpediaURI(uri: String, support: Int, types: Array[String]) {
+  private def addDbpediaURI(uri: String, support: Int) {
     //URI i.e: Click-through_rate
     //Types: TODO: Currently we don't handle the types as they should be
 
@@ -45,8 +45,9 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
     this.resStore.supportForID = Array concat (resStore.supportForID, Array(quantizedCounts))
     // Adds uri for new Id
     this.resStore.uriForID = Array concat (resStore.uriForID, Array(uri))
-    // Adds types for new ID
-    setOntologyTypes(this.resStore.getResourceByName(uri).id, types)
+
+    // Adds an empty type array for the new ID
+    this.resStore.typesForID = Array concat (this.resStore.typesForID,  Array(Array[java.lang.Short]()))
 
   }
 
@@ -81,10 +82,13 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   def addDbpediaResource(uri: String, support: Int, types: Array[String]): Int = {
 
     // add the dbpedia URI to the arrays
-    this.addDbpediaURI(uri, support, types)
+    this.addDbpediaURI(uri, support)
 
     //update internal indexes
     this.resStore.createReverseLookup()
+
+    // Adds types for new ID
+    setOntologyTypes(this.resStore.getResourceByName(uri).id, types)
 
     return this.resStore.getResourceByName(uri).id
   }
