@@ -24,6 +24,7 @@ package org.idio.dbpedia.spotlight.stores
 import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemoryResourceStore }
 import java.io.{FileInputStream, File}
 import org.dbpedia.spotlight.exceptions.DBpediaResourceNotFoundException
+import collection.JavaConversions._
 import org.idio.dbpedia.spotlight.stores.CustomQuantiziedCountStore
 
 class CustomDbpediaResourceStore(val pathtoFolder: String,
@@ -106,22 +107,12 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   * i.e: [dbpdia:person, dbpedia:location] => [100, 392]..
   * */
   def getTypesIds(dbpediaTypes: Array[String]): Array[java.lang.Short] = {
-    //var dbpediaTypesForResource2 = new Array[Array[java.lang.Short]](1)
-    var dbpediaTypesForResource: Array[java.lang.Short] = new Array[java.lang.Short](dbpediaTypes.length)
-
-    for (i <- 0 to dbpediaTypes.length - 1) {
-      var currentType: String = dbpediaTypes(i)
-      if (!currentType.equals("")) {
-
-        try dbpediaTypesForResource(i) = resStore.ontologyTypeStore.getOntologyTypeByName(currentType).id
-        catch {
-          case ex: NullPointerException => {println("Could not find a type in Ontology Store for: " + currentType)}
-        }
+    dbpediaTypes.map( ty => {
+      try Some(resStore.ontologyTypeStore.getOntologyTypeByName(ty).id)
+      catch {
+        case _ => None
       }
-    }
-
-    //dbpediaTypesForResource2(0) = dbpediaTypesForResource.filter(_ != null)
-    return dbpediaTypesForResource.filter(_ != null)
+    }).flatten
   }
 
   def setOntologyTypes(resourceID:Int, ontologyTypes:Array[String]) {
