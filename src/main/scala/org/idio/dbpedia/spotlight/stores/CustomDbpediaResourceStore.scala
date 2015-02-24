@@ -116,8 +116,10 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   }
 
   def setOntologyTypes(resourceID:Int, ontologyTypes:Array[String]) {
-    this.resStore.typesForID(resourceID)  = (this.resStore.typesForID(resourceID) ++ this.getTypesIds(ontologyTypes)).distinct
-  }
+    if (!ontologyTypes.isEmpty)){
+      this.resStore.typesForID(resourceID)  = (this.resStore.typesForID(resourceID) ++ this.getTypesIds(ontologyTypes)).distinct
 
+    }
+  }
 
 }
