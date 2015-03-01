@@ -24,6 +24,7 @@ package org.idio.dbpedia.spotlight.stores
 import org.dbpedia.spotlight.db.memory.{ MemoryStore, MemoryResourceStore }
 import java.io.{FileInputStream, File}
 import org.dbpedia.spotlight.exceptions.DBpediaResourceNotFoundException
+import collection.JavaConversions._
 import org.idio.dbpedia.spotlight.stores.CustomQuantiziedCountStore
 
 class CustomDbpediaResourceStore(val pathtoFolder: String,
@@ -36,18 +37,19 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   /*
   * Creates the specified DbpediaResource in the internal Arrays
   * */
-  private def addDbpediaURI(uri: String, support: Int, types: Array[String]) {
+  private def addDbpediaURI(uri: String, support: Int) {
     //URI i.e: Click-through_rate
-    //Types: ToDo: Currently we don't handle the types as they should be
+    //Types: TODO: Currently we don't handle the types as they should be
 
     val quantizedCounts:Short= getQuantiziedCounts(support)
-
+    // Adds support for new Id
     this.resStore.supportForID = Array concat (resStore.supportForID, Array(quantizedCounts))
+    // Adds uri for new Id
     this.resStore.uriForID = Array concat (resStore.uriForID, Array(uri))
 
-    var dbpediaTypesForResource: Array[Array[java.lang.Short]] = this.getTypesIds(types)
+    // Adds an empty type array for the new ID
+    this.resStore.typesForID = Array concat (this.resStore.typesForID,  Array(Array[java.lang.Short]()))
 
-    this.resStore.typesForID = Array concat (resStore.typesForID, dbpediaTypesForResource)
   }
 
   def setSupport(resourceId:Int, support:Int){
@@ -63,6 +65,7 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
     try {
       val resourceID = this.resStore.getResourceByName(uri).id
       println("\tfound dbpedia resource for:" + uri + "--" + resourceID)
+      setOntologyTypes(resourceID, types)
       return resourceID
     } catch {
 
@@ -80,10 +83,13 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   def addDbpediaResource(uri: String, support: Int, types: Array[String]): Int = {
 
     // add the dbpedia URI to the arrays
-    this.addDbpediaURI(uri, support, types)
+    this.addDbpediaURI(uri, support)
 
     //update internal indexes
     this.resStore.createReverseLookup()
+
+    // Adds types for new ID
+    setOntologyTypes(this.resStore.getResourceByName(uri).id, types)
 
     return this.resStore.getResourceByName(uri).id
   }
@@ -100,19 +106,20 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
   * Given a list of string of types it return a list wth types ids:
   * i.e: [dbpdia:person, dbpedia:location] => [100, 392]..
   * */
-  def getTypesIds(dbpediaTypes: Array[String]): Array[Array[java.lang.Short]] = {
-    var dbpediaTypesForResource2 = new Array[Array[java.lang.Short]](1)
-    var dbpediaTypesForResource: Array[java.lang.Short] = new Array[java.lang.Short](dbpediaTypes.length)
-
-    for (i <- 0 to dbpediaTypes.length - 1) {
-      var currentType: String = dbpediaTypes(i)
-      if (!currentType.equals("")) {
-        dbpediaTypesForResource(i) = resStore.ontologyTypeStore.getOntologyTypeByName(currentType).id
+  def getTypesIds(dbpediaTypes: Array[String]): Array[java.lang.Short] = {
+    dbpediaTypes.map( ty => {
+      try Some(resStore.ontologyTypeStore.getOntologyTypeByName(ty).id)
+      catch {
+        case _ => None
       }
-    }
+    }).flatten
+  }
 
-    dbpediaTypesForResource2(0) = dbpediaTypesForResource
-    return dbpediaTypesForResource2
+  def setOntologyTypes(resourceID:Int, ontologyTypes:Array[String]) {
+    if (!ontologyTypes.isEmpty)){
+      this.resStore.typesForID(resourceID)  = (this.resStore.typesForID(resourceID) ++ this.getTypesIds(ontologyTypes)).distinct
+
+    }
   }
 
 }

@@ -64,9 +64,10 @@ class ModelFileParser(pathToFile: String) {
     val splittedLine = line.trim.split("\t")
 
     // Get the data from the splitted line
-    val dbpediaURI = splittedLine(0)
+    val resourceInfo = splittedLine(0).split('|')
+    val dbpediaURI = resourceInfo.head
     val surfaceForms = splittedLine(1).split('|')
-    val types = new Array[String](0)
+    val types = resourceInfo.tail
     var contextWordsArray = new Array[String](0)
     var contextCounts = new Array[Int](0)
 
