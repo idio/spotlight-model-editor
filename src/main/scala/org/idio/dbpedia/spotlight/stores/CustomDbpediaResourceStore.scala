@@ -66,6 +66,11 @@ class CustomDbpediaResourceStore(val pathtoFolder: String,
       val resourceID = this.resStore.getResourceByName(uri).id
       println("\tfound dbpedia resource for:" + uri + "--" + resourceID)
       setOntologyTypes(resourceID, types)
+
+      // boost support if needed
+      val currentSupport = getCountFromQuantiziedValue(this.resStore.supportForID(resourceID))
+      this.resStore.supportForID(resourceID) = getQuantiziedCounts(math.max(support, currentSupport))
+
       return resourceID
     } catch {
 

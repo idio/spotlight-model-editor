@@ -53,11 +53,11 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
     println("\t adding a new surface form..." + surfaceText)
     this.sfStore.stringForID = this.sfStore.stringForID :+ surfaceText
 
-    val defaultQuantiziedValue: Short = getQuantiziedCounts(1)
+    val defaultValue: Int = 100
 
     // the counts for the new surface form is the avg of the counts for the other surface forms
-    this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID :+ defaultQuantiziedValue
-    this.sfStore.totalCountForID = this.sfStore.totalCountForID :+ defaultQuantiziedValue
+    this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID :+ defaultValue
+    this.sfStore.totalCountForID = this.sfStore.totalCountForID :+ defaultValue
   }
 
   /*
@@ -66,13 +66,15 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
 * */
   private def addListOfNewSurfaceForms(listOfNewSurfaceForms: List[String]): List[Int] = {
 
+    println("expanding internal arrays..")
+
     val indexFirstNewSf = this.sfStore.stringForID.length
     val indexLastNewSf = (this.sfStore.stringForID.length + listOfNewSurfaceForms.size)
 
     this.sfStore.stringForID = this.sfStore.stringForID ++ listOfNewSurfaceForms
 
-    val defaultQuantiziedValue: Short = getQuantiziedCounts(1)
-    val defaultValueList = List.fill(listOfNewSurfaceForms.size)(defaultQuantiziedValue)
+    val defaultValue: Int = 1
+    val defaultValueList = List.fill(listOfNewSurfaceForms.size)(defaultValue)
 
     this.sfStore.annotatedCountForID = this.sfStore.annotatedCountForID ++ defaultValueList
     this.sfStore.totalCountForID = this.sfStore.totalCountForID ++ defaultValueList
@@ -105,7 +107,7 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
   def addSetOfSF(setOfSurfaceForms: scala.collection.Set[String]): List[Int] = {
 
     // Searching SF in the main Store
-    val searchSurfaceFormResult = setOfSurfaceForms.toSeq.par.map(surfaceForm =>
+    val searchSurfaceFormResult = setOfSurfaceForms.toList.map(surfaceForm =>
       try {
         val sf = this.sfStore.getSurfaceForm(surfaceForm)
         println("\t found..\t" + surfaceForm)
@@ -117,12 +119,15 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
       })
 
     // Separating Existing SF from non existing
-    val (listOfNewSurfaceForms, listOfExistingSFIds) = searchSurfaceFormResult.par.partition(_.isInstanceOf[String])
+    println("separating sfs")
+    val (listOfNewSurfaceForms, listOfExistingSFIds) = searchSurfaceFormResult.partition(_.isInstanceOf[String])
 
     // Adding the non-existent SF to the low level maps
+    println("adding non-existent sf")
     val listOfNewSurfaceFormIds: List[Int] = addListOfNewSurfaceForms(listOfNewSurfaceForms.toList.asInstanceOf[List[String]])
 
     // making all new SF spottable(updating Probabilities)
+    println("boosting sf scores")
     val allSFIds: List[Int] = listOfExistingSFIds.toList.asInstanceOf[List[Int]] ++ listOfNewSurfaceFormIds
     allSFIds.foreach(
       surfaceFormId => boostCountsIfNeeded(surfaceFormId))
@@ -140,14 +145,13 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
   * */
   def boostCountsIfNeeded(surfaceFormID: Int) {
 
-    val annotatedCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.annotatedCountForID(surfaceFormID))
-    val totalCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.totalCountForID(surfaceFormID))
+    val annotatedCountsForSurfaceForm = this.sfStore.annotatedCountForID(surfaceFormID)
+    val totalCountsForSurfaceForm = this.sfStore.totalCountForID(surfaceFormID)
 
     val annotationProbability = annotatedCountsForSurfaceForm / totalCountsForSurfaceForm.toDouble
-    if (annotationProbability < 0.5) {
-      var newAnnotatedCount = (0.5 * totalCountsForSurfaceForm.toDouble).toInt + 1
-      val newAnnotatedCountQuantizied = getQuantiziedCounts(newAnnotatedCount)
-      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCountQuantizied
+    if (annotationProbability < 0.8) {
+      var newAnnotatedCount = (0.8 * totalCountsForSurfaceForm.toDouble).toInt + 1
+      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
     }
   }
 
@@ -173,17 +177,17 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
   * */
   def decreaseSpottingProbabilityById(surfaceFormID: Int, spotProbability: Double) {
 
-    val annotatedCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.annotatedCountForID(surfaceFormID))
-    val totalCountsForSurfaceForm = getCountFromQuantiziedValue(this.sfStore.totalCountForID(surfaceFormID)).toDouble
+    val annotatedCountsForSurfaceForm = this.sfStore.annotatedCountForID(surfaceFormID)
+    val totalCountsForSurfaceForm = this.sfStore.totalCountForID(surfaceFormID).toDouble
 
     val annotationProbability = annotatedCountsForSurfaceForm / totalCountsForSurfaceForm.toDouble
     if (annotatedCountsForSurfaceForm < 2) {
-      this.sfStore.totalCountForID(surfaceFormID) = getQuantiziedCounts(10)
+      this.sfStore.totalCountForID(surfaceFormID) = 10
     }
 
     if (annotationProbability > spotProbability) {
       var newAnnotatedCount = (spotProbability * totalCountsForSurfaceForm).toInt + 1
-      this.sfStore.annotatedCountForID(surfaceFormID) = getQuantiziedCounts(newAnnotatedCount)
+      this.sfStore.annotatedCountForID(surfaceFormID) = newAnnotatedCount
     }
 
   }
@@ -267,10 +271,9 @@ class CustomSurfaceFormStore(val pathtoFolder: String, val countStore: CustomQua
     val allCandidatesSF = scala.collection.mutable.HashSet[Int]((candidateSurfaceForms.tail++listOfUppercaseSfIds):_*).toArray
 
     // Find a  good value for the counts (based on the counts of the candidates surface form)
-    val quantiziedCandidateCounts = allCandidatesSF.map{ candidateSfId: Int => this.sfStore.totalCountForID(candidateSfId)}
+    val candidateCounts = allCandidatesSF.map{ candidateSfId: Int => this.sfStore.totalCountForID(candidateSfId)}
 
-    val lowercaseCounts:Array[Int] = Array[Int](quantiziedCandidateCounts.map{
-      quantiziedCandidateCount:Short => this.getCountFromQuantiziedValue(quantiziedCandidateCount)}.min)
+    val lowercaseCounts:Array[Int] = Array[Int](candidateCounts.min)
 
     // update the lowercase store.
     this.sfStore.lowercaseMap.put(surfaceText, lowercaseCounts++allCandidatesSF  )

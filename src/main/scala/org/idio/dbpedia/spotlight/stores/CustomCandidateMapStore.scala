@@ -66,6 +66,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
         this.createCandidateMapForSurfaceForm(surfaceFormID, candidates, counts)
 
         println("\tcandidates")
+        println("\tcandidates size:  %s".format(this.candidateMap.candidates.size))
 
         this.candidateMap.candidates(surfaceFormID).foreach { candidate =>
           println("\t" + candidate)
@@ -114,14 +115,27 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     this.candidateMap.candidates = Array concat (this.candidateMap.candidates, Array(listOfCandidates))
 
     // transofrming the counts into quantized equivalents
-    val listOfQuantizedCounts:Array[Short] = new Array[Short](listOfCounts.size)
-
-    for(i <- 0 until listOfCounts.size){
-      val currentCount = listOfCounts(i)
-      listOfQuantizedCounts(i) = getQuantiziedCounts(currentCount)
-    }
+    val listOfQuantizedCounts:Array[Short] = listOfCounts.map(getQuantiziedCounts(_))
 
     this.candidateMap.candidateCounts = Array concat (this.candidateMap.candidateCounts, Array(listOfQuantizedCounts))
+  }
+
+  def createCandidateMapForNewSurfaceForm(surfaceFormIds:List[Int]): Unit ={
+
+    println("candidates before expansion :  %s".format( this.candidateMap.candidates.size))
+
+    val  listOfCounts:Array[Int] =  surfaceFormIds.toList.map(i => 0).toArray
+    // transofrming the counts into quantized equivalents
+    val listOfQuantizedCounts:Array[Array[Short]] = listOfCounts.map(c => Array[Short]())
+    val listOfCandidates:Array[Array[Int]]  = surfaceFormIds.toList.map(i => Array[Int]()).toArray
+
+    println("expanding candidate arrays with new sfs...%s".format(surfaceFormIds.size))
+    println("expanding listOfCandidates arrays with new sfs...%s".format(listOfCandidates.size))
+
+    this.candidateMap.candidates = Array concat (this.candidateMap.candidates, listOfCandidates)
+    this.candidateMap.candidateCounts = Array concat (this.candidateMap.candidateCounts, listOfQuantizedCounts)
+
+    println("candidates after expansion :  %s".format( this.candidateMap.candidates.size))
   }
 
   /*

@@ -58,27 +58,18 @@ class ModelUpdateFromFile(pathToModelFolder: String, pathToFile: String) {
 
     // trying to add all set of SF's in a single go, so that the reverseMaps are just built once.
     println("adding SFs to Main SF Store")
-    customSpotlightModel.addSetOfSurfaceForms(setOfUpperCaseSF ++ lowerCasesAlreadyInMainSFStore.keySet)
+    customSpotlightModel.addSetOfSurfaceForms(setOfUpperCaseSF.union(setOfLowerCaseSF))
 
-    println("adding Lowercase SFs to lowercase store")
+    //println("adding Lowercase SFs to lowercase store")
     // adding lower case SF, rebuilding lowercase map
-    customSpotlightModel.addMapOfLowerCaseSurfaceForms(lowerSfMap)
+    //customSpotlightModel.addMapOfLowerCaseSurfaceForms(lowerSfMap)
 
     val contextFileWriter = new java.io.PrintWriter(this.pathToFile + "_just_context")
 
     parsedLines.foreach { parsedLine: Entry =>
 
-       //lowercases Sf existing in the main SurfaceForm Store need to add the topic as candidate
-       val lineLowerCaseSFsInMainStore = parsedLine.lowerCaseSF.map{ lowerCaseSurfaceForm:String =>
-        lowerCasesAlreadyInMainSFStore.get(lowerCaseSurfaceForm) match {
-          case Some(sfId) => Option[String](lowerCaseSurfaceForm)
-          case None => None
-         }
-       }.flatten
-
        // Gathering the UpperCaseSfs with the lower cases SF's in Store
-       val allSFBindsToTopics = parsedLine.upperCaseSurfaceForms ++ lineLowerCaseSFsInMainStore
-
+       val allSFBindsToTopics = parsedLine.upperCaseSurfaceForms.union(parsedLine.lowerCaseSF)
 
 
       allSFBindsToTopics.foreach { surfaceForm: String =>

@@ -71,7 +71,7 @@
     <dependency>
       <groupId>org.dbpedia</groupId>
       <artifactId>spotlight</artifactId>
-      <version>0.7</version>
+      <version>0.8</version>
       <!--
         License: Apache Software License, Version 2.0
        -->
@@ -140,14 +140,15 @@
                       <mainClass>org.idio.dbpedia.spotlight.Main</mainClass>
                       <id>model-editor</id>
                       <jvmSettings>
-                          <initialMemorySize>15000M</initialMemorySize>
-                          <maxMemorySize>15000M</maxMemorySize>
+                          <initialMemorySize>27000M</initialMemorySize>
+                          <maxMemorySize>27000M</maxMemorySize>
                       </jvmSettings>
                   </program>
               </programs>
               <assembleDirectory> ${project.build.directory} </assembleDirectory>
           </configuration>
       </plugin>
+
 
       <plugin>
         <groupId>org.scala-tools</groupId>
@@ -214,11 +215,5 @@
     </plugins>
   </build>
 
-  <repositories>
-      <repository>
-          <id>idio-spotlight-releases-repository</id>
-          <url>https://bytebucket.org/idio/mvn-repo/raw/master/releases</url>
-      </repository>
-  </repositories>
 
 </project>

@@ -202,8 +202,11 @@ class CustomSpotlightModel(val pathToFolder: String) {
         usedStores.contains(Store.SurfaceStore) ||
         usedStores.contains(Store.ContextStore) ){
             println("Creating FSA....")
+            println("updating quantized store for sfstore")
             this.customSurfaceFormStore.sfStore.quantizedCountStore = this.customQuantizedCountStore.quantizedStore
+            println("building FSA Spotter")
             val fsaDict = FSASpotter.buildDictionary(this.customSurfaceFormStore.sfStore, tokenizer.tokenizer)
+            println("dumping FSA")
             MemoryStore.dump(fsaDict, new File(propertyFolder, "fsa_dict.mem"))
       }
     }catch{
@@ -476,9 +479,9 @@ class CustomSpotlightModel(val pathToFolder: String) {
   def addSetOfSurfaceForms(setOfSF: scala.collection.Set[String]) {
     val listOfNewSurfaceFormIds = this.customSurfaceFormStore.addSetOfSF(setOfSF)
     // adds the candidate array for the SF which were added.
-    listOfNewSurfaceFormIds.foreach(
-      surfaceFormId =>
-        this.customCandidateMapStore.createCandidateMapForSurfaceForm(surfaceFormId, new Array[Int](0), new Array[Int](0)))
+
+    this.customCandidateMapStore.createCandidateMapForNewSurfaceForm(listOfNewSurfaceFormIds)
+
   }
   /*
     Takes all topic candidates for the surfaceForm1
