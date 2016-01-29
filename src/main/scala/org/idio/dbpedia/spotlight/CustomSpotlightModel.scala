@@ -462,9 +462,9 @@ class CustomSpotlightModel(val pathToFolder: String) {
   * */
   def makeSFNotSpottable(surfaceText: String) {
     if (!surfaceText.contains(" "))
-      this.customSurfaceFormStore.decreaseSpottingProbabilityByString(surfaceText, 0.1)
+      this.customSurfaceFormStore.decreaseSpottingProbabilityByString(surfaceText, 0.00001)
     else
-      this.customSurfaceFormStore.decreaseSpottingProbabilityByString(surfaceText, 0.005)
+      this.customSurfaceFormStore.decreaseSpottingProbabilityByString(surfaceText, 0.00005)
   }
 
   /*
