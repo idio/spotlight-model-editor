@@ -99,7 +99,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   lazy val customTokenTypeStore: CustomTokenResourceStore = try {
     usedStores.add(Store.TokenStore)
-     new CustomTokenResourceStore(pathToFolder, properties.getProperty("stemmer"))
+     new CustomTokenResourceStore(pathToFolder, properties.getProperty("stemmer"), locale)
   } catch {
     case ex: FileNotFoundException => {
       println(ex.getMessage)
@@ -118,9 +118,10 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
   }
 
-  val locale = properties.getProperty("locale").split("_")
+  val localeParsed = properties.getProperty("locale").split("_")
+  val locale = new Locale(localeParsed(0), localeParsed(1))
 
-  lazy val tokenizer:CustomTokenizer = new CustomTokenizer(customTokenTypeStore, new Locale(locale(0), locale(1)))
+  lazy val tokenizer:CustomTokenizer = new CustomTokenizer(customTokenTypeStore, locale)
 
   lazy val customFSAStore: CustomFSAStore =
     try {

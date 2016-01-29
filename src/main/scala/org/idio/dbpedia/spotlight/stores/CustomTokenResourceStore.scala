@@ -30,12 +30,11 @@ import org.dbpedia.spotlight.db.tokenize.LanguageIndependentStringTokenizer
 import org.dbpedia.spotlight.db.model.StringTokenizer
 import org.dbpedia.spotlight.model.SurfaceForm
 
-class CustomTokenResourceStore(val pathtoFolder: String, stemmerLanguage: String) {
+class CustomTokenResourceStore(val pathtoFolder: String, stemmerLanguage: String, locale:Locale) {
 
   val tokenMemFile = new FileInputStream(new File(pathtoFolder, "tokens.mem"))
   var tokenStore: MemoryTokenTypeStore = MemoryStore.loadTokenTypeStore(tokenMemFile)
   var stemmer: SnowballStemmer = new SnowballStemmer(stemmerLanguage)
-  val locale = new Locale("en", "")
   val tokenizer:StringTokenizer = new LanguageIndependentStringTokenizer(locale, stemmer)
 
   /*
