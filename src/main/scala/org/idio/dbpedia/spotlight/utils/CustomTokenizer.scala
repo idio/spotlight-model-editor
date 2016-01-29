@@ -25,9 +25,12 @@ import org.idio.dbpedia.spotlight.stores.{CustomTokenResourceStore}
 /**
  * @author David Przybilla david.przybilla@idioplatform.com
  **/
-class CustomTokenizer(val customTokenStore: CustomTokenResourceStore) {
-  val locale = new Locale("en", "US")
-  val stemmer: Stemmer = new SnowballStemmer("EnglishStemmer")
+class CustomTokenizer(val customTokenStore: CustomTokenResourceStore, val locale: Locale) {
+
+  val languageName = locale.getDisplayName().split(" ").toList(0);
+  val stemmerName = languageName + "Stemmer"
+  println("creating stemmer: " + stemmerName)
+  val stemmer: Stemmer = new SnowballStemmer(stemmerName)
   val tokenizer: TextTokenizer = new LanguageIndependentTokenizer(Set[String](), stemmer, locale, customTokenStore.tokenStore)
 
 

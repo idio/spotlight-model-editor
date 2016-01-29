@@ -118,7 +118,9 @@ class CustomSpotlightModel(val pathToFolder: String) {
     }
   }
 
-  lazy val tokenizer:CustomTokenizer = new CustomTokenizer(customTokenTypeStore)
+  val locale = properties.getProperty("locale").split("_")
+
+  lazy val tokenizer:CustomTokenizer = new CustomTokenizer(customTokenTypeStore, new Locale(locale(0), locale(1)))
 
   lazy val customFSAStore: CustomFSAStore =
     try {
