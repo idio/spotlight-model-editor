@@ -167,6 +167,22 @@ object Main {
         spotlightModelReader.exportModels(pathToModelFolder)
       }
 
+      case("association", "percentage_context_vector") =>{
+        val pathToFileWithSFTopicPairs = commandLineConfig.argument
+        val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
+
+        sourceFile.getLines().foreach { line =>
+          val splitLine = line.trim().split("\t")
+          val dbpediaURI = splitLine(0)
+          val surfaceFormText = splitLine(1)
+          val percentageOfContextVector = splitLine(2).toDouble
+          spotlightModelReader.updatePercentageOfContextVector(surfaceFormText, dbpediaURI, percentageOfContextVector)
+          println("Updating association's support : " + dbpediaURI + " -- " + surfaceFormText + " - to allow new percentage of context vector : " + percentageOfContextVector )
+        }
+        println("Exporting new model.....")
+        spotlightModelReader.exportModels(pathToModelFolder)
+      }
+
       // Export context to a file
       case("context", "export") =>{
         println("Exporting contexts.....")

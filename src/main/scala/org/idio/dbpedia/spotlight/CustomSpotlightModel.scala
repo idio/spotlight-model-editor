@@ -521,6 +521,28 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   }
 
+
+  /*
+  * Change % of context vector
+  * */
+  def updatePercentageOfContextVector(surfaceForm: String, dbpediaURI: String, percentageOfVector: Double): Unit ={
+
+    try{
+      val surfaceFormId = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceForm).id
+      val surfaceFormCounts = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceForm).totalCount
+      val dbpediaId = this.customDbpediaResourceStore.resStore.getResourceByName(dbpediaURI).id
+      this.customCandidateMapStore.changePercentageOfContextVector(surfaceFormId, dbpediaId, surfaceFormCounts, percentageOfVector)
+
+    } catch {
+      case e: Exception => {
+        println("\t Given dbpediaURI or SF: " + dbpediaURI + " , " + surfaceForm + " could not be found")
+      }
+    }
+
+
+  }
+
+
   /**
    *  Given an SF return the list of candidate Topics
    */
