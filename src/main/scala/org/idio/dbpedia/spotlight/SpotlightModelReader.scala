@@ -167,7 +167,7 @@ object Main {
         spotlightModelReader.exportModels(pathToModelFolder)
       }
 
-      case("association", "percentage_context_vector") =>{
+      case("association", "percentage-context-vector") =>{
         val pathToFileWithSFTopicPairs = commandLineConfig.argument
         val sourceFile = scala.io.Source.fromFile(pathToFileWithSFTopicPairs)
 
