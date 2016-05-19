@@ -161,7 +161,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     return false
   }
 
-  def changePercentageOfContextVector(surfaceFormID: Int, dbpediaId: Int, surfaceFormCounts:Int, percentageOfVector: Double): Unit ={
+  def changePercentageOfContextVector(surfaceFormAnnotatedCount:Int, surfaceFormID: Int, dbpediaId: Int, surfaceFormCounts:Int, percentageOfVector: Double): Unit ={
 
     def getCandidateSupport( surfaceFormCounts:Int, percentageOfVector: Double): Int = {
       val numerator = (surfaceFormCounts + 3)
@@ -173,7 +173,10 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == dbpediaId }
     val candidateCount = getCandidateSupport(surfaceFormCounts, percentageOfVector)
 
-    val newQuantizedCount:Short = getQuantiziedCounts(candidateCount)
+    val maxCandidateCount = (surfaceFormAnnotatedCount * 0.9).toInt
+    val newCandidateCount = Math.min(maxCandidateCount, candidateCount)
+
+    val newQuantizedCount:Short = getQuantiziedCounts(newCandidateCount)
 
     println("\t updating candidate support from: " +  this.candidateMap.candidates(surfaceFormID)(indexOfCandidateInArray) + " to:" + newQuantizedCount)
 

@@ -532,7 +532,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
       val surfaceFormId = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceForm).id
       val surfaceFormCounts = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceForm).totalCount
       val dbpediaId = this.customDbpediaResourceStore.resStore.getResourceByName(dbpediaURI).id
-      this.customCandidateMapStore.changePercentageOfContextVector(surfaceFormId, dbpediaId, surfaceFormCounts, percentageOfVector)
+      val surfaceFormAnnotatedCount = this.customSurfaceFormStore.sfStore.getSurfaceForm(surfaceForm).annotatedCount
+      this.customCandidateMapStore.changePercentageOfContextVector(surfaceFormAnnotatedCount, surfaceFormId, dbpediaId, surfaceFormCounts, percentageOfVector)
 
     } catch {
       case e: Exception => {
