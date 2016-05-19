@@ -26,6 +26,7 @@ import java.io.{ File, FileInputStream }
 import Array.concat
 import org.dbpedia.spotlight.model.SurfaceForm
 import org.idio.dbpedia.spotlight.utils.ArrayUtils
+import org.dbpedia.spotlight.db.similarity.PercentageOfContextVector
 
 class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
                               val pathtoFolder: String,
@@ -163,15 +164,9 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
 
   def changePercentageOfContextVector(surfaceFormAnnotatedCount:Int, surfaceFormID: Int, dbpediaId: Int, surfaceFormCounts:Int, percentageOfVector: Double): Unit ={
 
-    def getCandidateSupport( surfaceFormCounts:Int, percentageOfVector: Double): Int = {
-      val numerator = (surfaceFormCounts + 3)
-      val denominator = (1-(2*(percentageOfVector - 0.1)))/(5*(percentageOfVector-0.1))
-      val candidateSupport = (numerator/ math.pow(math.E, denominator)) - 3
-      candidateSupport.toInt
-    }
 
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == dbpediaId }
-    val candidateCount = getCandidateSupport(surfaceFormCounts, percentageOfVector)
+    val candidateCount = PercentageOfContextVector.candidateSupport(surfaceFormCounts, percentageOfVector)
 
     val maxCandidateCount = (surfaceFormAnnotatedCount * 0.9).toInt
     val newCandidateCount = Math.min(maxCandidateCount, candidateCount)
