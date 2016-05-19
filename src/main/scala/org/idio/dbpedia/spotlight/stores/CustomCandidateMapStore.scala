@@ -175,6 +175,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
 
     val newQuantizedCount:Short = getQuantiziedCounts(candidateCount)
 
+    println("\t updating candidate support from: " +  this.candidateMap.candidates(surfaceFormID)(indexOfCandidateInArray) + " to:" + newQuantizedCount)
+
     this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray) = newQuantizedCount
   }
 
@@ -186,6 +188,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     println("updating candidate count value")
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
     val newQuantizedCount:Short = getQuantiziedCounts(boostValue)
+    this.candidateMap.candidates
     this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray) = newQuantizedCount
   }
 

@@ -159,6 +159,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
     try {
       if(usedStores.contains(Store.CandidateStore))
+         println("exporting candidate store")
           MemoryStore.dump(this.customCandidateMapStore.candidateMap, new File(pathToFolder, "candmap.mem"))
     } catch {
       case ex: Exception => {
