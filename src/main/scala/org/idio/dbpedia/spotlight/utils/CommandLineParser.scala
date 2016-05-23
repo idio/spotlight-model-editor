@@ -117,7 +117,7 @@ class CommandLineParser {
     val associationCommand = getSimpleCommand("association", "surfaceforms and candidate topics commands")
     associationCommand.children(
       getCommandSingleArg("remove", "file with pairs(topic-surfaceForm)", "remove associations between sf and topics"),
-      getCommandSingleArg("percentage-context-vector", "file with pairs(topic-surfaceForm-%context vector)", "% of context vector used when matching entities")
+      getCommandSingleArg("percentage-context-vector", "file with Triples(topic-surfaceForm-%context vector)", "% of context vector used when matching entities")
     )
 
     val contextCommand =  getSimpleCommand("context", "context vectors commands")
