@@ -21,7 +21,7 @@
 package org.idio.dbpedia.spotlight.stores
 
 
-import org.dbpedia.spotlight.db.memory.{ MemoryResourceStore, MemoryStore, MemoryCandidateMapStore }
+import org.dbpedia.spotlight.db.memory.{MemorySurfaceFormStore, MemoryResourceStore, MemoryStore, MemoryCandidateMapStore}
 import java.io.{ File, FileInputStream }
 import Array.concat
 import org.dbpedia.spotlight.model.SurfaceForm
@@ -35,8 +35,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
 
   quantizedCountStore = countStore
 
-  def this(pathtoFolder: String, resStore: MemoryResourceStore, countStore: CustomQuantiziedCountStore) {
-    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder, "candmap.mem")), resStore, countStore.quantizedStore),
+  def this(pathtoFolder: String, resStore: MemoryResourceStore, sfStore: MemorySurfaceFormStore, countStore: CustomQuantiziedCountStore) {
+    this(MemoryStore.loadCandidateMapStore(new FileInputStream(new File(pathtoFolder, "candmap.mem")), resStore, sfStore, countStore.quantizedStore),
                                            pathtoFolder, resStore, countStore)
   }
 

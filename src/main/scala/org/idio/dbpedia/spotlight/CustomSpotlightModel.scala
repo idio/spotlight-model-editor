@@ -79,7 +79,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
   lazy val customCandidateMapStore: CustomCandidateMapStore = try {
     usedStores.add(Store.CandidateStore)
-    new CustomCandidateMapStore(pathToFolder, customDbpediaResourceStore.resStore, customQuantizedCountStore)
+    new CustomCandidateMapStore(pathToFolder, customDbpediaResourceStore.resStore, customSurfaceFormStore.sfStore, customQuantizedCountStore)
   } catch {
     case ex: Exception => {
       println(ex.getMessage)
