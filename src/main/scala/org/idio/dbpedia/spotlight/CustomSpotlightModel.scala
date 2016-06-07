@@ -300,6 +300,8 @@ class CustomSpotlightModel(val pathToFolder: String) {
 
     } catch {
       case ex: Exception => {
+        println(ex.getMessage + "\n")
+        ex.printStackTrace()
         println("\tNot Context Store found....")
         println("\tSkipping Context Tokens....")
       }
