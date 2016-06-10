@@ -101,7 +101,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     if (!this.checkCandidateInSFCandidates(surfaceFormID, candidateID)) {
       println("\tadding the candidate(" + candidateID + ") to candidates of " + surfaceFormID)
       this.addNewCandidateToSF(surfaceFormID, candidateID, candidateCounts)
-    }else {
+    } else {
       println("\tboosting candidate counts if current cand support below default value")
       boostCandidateCounts(surfaceFormID, candidateID, candidateCounts)
     }
@@ -169,7 +169,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   def updateCountsOfCandidate(surfaceFormID: Int, candidateID: Int, boostValue: Int) {
     // update the candidate count value
     println("updating candidate count value")
-    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
+    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexOf(candidateID)
     val newQuantizedCount:Short = getQuantiziedCounts(boostValue)
     this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray) = newQuantizedCount
   }
@@ -179,11 +179,11 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   * */
   def boostCandidateCounts(surfaceFormID: Int, candidateID: Int, value: Int) = {
 
-    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
+    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexOf(candidateID)
 
     val currentSupport = quantizedCountStore.quantizedStore.getCount(this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray))
 
-    if(value > currentSupport){
+    if(value > currentSupport) {
       updateCountsOfCandidate(surfaceFormID, candidateID, value)
     }
 
