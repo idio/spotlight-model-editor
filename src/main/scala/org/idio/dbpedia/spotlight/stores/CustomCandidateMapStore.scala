@@ -162,7 +162,8 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     return false
   }
 
-  def changePercentageOfContextVector(surfaceFormAnnotatedCount:Int, surfaceFormID: Int, dbpediaId: Int, surfaceFormCounts:Int, percentageOfVector: Double): Unit ={
+  def changePercentageOfContextVector(surfaceFormAnnotatedCount: Int, surfaceFormID: Int, dbpediaId: Int,
+                                      surfaceFormCounts: Int, percentageOfVector: Double): Unit ={
 
 
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == dbpediaId }
@@ -171,7 +172,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     val maxCandidateCount = (surfaceFormAnnotatedCount * 0.9).toInt
     val newCandidateCount = Math.min(maxCandidateCount, candidateCount)
 
-    val newQuantizedCount:Short = getQuantiziedCounts(newCandidateCount)
+    val newQuantizedCount: Short = getQuantiziedCounts(newCandidateCount)
 
     println("\t updating candidate support from: " +  this.candidateMap.candidates(surfaceFormID)(indexOfCandidateInArray) + " to:" + newQuantizedCount)
 
@@ -186,7 +187,6 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
     println("updating candidate count value")
     val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
     val newQuantizedCount:Short = getQuantiziedCounts(boostValue)
-    this.candidateMap.candidates
     this.candidateMap.candidateCounts(surfaceFormID)(indexOfCandidateInArray) = newQuantizedCount
   }
 
@@ -207,7 +207,7 @@ class CustomCandidateMapStore(var candidateMap: MemoryCandidateMapStore,
   * Remove association between an SF and a DbpediaURI
   * */
   def removeAssociation(surfaceFormID: Int, candidateID: Int) {
-    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexWhere { case (x) => x == candidateID }
+    val indexOfCandidateInArray = this.candidateMap.candidates(surfaceFormID).indexOf(candidateID)
     this.candidateMap.candidates(surfaceFormID) = ArrayUtils.dropIndex(this.candidateMap.candidates(surfaceFormID), indexOfCandidateInArray)
     this.candidateMap.candidateCounts(surfaceFormID) = ArrayUtils.dropIndex(this.candidateMap.candidateCounts(surfaceFormID), indexOfCandidateInArray)
   }

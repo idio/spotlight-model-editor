@@ -57,7 +57,7 @@ class CustomContextStore(val pathtoFolder: String,
   * */
   def addContext(dbpediaResourceID: Int, tokenID: Int, count: Int) {
     // check if the token is already in the context, if so dont do anything.
-    if(this.contextStore.tokens(dbpediaResourceID)==null && this.contextStore.tokens(dbpediaResourceID)==null) {
+    if(this.contextStore.tokens(dbpediaResourceID) == null && this.contextStore.tokens(dbpediaResourceID) == null) {
       this.contextStore.tokens(dbpediaResourceID) = Array[Int]()
       this.contextStore.counts(dbpediaResourceID) = Array[Short]()
     }

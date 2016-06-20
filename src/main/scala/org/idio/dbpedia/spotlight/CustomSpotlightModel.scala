@@ -20,6 +20,7 @@
 
 package org.idio.dbpedia.spotlight
 
+import org.dbpedia.spotlight.exceptions.{DBpediaResourceNotFoundException, SurfaceFormNotFoundException}
 import org.dbpedia.spotlight.model.{ Candidate, TokenType, OntologyType }
 import org.dbpedia.spotlight.db.memory.MemoryStore
 import java.io.File
@@ -513,6 +514,12 @@ class CustomSpotlightModel(val pathToFolder: String) {
       this.customCandidateMapStore.removeAssociation(surfaceFormId, dbpediaId)
 
     } catch {
+      case e: SurfaceFormNotFoundException => {
+        println("Surface form not found:" + surfaceFormText)
+      }
+      case e: DBpediaResourceNotFoundException =>{
+        println("DBpediaResource not found:" + dbpediaURI)
+      }  
       case e: Exception => {
         println("\t Given dbpediaURI or SF: " + dbpediaURI + " , " + surfaceFormText + " could not be found")
       }
