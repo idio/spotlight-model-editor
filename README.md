@@ -31,6 +31,7 @@ for instructions on how to set up a project.
     - [Making a list of Surface Forms Spottable](#making-a-list-of-surface-forms-spottable)
     - [Set the Context Words of a Topic](#set-the-context-words-of-a-topic)
     - [Deleting Associations between SF and Topics](#deleting-associations-between-sf-and-topics)
+    - [Update Percentage of Context Vector](#percentage-of-context-vector)
 - [Updating Model From File](#updating-model-from-file)
     - [Insight](#insight)
     - [Updating a model From File (All in One Go)](#updating-a-model-from-file-all-in-one-go)
@@ -279,6 +280,29 @@ example:
 ```
 sh target/bin/model-editor association remove /mnt/share/spotlight/en/model /path/to/file/file_with_associations
 ```
+
+### Update Percentage of Context Vector
+
+- **command**: `association`
+- **subcommand**: `percentage-context-vector`
+- **arg1**: `pathToSpotlightModel/model`
+- **arg2**: `pathToInputFile`
+- **result**: All associations between SFs and Topics in the given input file will updated such that support of the association enforces the pass value of percentage-of-context-vector
+
+Every line in the input file describes an association which will be deleted, each line should follow the format:
+
+```
+dbpediaURI <tab> Surface Form <tab> enforcePercentageOfContextVector
+```
+
+
+
+example:
+```
+sh target/bin/model-editor association percentage-context-vector path/to/model path/to/changes.tsv
+```
+
+
 
 ### FSA
 
