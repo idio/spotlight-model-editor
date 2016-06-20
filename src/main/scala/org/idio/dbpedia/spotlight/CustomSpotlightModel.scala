@@ -519,7 +519,7 @@ class CustomSpotlightModel(val pathToFolder: String) {
       }
       case e: DBpediaResourceNotFoundException =>{
         println("DBpediaResource not found:" + dbpediaURI)
-      }  
+      }
       case e: Exception => {
         println("\t Given dbpediaURI or SF: " + dbpediaURI + " , " + surfaceFormText + " could not be found")
       }
