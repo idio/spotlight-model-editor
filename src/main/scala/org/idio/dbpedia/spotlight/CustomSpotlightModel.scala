@@ -544,6 +544,12 @@ class CustomSpotlightModel(val pathToFolder: String) {
       this.customCandidateMapStore.changePercentageOfContextVector(surfaceFormAnnotatedCount, surfaceFormId, dbpediaId, surfaceFormCounts, percentageOfVector)
 
     } catch {
+      case e: SurfaceFormNotFoundException => {
+        println("Surface form not found:" + surfaceForm)
+      }
+      case e: DBpediaResourceNotFoundException =>{
+        println("DBpediaResource not found:" + dbpediaURI)
+      }
       case e: Exception => {
         println("\t Given dbpediaURI or SF: " + dbpediaURI + " , " + surfaceForm + " could not be found")
       }
