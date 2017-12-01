@@ -1,3 +1,7 @@
+**IMPORTANT: No longer in active development.**
+
+---
+
 # Spotlight Model's Editor
 
 Idio's Spotlight Model Editor allows you to manually tweak dbpedia spotlight's models.
